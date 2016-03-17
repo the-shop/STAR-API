@@ -11,9 +11,21 @@
 |
 */
 
+//Routes for CRUD operations controllers
+Route::resource('profiles', 'ProfileController');
+Route::resource('tasks', 'TaskController');
+
+
+
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+
+
+
+
 
 /*
 |--------------------------------------------------------------------------
