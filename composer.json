@@ -9,7 +9,8 @@
         "laravel/framework": "5.2.*",
         "jenssegers/mongodb": "^3.0",
         "jenssegers/mongodb-session": "^1.1",
-        "jenssegers/mongodb-sentry": "^1.0"
+        "jenssegers/mongodb-sentry": "^1.0",
+        "tymon/jwt-auth": "^0.5.9"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
