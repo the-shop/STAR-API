@@ -24,7 +24,7 @@
 Route::group(['prefix' => 'api/v1'], function()
 {
     // API calls we allow without token authorization
-    Route::post('register', 'ProfileController@register');
+    Route::post('register', 'ProfileController@store');
     Route::post('login', 'ProfileController@login');
 
     // Define a group of APIs that require auth (we use JWT Auth for token authorization)
