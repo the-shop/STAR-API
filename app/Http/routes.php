@@ -11,21 +11,29 @@
 |
 */
 
-//Routes for CRUD operations controllers
-Route::resource('profiles', 'ProfileController');
-Route::resource('tasks', 'TaskController');
+// All API calls are prefixed with "api", and we're defining version of API "v1"
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| This route group applies the "JWTAuth" middleware group to every route
+| except for login and signup.
+|
+*/
+Route::group(['prefix' => 'api/v1'], function()
+{
+    // API calls we allow without token authorization
+    Route::post('register', 'ProfileController@store');
+    Route::post('login', 'ProfileController@login');
 
-
-
-Route::get('/', function () {
-    return view('welcome');
+    // Define a group of APIs that require auth (we use JWT Auth for token authorization)
+    Route::group(['middleware' => 'jwt.auth'], function()
+    {
+        Route::resource('profiles', 'ProfileController');
+        Route::resource('tasks', 'TaskController');
+    });
 });
-
-
-
-
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -37,7 +45,8 @@ Route::get('/', function () {
 | kernel and includes session state, CSRF protection, and more.
 |
 */
-
 Route::group(['middleware' => ['web']], function () {
-    //
+    Route::get('/', function () {
+        return view('welcome');
+    });
 });
