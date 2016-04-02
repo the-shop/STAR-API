@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Validator;
+use Mockery\CountValidator\Exception;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Profile;
 use Illuminate\Http\Request;
@@ -91,12 +94,30 @@ class ProfileController extends Controller
     //Profile update for slack, trello and github user names
     public function update(Request $request, $id)
     {
-
+        //Authenticate user
         $profile= Auth::user();
+        //Input
         $profile->slack = $request->input('slack');
         $profile->trello = $request->input('trello');
         $profile->github = $request->input('github');
+
+        //Validate slack, trello and github input fields
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'slack' => 'alpha_dash',
+                'trello' => 'alpha_dash',
+                'github' => 'alpha_dash'
+            ]
+        );
+
+        if($validator->fails()){
+            return response()->json(['error' =>$validator->errors()->all(), 400]);
+        }
+
+        //Save profile changes
         $profile->save();
+        //Return updated user
         return response()->json($profile);
 
     }
