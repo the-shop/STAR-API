@@ -51,19 +51,17 @@ class ProfileController extends Controller
     public function store(Request $request)
     {
         // First let's validate the input
-        try {
-            $this->validate(
-                $request,
-                [
-                    'name' => 'required',
-                    'password' => 'required|min:8',
-                    'email' => 'required|email|unique:profiles'
-                ]
-            );
-        } catch (\Exception $e) {
-            // TODO: Should be more specific, good enough for now
-            // Return error(s)
-            return response()->json(['error' => $e->getMessage()]);
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'name' => 'required',
+                'password' => 'required|min:8',
+                'email' => 'required|email|unique:profiles'
+            ]
+        );
+
+        if($validator->fails()){
+            return response()->json(['errors' => $validator->errors()->all(), 400]);
         }
 
         // Create a new profile
