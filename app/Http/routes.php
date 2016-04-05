@@ -33,7 +33,12 @@ Route::group(['prefix' => 'api/v1'], function()
         Route::resource('profiles', 'ProfileController');
         Route::resource('tasks', 'TaskController');
 
-        // Generic resources routes
+        /**
+         * Generic resources routes
+         *
+         * All of routes use `the-shop.genericResource` middleware so that GenericModel gets injected
+         * `$collection` from `resource` route paramter
+         */
         Route::get('{resource}', 'GenericResourceController@index')->middleware('the-shop.genericResource');
         Route::get('{resource}/{id}', 'GenericResourceController@show')->middleware('the-shop.genericResource');
         Route::post('{resource}', 'GenericResourceController@store')->middleware('the-shop.genericResource');
