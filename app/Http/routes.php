@@ -32,6 +32,13 @@ Route::group(['prefix' => 'api/v1'], function()
     {
         Route::resource('profiles', 'ProfileController');
         Route::resource('tasks', 'TaskController');
+
+        // Generic resources routes
+        Route::get('{resource}', 'GenericResourceController@index')->middleware('the-shop.genericResource');
+        Route::get('{resource}/{id}', 'GenericResourceController@show')->middleware('the-shop.genericResource');
+        Route::post('{resource}', 'GenericResourceController@store')->middleware('the-shop.genericResource');
+        Route::put('{resource}/{id}', 'GenericResourceController@update')->middleware('the-shop.genericResource');
+        Route::delete('{resource}/{id}', 'GenericResourceController@destroy')->middleware('the-shop.genericResource');
     });
 });
 
