@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Profile;
@@ -115,7 +116,55 @@ class ProfileController extends Controller
         $profile->save();
         //Return updated user
         return response()->json($profile);
+    }
 
+    /**
+     * Change password implementation
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function changePassword(Request $request)
+    {
+        //Authenticate user profile
+        $profile = Auth::user();
+
+        //Validation
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'oldPassword' => 'required|min:8',
+                'newPassword' => 'required|min:8',
+                'repeatNewPassword' => 'required|min:8'
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()->all(), 400]);
+        }
+
+        $oldPassword = $request->input('oldPassword');
+        $newPassword = $request->input('newPassword');
+        $repeatNewPassword = $request->input('repeatNewPassword');
+
+        if ($newPassword != $repeatNewPassword) {
+            return response()->json(['not the same password']);
+        }
+
+        if (Hash::check($oldPassword, $profile->password) === false) {
+            return response()->json(['wrong password']);
+        }
+
+        //Save new password
+        $profile->password = $newPassword;
+
+        $token = JWTAuth::fromUser($profile);
+
+        //Save profile updates
+        $profile->save();
+
+        //Return new token
+        return response()->json(compact('token'));
     }
 
     /**

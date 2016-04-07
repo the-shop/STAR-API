@@ -30,6 +30,7 @@ Route::group(['prefix' => 'api/v1'], function()
     // Define a group of APIs that require auth (we use JWT Auth for token authorization)
     Route::group(['middleware' => 'jwt.auth'], function()
     {
+        Route::put('profiles/changePassword', 'ProfileController@changePassword');
         Route::resource('profiles', 'ProfileController');
         Route::resource('tasks', 'TaskController');
 
