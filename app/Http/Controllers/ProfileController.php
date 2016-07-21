@@ -27,10 +27,13 @@ class ProfileController extends Controller
         $credentials = $request->only('email', 'password');
 
         if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json(false, 403);
+            return $this->jsonError('Invalid credentials.', 401);
         }
 
-        return response()->json(compact('token'));
+        //Authenticated user
+        $profile = Auth::user();
+
+        return $this->jsonSuccess($profile);
     }
 
     /**
@@ -38,8 +41,8 @@ class ProfileController extends Controller
      */
     public function index()
     {
-        $user = Profile::all();
-        return response()->json($user);
+        $profiles = Profile::all();
+        return $this->jsonSuccess($profiles);
     }
 
     /**
@@ -60,16 +63,21 @@ class ProfileController extends Controller
         );
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()->all(), 400]);
+            return $this->jsonError($validator->errors()->all(), 400);
         }
 
         // Create a new profile
-        $user = Profile::create($request->all());
+        $profile = Profile::create($request->all());
 
-        $token = JWTAuth::fromUser($user);
+        $credentials = $request->only('email', 'password');
+        if (!$token = JWTAuth::attempt($credentials)) {
+            return response()->json('Issue with automatic sign in.', 401);
+        }
+
+        JWTAuth::setToken($token);
 
         // Return newly created user
-        return response()->json(compact('token'));
+        return $this->jsonSuccess($profile);
     }
 
     /**
@@ -78,17 +86,20 @@ class ProfileController extends Controller
      */
     public function show($id)
     {
-        $user = Profile::find($id);
-        return response()->json($user);
+        $profile = Profile::find($id);
+        if (!$profile) {
+            return $this->jsonError('User not found.', 404);
+        }
+        return $this->jsonSuccess($profile);
     }
 
     /**
+     * Profile update for slack, trello and github user names
+     *
      * @param Request $request
      * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
-
-    //Profile update for slack, trello and github user names
     public function update(Request $request, $id)
     {
         //Authenticate user
@@ -109,13 +120,14 @@ class ProfileController extends Controller
         );
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->all(), 400]);
+            return $this->jsonError($validator->errors()->all(), 400);
         }
 
         //Save profile changes
         $profile->save();
+
         //Return updated user
-        return response()->json($profile);
+        return $this->jsonSuccess($profile);
     }
 
     /**
@@ -140,7 +152,7 @@ class ProfileController extends Controller
         );
 
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()->all(), 400]);
+            return $this->jsonError($validator->errors()->all(), 400);
         }
 
         $oldPassword = $request->input('oldPassword');
@@ -148,23 +160,21 @@ class ProfileController extends Controller
         $repeatNewPassword = $request->input('repeatNewPassword');
 
         if ($newPassword != $repeatNewPassword) {
-            return response()->json(['not the same password']);
+            return $this->jsonError('not the same password');
         }
 
         if (Hash::check($oldPassword, $profile->password) === false) {
-            return response()->json(['wrong password']);
+            return $this->jsonError('wrong password');
         }
 
         //Save new password
         $profile->password = $newPassword;
 
-        $token = JWTAuth::fromUser($profile);
-
         //Save profile updates
         $profile->save();
 
         //Return new token
-        return response()->json(compact('token'));
+        return $this->jsonSuccess($profile);
     }
 
     /**
@@ -175,8 +185,13 @@ class ProfileController extends Controller
     public function destroy($id)
     {
         $profile = Profile::find($id);
+
+        if (!$profile) {
+            return $this->jsonError('User not found.', 404);
+        }
+
         $profile->delete();
-        return response()->json('success');
+        return $this->jsonSuccess($profile);
 
     }
 }
