@@ -30,7 +30,10 @@ class ProfileController extends Controller
             return $this->jsonError('Invalid credentials.', 401);
         }
 
-        //Authenticated user
+        // Set the token
+        JWTAuth::setToken($token);
+
+        // Authenticated user
         $profile = Auth::user();
 
         return $this->jsonSuccess($profile);
