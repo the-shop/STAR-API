@@ -18,7 +18,7 @@ class GenericResourceController extends Controller
     public function index()
     {
         $models = GenericModel::all();
-        return response()->json($models);
+        return $this->jsonSuccess($models);
     }
 
     /**
@@ -28,7 +28,7 @@ class GenericResourceController extends Controller
     public function show(Request $request)
     {
         $model = $this->loadModel($request->route('id'));
-        return response()->json($model);
+        return $this->jsonSuccess($model);
     }
 
     /**
@@ -39,9 +39,9 @@ class GenericResourceController extends Controller
     {
         $model = GenericModel::create($request->all());
         if ($model->save()) {
-            return response()->json($model);
+            return $this->jsonSuccess($model);
         }
-        return response()->json(['error' => true, 'message' => 'Issue with saving model.']);
+        return $this->jsonError('Issue with saving resource.');
     }
 
     /**
@@ -53,10 +53,10 @@ class GenericResourceController extends Controller
         $model = $this->loadModel($request->route('id'));
         $model->fill($request->all());
         if ($model->save()) {
-            return response()->json($model);
+            return $this->jsonSuccess($model);
         }
 
-        return response()->json(['error' => true, 'message' => 'Issue with updating model.']);
+        return $this->jsonError('Issue with updating resource.');
     }
 
     /**
@@ -68,9 +68,9 @@ class GenericResourceController extends Controller
         $model = $this->loadModel($request->route('id'));
 
         if ($model->delete()) {
-            return response()->json(['success' => true, 'id' => $model->id]);
+            return $this->jsonSuccess(['id' => $model->id]);
         }
-        return response()->json(['success' => false, 'message' => 'Issue with deleting model.']);
+        return $this->jsonError('Issue with deleting resource.');
     }
 
     /**
@@ -84,7 +84,7 @@ class GenericResourceController extends Controller
         $model = GenericModel::find($id);
 
         if (!$model instanceof GenericModel) {
-            return response()->json(['success' => false, 'message' => 'Model not found.']);
+            return $this->jsonSuccess('Resource not found.', 404);
         }
 
         return $model;
