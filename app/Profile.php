@@ -22,7 +22,7 @@ class Profile extends Eloquent implements AuthenticatableContract, CanResetPassw
      *
      * @var array
      */
-    protected $fillable = ['name', 'email', 'password', 'trello', 'slack', 'github'];
+    protected $fillable = ['name', 'email', 'password', 'trello', 'slack', 'github', 'xp'];
 
     /**
      * The attributes excluded from the model's JSON form.
@@ -30,6 +30,23 @@ class Profile extends Eloquent implements AuthenticatableContract, CanResetPassw
      * @var array
      */
     protected $hidden = ['password', 'remember_token'];
+
+    /**
+     * Save a new model and return the instance.
+     *
+     * @param  array  $attributes
+     * @return static
+     */
+    public static function create(array $attributes = [])
+    {
+        $model = new static($attributes);
+
+        $model->xp = 50;
+
+        $model->save();
+
+        return $model;
+    }
 
     /**
      * Passwords must always be hashed
