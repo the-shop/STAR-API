@@ -51,6 +51,11 @@ class GenericResourceController extends Controller
     public function update(Request $request)
     {
         $model = $this->loadModel($request->route('id'));
+
+        if (!$model instanceof GenericModel) {
+            return $this->jsonError(['Resource not found.'], 404);
+        }
+
         $model->fill($request->all());
         if ($model->save()) {
             return $this->jsonSuccess($model);
@@ -84,7 +89,7 @@ class GenericResourceController extends Controller
         $model = GenericModel::find($id);
 
         if (!$model instanceof GenericModel) {
-            return $this->jsonSuccess('Resource not found.', 404);
+            return $this->jsonError(['Resource not found.'], 404);
         }
 
         return $model;
