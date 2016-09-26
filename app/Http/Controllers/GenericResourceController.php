@@ -27,7 +27,12 @@ class GenericResourceController extends Controller
      */
     public function show(Request $request)
     {
-        $model = $this->loadModel($request->route('id'));
+        $model = GenericModel::find($request->route('id'));
+
+        if (!$model instanceof GenericModel) {
+            return $this->jsonError(['Resource not found.'], 404);
+        }
+
         return $this->jsonSuccess($model);
     }
 
@@ -50,7 +55,7 @@ class GenericResourceController extends Controller
      */
     public function update(Request $request)
     {
-        $model = $this->loadModel($request->route('id'));
+        $model = GenericModel::find($request->route('id'));
 
         if (!$model instanceof GenericModel) {
             return $this->jsonError(['Resource not found.'], 404);
@@ -70,28 +75,15 @@ class GenericResourceController extends Controller
      */
     public function destroy(Request $request)
     {
-        $model = $this->loadModel($request->route('id'));
-
-        if ($model->delete()) {
-            return $this->jsonSuccess(['id' => $model->id]);
-        }
-        return $this->jsonError('Issue with deleting resource.');
-    }
-
-    /**
-     * Helper method to validate model is loaded
-     *
-     * @param $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function loadModel($id)
-    {
-        $model = GenericModel::find($id);
+        $model = GenericModel::find($request->route('id'));
 
         if (!$model instanceof GenericModel) {
             return $this->jsonError(['Resource not found.'], 404);
         }
 
-        return $model;
+        if ($model->delete()) {
+            return $this->jsonSuccess(['id' => $model->id]);
+        }
+        return $this->jsonError('Issue with deleting resource.');
     }
 }
