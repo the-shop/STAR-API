@@ -111,6 +111,7 @@ class ProfileController extends Controller
         $profile->slack = $request->input('slack');
         $profile->trello = $request->input('trello');
         $profile->github = $request->input('github');
+        $profile->xp_id = $request->input('xp_id');
 
         //Validate slack, trello and github input fields
         $validator = Validator::make(
