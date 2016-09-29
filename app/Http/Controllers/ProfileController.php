@@ -118,7 +118,8 @@ class ProfileController extends Controller
             [
                 'slack' => 'alpha_dash',
                 'trello' => 'alpha_dash',
-                'github' => 'alpha_dash'
+                'github' => 'alpha_dash',
+                'xp_id' => 'alpha_num',
             ]
         );
 

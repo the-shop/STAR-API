@@ -22,7 +22,7 @@ class Profile extends Eloquent implements AuthenticatableContract, CanResetPassw
      *
      * @var array
      */
-    protected $fillable = ['name', 'email', 'password', 'trello', 'slack', 'github', 'xp'];
+    protected $fillable = ['name', 'email', 'password', 'trello', 'slack', 'github', 'xp', 'xp_id'];
 
     /**
      * The attributes excluded from the model's JSON form.
