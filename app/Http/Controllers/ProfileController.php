@@ -105,22 +105,18 @@ class ProfileController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //Authenticate user
+        //Find user
         $profile = Profile::find($id);
 
-        //Input
-        $profile->slack = $request->input('slack');
-        $profile->trello = $request->input('trello');
-        $profile->github = $request->input('github');
-        $profile->xp_id = $request->input('xp_id');
+        $profile->fill($request->all());
 
-        //Validate slack, trello and github input fields
         $validator = Validator::make(
             $request->all(),
             [
                 'slack' => 'alpha_dash',
                 'trello' => 'alpha_dash',
                 'github' => 'alpha_dash',
+                'xp' => 'alpha_num',
                 'xp_id' => 'alpha_num',
             ]
         );
