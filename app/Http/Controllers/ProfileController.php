@@ -106,7 +106,8 @@ class ProfileController extends Controller
     public function update(Request $request, $id)
     {
         //Authenticate user
-        $profile = Auth::user();
+        $profile = Profile::find($id);
+
         //Input
         $profile->slack = $request->input('slack');
         $profile->trello = $request->input('trello');
