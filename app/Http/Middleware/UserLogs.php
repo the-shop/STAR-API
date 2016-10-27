@@ -3,32 +3,49 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use App\Http\Requests\Request;
+use App\Log;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Auth;
+use DateTime;
 
-class UserInformation
+class UserLogs
 {
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param  \Illuminate\Http\Request $request
+     * @param  \Closure $next
      * @return mixed
      */
     public function handle($request, Closure $next)
     {
+        //authenticate user
+        $credentials = $request->only('email', 'password');
 
-        /* $profile = Profile::find($name, $id);
-        if(!$profile){
-            return $this->jsonError('User not found');
-        } */
+        //if user authenticated get name and id, if not name and id are null
+        if ($token = JWTAuth::attempt($credentials)) {
+            $name = Auth::user()->name;
+            $id = Auth::user()->id;
+        } else {
+            $name = '';
+            $id = '';
+        }
 
-        $file = "UserInformation.txt";
-        //$request->ip();
+        $date = new DateTime();
 
+        //data to be written
+        $logData = [
+            'name' => $name,
+            'id' => $id,
+            'date' => $date->format('d-m-Y H:i:s'),
+            'ip' => $request->ip()
+        ];
 
-        $contents = array('asdadads', 'fgdfg', $request->ip());
+        //Create new Log model
+        $log = new Log($logData);
 
-        file_put_contents($file, $contents, FILE_APPEND );
+        //Save log
+        $log->save();
 
         return $next($request);
     }
