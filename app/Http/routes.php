@@ -21,7 +21,7 @@
 | except for login and signup.
 |
 */
-Route::group(['prefix' => 'api/v1'], function()
+Route::group(['prefix' => 'api/v1', 'middleware' => 'log'], function()
 {
     // API calls we allow without token authorization
     Route::post('register', 'ProfileController@store');
@@ -33,6 +33,7 @@ Route::group(['prefix' => 'api/v1'], function()
         Route::put('profiles/changePassword', 'ProfileController@changePassword');
         Route::resource('profiles', 'ProfileController');
         Route::resource('tasks', 'TaskController');
+        //Route::resource('profiles', 'ProfileController')->middleware('log');
 
         /**
          * Generic resources routes
