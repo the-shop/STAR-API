@@ -38,7 +38,9 @@ class UserLogs
             'name' => $name,
             'id' => $id,
             'date' => $date->format('d-m-Y H:i:s'),
-            'ip' => $request->ip()
+            'ip' => $request->ip(),
+            'uri' => $request->path(),
+            'method' => $request->method()
         ];
 
         //Create new Log model
