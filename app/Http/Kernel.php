@@ -51,6 +51,6 @@ class Kernel extends HttpKernel
         'jwt.auth' => \Tymon\JWTAuth\Middleware\GetUserFromToken::class,
         'jwt.refresh' => \Tymon\JWTAuth\Middleware\RefreshToken::class,
         'the-shop.genericResource' => \App\Http\Middleware\GenericResource::class,
-        "log" => \App\Http\Middleware\UserLogs::class,
+        'the-shop.requestLogger' => \App\Http\Middleware\RequestLogger::class,
     ];
 }

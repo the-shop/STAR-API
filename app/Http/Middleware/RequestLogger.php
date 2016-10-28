@@ -8,7 +8,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Auth;
 use DateTime;
 
-class UserLogs
+class RequestLogger
 {
     /**
      * Handle an incoming request.
@@ -19,14 +19,12 @@ class UserLogs
      */
     public function handle($request, Closure $next)
     {
-        //authenticate user
-        $credentials = $request->only('email', 'password');
-
-        //if user authenticated get name and id, if not name and id are null
-        if ($token = JWTAuth::attempt($credentials)) {
-            $name = Auth::user()->name;
-            $id = Auth::user()->id;
-        } else {
+        // Check authorization
+        try {
+            $profile = JWTAuth::parseToken()->authenticate();
+            $name = $profile->name;
+            $id = $profile->id;
+        } catch (\Exception $e) {
             $name = '';
             $id = '';
         }
