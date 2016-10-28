@@ -6,5 +6,5 @@ use Jenssegers\Mongodb\Eloquent\Model;
 
 class Log extends Model
 {
-    protected $fillable = ['name', 'id', 'date', 'ip'];
+    protected $fillable = ['name', 'id', 'date', 'ip', 'uri', 'method'];
 }
