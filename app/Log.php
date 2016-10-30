@@ -2,9 +2,7 @@
 
 namespace App;
 
-use Jenssegers\Mongodb\Eloquent\Model;
-
-class Log extends Model
+class Log extends StarModel
 {
     protected $fillable = ['name', 'id', 'date', 'ip', 'uri', 'method'];
 }

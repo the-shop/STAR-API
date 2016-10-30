@@ -3,7 +3,6 @@
 namespace App;
 
 use Illuminate\Support\Facades\Hash;
-use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
 use Illuminate\Auth\Authenticatable;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
@@ -13,7 +12,7 @@ use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
  * Class Profile
  * @package App
  */
-class Profile extends Eloquent implements AuthenticatableContract, CanResetPasswordContract
+class Profile extends StarModel implements AuthenticatableContract, CanResetPasswordContract
 {
     use Authenticatable, CanResetPassword;
 
@@ -25,7 +24,11 @@ class Profile extends Eloquent implements AuthenticatableContract, CanResetPassw
     protected $fillable = [
         'name',
         'email',
-        'password'
+        'github',
+        'trello',
+        'slack',
+        'xp',
+        'xp_id'
     ];
 
     /**
@@ -34,7 +37,8 @@ class Profile extends Eloquent implements AuthenticatableContract, CanResetPassw
      * @var array
      */
     protected $attributes = [
-        'admin'
+        'admin',
+        'password',
     ];
 
     /**

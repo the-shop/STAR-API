@@ -75,17 +75,24 @@ class Controller extends BaseController
     /**
      * @param $fields
      * @param $resourceName
+     * @param array $inputOverrides
      * @throws DynamicValidationException
      */
-    protected function validateInputsForResource($fields, $resourceName)
+    protected function validateInputsForResource($fields, $resourceName, array $inputOverrides = [])
     {
         $validationModel = Validation::where('resource', $resourceName)
             ->first();
 
+        $validations = $validationModel->getFields();
+
+        foreach ($inputOverrides as $field => $value) {
+            $validations[$field] = $value;
+        }
+
         if ($validationModel instanceof Validation) {
             $validator = Validator::make(
                 $fields,
-                $validationModel->getFields(),
+                $validations,
                 $validationModel->getMessages()
             );
 

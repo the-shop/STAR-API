@@ -51,11 +51,7 @@ class ProfileController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = $this->createProfileInputValidator($request);
-
-        if ($validator->fails()) {
-            return $this->jsonError($validator->errors()->all(), 400);
-        }
+        $this->validateInputsForResource($request->all(), 'profiles');
 
         $profile = Profile::create($request->all());
 
@@ -100,7 +96,7 @@ class ProfileController extends Controller
             return $this->jsonError('Not enough permissions.', 403);
         }
 
-        $this->validateInputsForResource($request->all(), 'profiles');
+        $this->validateInputsForResource($request->all(), 'profiles', ['email' => 'required|email']);
 
         $profile->fill($request->all());
 

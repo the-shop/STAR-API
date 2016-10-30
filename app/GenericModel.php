@@ -2,13 +2,11 @@
 
 namespace App;
 
-use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
-
 /**
  * Class GenericModel
  * @package App
  */
-class GenericModel extends Eloquent
+class GenericModel extends StarModel
 {
     /**
      * The collection associated with the model.
