@@ -24,6 +24,7 @@ class Profile extends StarModel implements AuthenticatableContract, CanResetPass
     protected $fillable = [
         'name',
         'email',
+        'password',
         'github',
         'trello',
         'slack',
@@ -38,7 +39,6 @@ class Profile extends StarModel implements AuthenticatableContract, CanResetPass
      */
     protected $attributes = [
         'admin',
-        'password',
     ];
 
     /**

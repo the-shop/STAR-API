@@ -57,7 +57,7 @@ class ProfileController extends Controller
 
         $credentials = $request->only('email', 'password');
         if (!$token = JWTAuth::attempt($credentials)) {
-            return response()->json('Issue with automatic sign in.', 401);
+            return $this->jsonError(['Issue with automatic sign in.'], 401);
         }
 
         JWTAuth::setToken($token);
