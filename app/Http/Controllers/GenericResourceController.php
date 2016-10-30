@@ -30,7 +30,7 @@ class GenericResourceController extends Controller
         $model = GenericModel::find($request->route('id'));
 
         if (!$model instanceof GenericModel) {
-            return $this->jsonError(['Resource not found.'], 404);
+            return $this->jsonError(['Model not found.'], 404);
         }
 
         return $this->jsonSuccess($model);
@@ -42,6 +42,8 @@ class GenericResourceController extends Controller
      */
     public function store(Request $request)
     {
+        $this->validateInputsForResource($request->all(), $request->route('resource'));
+
         $model = GenericModel::create($request->all());
         if ($model->save()) {
             return $this->jsonSuccess($model);
@@ -58,8 +60,10 @@ class GenericResourceController extends Controller
         $model = GenericModel::find($request->route('id'));
 
         if (!$model instanceof GenericModel) {
-            return $this->jsonError(['Resource not found.'], 404);
+            return $this->jsonError(['Model not found.'], 404);
         }
+
+        $this->validateInputsForResource($request->all(), $request->route('resource'));
 
         $model->fill($request->all());
         if ($model->save()) {
@@ -78,7 +82,7 @@ class GenericResourceController extends Controller
         $model = GenericModel::find($request->route('id'));
 
         if (!$model instanceof GenericModel) {
-            return $this->jsonError(['Resource not found.'], 404);
+            return $this->jsonError(['Model not found.'], 404);
         }
 
         if ($model->delete()) {
