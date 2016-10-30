@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\DynamicValidationException;
+use App\Profile;
+use App\Validation;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
@@ -66,5 +70,42 @@ class Controller extends BaseController
         }
 
         return $headers;
+    }
+
+    /**
+     * @param $fields
+     * @param $resourceName
+     * @throws DynamicValidationException
+     */
+    protected function validateInputsForResource($fields, $resourceName)
+    {
+        $validationModel = Validation::where('resource', $resourceName)
+            ->first();
+
+        if ($validationModel instanceof Validation) {
+            $validator = Validator::make(
+                $fields,
+                $validationModel->getFields(),
+                $validationModel->getMessages()
+            );
+
+            if ($validator->fails()) {
+                throw new DynamicValidationException($validator->errors()->all(), 400);
+            }
+        }
+    }
+
+    /**
+     * @return Profile|null
+     */
+    protected function getCurrentProfile()
+    {
+        try {
+            $profile = JWTAuth::parseToken()->authenticate();
+        } catch (\Exception $e) {
+            $profile = null;
+        }
+
+        return $profile;
     }
 }

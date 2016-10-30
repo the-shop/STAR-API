@@ -8,7 +8,12 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Tymon\JWTAuth\Exceptions\JWTException;
 
+/**
+ * Class Handler
+ * @package App\Exceptions
+ */
 class Handler extends ExceptionHandler
 {
     /**
@@ -20,7 +25,7 @@ class Handler extends ExceptionHandler
         AuthorizationException::class,
         HttpException::class,
         ModelNotFoundException::class,
-        ValidationException::class,
+        ValidationException::class
     ];
 
     /**
@@ -45,6 +50,24 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $e)
     {
-        return parent::render($request, $e);
+        if ($e instanceof JWTException) {
+            return response()->json(
+                [
+                    'error' => true,
+                    'message' => $e->getMessage()
+                ],
+                403
+            );
+        } else if ($e instanceof DynamicValidationException) {
+            return response()->json(
+                $e->getMessages(),
+                400
+            );
+        }
+
+        return parent::render(
+            $request,
+            $e
+        );
     }
 }

@@ -5,9 +5,11 @@ namespace App\Http\Middleware;
 use Closure;
 use App\Log;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use Illuminate\Support\Facades\Auth;
-use DateTime;
 
+/**
+ * Class RequestLogger
+ * @package App\Http\Middleware
+ */
 class RequestLogger
 {
     /**
@@ -19,7 +21,6 @@ class RequestLogger
      */
     public function handle($request, Closure $next)
     {
-        // Check authorization
         try {
             $profile = JWTAuth::parseToken()->authenticate();
             $name = $profile->name;
@@ -29,9 +30,8 @@ class RequestLogger
             $id = '';
         }
 
-        $date = new DateTime();
+        $date = new \DateTime();
 
-        //data to be written
         $logData = [
             'name' => $name,
             'id' => $id,
@@ -41,10 +41,8 @@ class RequestLogger
             'method' => $request->method()
         ];
 
-        //Create new Log model
         $log = new Log($logData);
 
-        //Save log
         $log->save();
 
         return $next($request);

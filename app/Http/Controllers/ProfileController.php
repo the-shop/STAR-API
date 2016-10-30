@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Profile;
 use Illuminate\Http\Request;
-use App\Http\Requests;
 
 /**
  * Class ProfileController
@@ -30,10 +29,8 @@ class ProfileController extends Controller
             return $this->jsonError('Invalid credentials.', 401);
         }
 
-        // Set the token
         JWTAuth::setToken($token);
 
-        // Authenticated user
         $profile = Auth::user();
 
         return $this->jsonSuccess($profile);
@@ -52,24 +49,14 @@ class ProfileController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    //Store and Register
     public function store(Request $request)
     {
-        // First let's validate the input
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'name' => 'required',
-                'password' => 'required|min:8',
-                'email' => 'required|email|unique:profiles'
-            ]
-        );
+        $validator = $this->createProfileInputValidator($request);
 
         if ($validator->fails()) {
             return $this->jsonError($validator->errors()->all(), 400);
         }
 
-        // Create a new profile
         $profile = Profile::create($request->all());
 
         $credentials = $request->only('email', 'password');
@@ -79,7 +66,6 @@ class ProfileController extends Controller
 
         JWTAuth::setToken($token);
 
-        // Return newly created user
         return $this->jsonSuccess($profile);
     }
 
@@ -97,38 +83,29 @@ class ProfileController extends Controller
     }
 
     /**
-     * Profile update for slack, trello and github user names
-     *
      * @param Request $request
      * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, $id)
     {
-        //Find user
         $profile = Profile::find($id);
+
+        if (!$profile instanceof Profile) {
+            return $this->jsonError('Model not found.', 404);
+        }
+
+        // TODO: replace with Gate after ACL is implemented
+        if ($profile->id !== $this->getCurrentProfile()->id) {
+            return $this->jsonError('Not enough permissions.', 403);
+        }
+
+        $this->validateInputsForResource($request->all(), 'profiles');
 
         $profile->fill($request->all());
 
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'slack' => 'alpha_dash',
-                'trello' => 'alpha_dash',
-                'github' => 'alpha_dash',
-                'xp' => 'alpha_num',
-                'xp_id' => 'alpha_num',
-            ]
-        );
-
-        if ($validator->fails()) {
-            return $this->jsonError($validator->errors()->all(), 400);
-        }
-
-        //Save profile changes
         $profile->save();
 
-        //Return updated user
         return $this->jsonSuccess($profile);
     }
 
@@ -140,10 +117,12 @@ class ProfileController extends Controller
      */
     public function changePassword(Request $request)
     {
-        //Authenticate user profile
-        $profile = Auth::user();
+        $profile = $this->getCurrentProfile();
 
-        //Validation
+        if (!$profile instanceof Profile) {
+            return $this->jsonError('User not found.', 404);
+        }
+
         $validator = Validator::make(
             $request->all(),
             [
@@ -162,20 +141,17 @@ class ProfileController extends Controller
         $repeatNewPassword = $request->input('repeatNewPassword');
 
         if ($newPassword != $repeatNewPassword) {
-            return $this->jsonError('not the same password');
+            return $this->jsonError(['Passwords mismatch']);
         }
 
         if (Hash::check($oldPassword, $profile->password) === false) {
-            return $this->jsonError('wrong password');
+            return $this->jsonError(['Invalid old password']);
         }
 
-        //Save new password
         $profile->password = $newPassword;
 
-        //Save profile updates
         $profile->save();
 
-        //Return new token
         return $this->jsonSuccess($profile);
     }
 
@@ -183,17 +159,49 @@ class ProfileController extends Controller
      * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
-    //Deleting users from database
     public function destroy($id)
     {
         $profile = Profile::find($id);
 
-        if (!$profile) {
+        if (!$profile instanceof Profile) {
             return $this->jsonError('User not found.', 404);
+        }
+
+        // TODO: replace with Gate after ACL is implemented
+        if ($profile->id !== $this->getCurrentProfile()->id) {
+            return $this->jsonError('Not enough permissions.', 403);
         }
 
         $profile->delete();
         return $this->jsonSuccess(['id' => $profile->id]);
 
+    }
+
+    /**
+     * Helper method to validate mandatory profile fields
+     *
+     * @param Request $request
+     * @return Validator
+     */
+    protected function createProfileInputValidator(Request $request)
+    {
+        $messages = [
+            'regex' => 'Name has to have at least 2 words.',
+        ];
+
+        return Validator::make(
+            $request->all(),
+            [
+                'name' => 'required|regex:/\w+ \w+/',
+                'password' => 'required|min:8',
+                'email' => 'required|email|unique:profiles',
+                'slack' => 'alpha_dash',
+                'trello' => 'alpha_dash',
+                'github' => 'alpha_dash',
+                'xp' => 'alpha_num',
+                'xp_id' => 'alpha_num',
+            ],
+            $messages
+        );
     }
 }
