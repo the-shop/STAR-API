@@ -92,7 +92,7 @@ class ProfileController extends Controller
         }
 
         // TODO: replace with Gate after ACL is implemented
-        if ($profile->id !== $this->getCurrentProfile()->id) {
+        if ($profile->id !== $this->getCurrentProfile()->id && $this->getCurrentProfile()->admin !== true) {
             return $this->jsonError('Not enough permissions.', 403);
         }
 
@@ -164,40 +164,12 @@ class ProfileController extends Controller
         }
 
         // TODO: replace with Gate after ACL is implemented
-        if ($profile->id !== $this->getCurrentProfile()->id) {
+        if ($profile->id !== $this->getCurrentProfile()->id && $this->getCurrentProfile()->admin !== true) {
             return $this->jsonError('Not enough permissions.', 403);
         }
 
         $profile->delete();
         return $this->jsonSuccess(['id' => $profile->id]);
 
-    }
-
-    /**
-     * Helper method to validate mandatory profile fields
-     *
-     * @param Request $request
-     * @return Validator
-     */
-    protected function createProfileInputValidator(Request $request)
-    {
-        $messages = [
-            'regex' => 'Name has to have at least 2 words.',
-        ];
-
-        return Validator::make(
-            $request->all(),
-            [
-                'name' => 'required|regex:/\w+ \w+/',
-                'password' => 'required|min:8',
-                'email' => 'required|email|unique:profiles',
-                'slack' => 'alpha_dash',
-                'trello' => 'alpha_dash',
-                'github' => 'alpha_dash',
-                'xp' => 'alpha_num',
-                'xp_id' => 'alpha_num',
-            ],
-            $messages
-        );
     }
 }
