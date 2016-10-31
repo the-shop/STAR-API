@@ -60,7 +60,7 @@ class Handler extends ExceptionHandler
             );
         } else if ($e instanceof DynamicValidationException) {
             return response()->json(
-                $e->getMessages(),
+                ['errors' => $e->getMessages()],
                 400
             );
         }
