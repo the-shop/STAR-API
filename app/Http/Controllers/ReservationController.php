@@ -64,7 +64,7 @@ class ReservationController extends Controller
                 }
             }
         }
-        
+
         //make project reservation
         $reservationsBy = $project->reservationsBy;
         $reservationsBy[] = ['user_id' => \Auth::user()->id, 'timestamp' => $time];
