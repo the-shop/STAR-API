@@ -33,6 +33,10 @@ Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], f
         Route::put('profiles/changePassword', 'ProfileController@changePassword');
         Route::resource('profiles', 'ProfileController');
         Route::resource('validations', 'ValidationController');
+        Route::put('projects/{id?}/makeReservation', 'ReservationController@make');
+        Route::put('projects/{id?}/acceptReservation', 'ReservationController@accept');
+        Route::put('projects/{id?}/declineReservation', 'ReservationController@decline');
+        Route::get('database/listCollections', 'DatabaseController@listCollections');
 
         /**
          * Generic resources routes
