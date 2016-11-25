@@ -33,10 +33,14 @@ Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], f
         Route::put('profiles/changePassword', 'ProfileController@changePassword');
         Route::resource('profiles', 'ProfileController');
         Route::resource('validations', 'ValidationController');
-        Route::put('projects/{id?}/makeReservation', 'ReservationController@make');
-        Route::put('projects/{id?}/acceptReservation', 'ReservationController@accept');
-        Route::put('projects/{id?}/declineReservation', 'ReservationController@decline');
+        Route::put('projects/{id}/makeReservation', 'ReservationController@make');
+        Route::put('projects/{id}/acceptReservation', 'ReservationController@accept');
+        Route::put('projects/{id}/declineReservation', 'ReservationController@decline');
         Route::get('database/listCollections', 'DatabaseController@listCollections');
+        Route::post('slack/message', 'SlackController@sendMessage');
+        Route::get('slack/users', 'SlackController@getUsers');
+        Route::get('slack/channels', 'SlackController@getChannels');
+
 
         /**
          * Generic resources routes
