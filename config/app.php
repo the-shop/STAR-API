@@ -148,6 +148,7 @@ return [
         Jenssegers\Mongodb\MongodbServiceProvider::class,
         Jenssegers\Mongodb\Auth\PasswordResetServiceProvider::class,
         Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,
+        Vluzrmos\SlackApi\SlackApiServiceProvider::class,
 
         /*
          * Application Service Providers...
@@ -201,5 +202,17 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View'      => Illuminate\Support\Facades\View::class,
         'JWTAuth'   => Tymon\JWTAuth\Facades\JWTAuth::class,
+        'SlackApi'              => Vluzrmos\SlackApi\Facades\SlackApi::class,
+        'SlackChannel'          => Vluzrmos\SlackApi\Facades\SlackChannel::class,
+        'SlackChat'             => Vluzrmos\SlackApi\Facades\SlackChat::class,
+        'SlackGroup'            => Vluzrmos\SlackApi\Facades\SlackGroup::class,
+        'SlackFile'             => Vluzrmos\SlackApi\Facades\SlackFile::class,
+        'SlackSearch'           => Vluzrmos\SlackApi\Facades\SlackSearch::class,
+        'SlackInstantMessage'   => Vluzrmos\SlackApi\Facades\SlackInstantMessage::class,
+        'SlackUser'             => Vluzrmos\SlackApi\Facades\SlackUser::class,
+        'SlackStar'             => Vluzrmos\SlackApi\Facades\SlackStar::class,
+        'SlackUserAdmin'        => Vluzrmos\SlackApi\Facades\SlackUserAdmin::class,
+        'SlackRealTimeMessage'  => Vluzrmos\SlackApi\Facades\SlackRealTimeMessage::class,
+        'SlackTeam'             => Vluzrmos\SlackApi\Facades\SlackTeam::class
     ],
 ];
