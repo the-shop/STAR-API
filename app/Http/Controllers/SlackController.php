@@ -53,11 +53,17 @@ class SlackController extends Controller
         $recipient = $this->validateInput($to, $message, $errors);
 
         if ($recipient === false) {
-            return $this->jsonError($errors, 404);
+            return $this->jsonError($errors, 400);
         }
         
         \SlackChat::message($recipient, $message);
-        return $this->jsonSuccess('Message sent.');
+        return $this->jsonSuccess(
+            [
+                'sent' => true,
+                'to' => $to,
+                'message' => $message
+            ]
+        );
     }
 
     /**
