@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-use App\Http\Requests;
-
+/**
+ * Class SlackController
+ * @package App\Http\Controllers
+ */
 class SlackController extends Controller
 {
     /**
@@ -48,15 +50,13 @@ class SlackController extends Controller
 
         $errors = [];
 
-        //validate recipient
-        $validatedRecipient = $this->validateRecipient($to, $message, $errors);
+        $recipient = $this->validateInput($to, $message, $errors);
 
-        if ($validatedRecipient === false) {
+        if ($recipient === false) {
             return $this->jsonError($errors, 404);
         }
         
-        //send message to Slack
-        \SlackChat::message($validatedRecipient, $message);
+        \SlackChat::message($recipient, $message);
         return $this->jsonSuccess('Message sent.');
     }
 
@@ -95,12 +95,12 @@ class SlackController extends Controller
     }
 
     /**
-     * Validate recipient field
+     * Validate input
      * @param $to
      * @param $errors
      * @return bool
      */
-    private function validateRecipient($to, $message, &$errors)
+    private function validateInput($to, $message, &$errors)
     {
         //check if recipient field is empty
         if (empty($to)) {

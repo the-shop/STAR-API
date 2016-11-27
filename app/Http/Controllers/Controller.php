@@ -45,6 +45,7 @@ class Controller extends BaseController
             $errors = [$errors];
         }
 
+        $response['error'] = true;
         $response['errors'] = $errors;
 
         $headers = $this->appendAuthHeaders($headers);

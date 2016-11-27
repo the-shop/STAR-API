@@ -8,6 +8,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
 /**
@@ -54,7 +55,19 @@ class Handler extends ExceptionHandler
             return response()->json(
                 [
                     'error' => true,
-                    'message' => $e->getMessage()
+                    'errors' => [
+                        'Issue with JWT token'
+                    ]
+                ],
+                403
+            );
+        } else if ($e instanceof MethodNotAllowedHttpException) {
+            return response()->json(
+                [
+                    'error' => true,
+                    'errors' => [
+                        'Method not allowed'
+                    ]
                 ],
                 403
             );
@@ -65,9 +78,24 @@ class Handler extends ExceptionHandler
             );
         }
 
-        return parent::render(
-            $request,
-            $e
+        $errors = ['Internal server error.'];
+
+        if (empty($e->getMessage()) === false) {
+            $errors[] = $e->getMessage();
+        }
+
+        $response = ['errors' =>$errors];
+
+        if (getenv('APP_DEBUG')) {
+            $response['exceptionClass'] = get_class($e);
+            $response['line'] = $e->getLine();
+            $response['file'] = $e->getFile();
+            $response['trace'] = $e->getTrace();
+        }
+
+        return response()->json(
+            $response,
+            500
         );
     }
 }

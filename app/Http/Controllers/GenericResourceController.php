@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\GenericModel;
 use Illuminate\Http\Request;
-use App\Http\Requests;
 
 /**
  * Class GenericResourceController

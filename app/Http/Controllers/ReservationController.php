@@ -8,7 +8,10 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 
-
+/**
+ * Class ReservationController
+ * @package App\Http\Controllers
+ */
 class ReservationController extends Controller
 {
     /**
@@ -19,17 +22,14 @@ class ReservationController extends Controller
      */
     private function validateReservation($project = null)
     {
-        //check if project ID exist
         if (empty($project)) {
             return $this->jsonError('ID not found.', 404);
         }
 
-        //check if project has been accepted already
         if (isset($project->acceptedBy)) {
             return $this->jsonError('Project already accepted.', 403);
         }
 
-        //check if project has been declined already by current user
         if (isset($project->declinedBy)) {
             foreach ($project->declinedBy as $declined) {
                 if ($declined['user_id'] == \Auth::user()->id) {
@@ -54,7 +54,6 @@ class ReservationController extends Controller
             return $this->validateReservation($project);
         }
 
-        //check if project has been reserved within last 30 minutes
         $date = new \DateTime();
         $time = $date->getTimestamp();
         if (isset($project->reservationsBy)) {
@@ -65,7 +64,6 @@ class ReservationController extends Controller
             }
         }
 
-        //make project reservation
         $reservationsBy = $project->reservationsBy;
         $reservationsBy[] = ['user_id' => \Auth::user()->id, 'timestamp' => $time];
         $project->reservationsBy = $reservationsBy;
@@ -88,7 +86,6 @@ class ReservationController extends Controller
             return $this->validateReservation($project);
         }
 
-        //check if project has been reserved within last 30 minutes by current user
         $date = new \DateTime();
         $time = $date->getTimestamp();
         if (isset($project->reservationsBy)) {
@@ -99,7 +96,6 @@ class ReservationController extends Controller
             }
         }
 
-        //accept reserved project
         $accepted = $project->acceptedBy;
         $accepted[] = \Auth::user()->id;
         $project->acceptedBy = $accepted;
@@ -122,7 +118,6 @@ class ReservationController extends Controller
             return $this->validateReservation($project);
         }
 
-        //check if project has been reserved within last 30 minutes by current user
         $date = new \DateTime();
         $time = $date->getTimestamp();
         if (isset($project->reservationsBy)) {
@@ -133,7 +128,6 @@ class ReservationController extends Controller
             }
         }
 
-        //decline reserved project
         $declined = $project->declinedBy;
         $declined[] = ['user_id' => \Auth::user()->id, 'timestamp' => $time];
         $project->declinedBy = $declined;
