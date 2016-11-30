@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "267485817265c09a08943a9a48fe751f",
-    "content-hash": "f2453fbc7cd3cd0e75f5e7974095ff2b",
+    "hash": "8ada2206f799400275d805f1fb2b5ad7",
+    "content-hash": "ae11b3aa298edf106750342fbb67c8b2",
     "packages": [
         {
             "name": "cartalyst/sentry",
@@ -106,6 +106,53 @@
                 "security"
             ],
             "time": "2015-11-26 01:19:39"
+        },
+        {
+            "name": "cdaguerre/php-trello-api",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cdaguerre/php-trello-api.git",
+                "reference": "04b52666cdf38dda4a6060e5181a52bc44827547"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cdaguerre/php-trello-api/zipball/04b52666cdf38dda4a6060e5181a52bc44827547",
+                "reference": "04b52666cdf38dda4a6060e5181a52bc44827547",
+                "shasum": ""
+            },
+            "require": {
+                "guzzle/guzzle": "~3.7",
+                "php": ">=5.3.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": ">=4.1"
+            },
+            "suggest": {
+                "symfony/http-foundation": "Needed for the Trello webhook service"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Trello\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Christian Daguerre",
+                    "email": "christian@daguer.re"
+                }
+            ],
+            "description": "Trello API v1 client",
+            "homepage": "https://github.com/cdaguerre/php-trello-api",
+            "keywords": [
+                "trello"
+            ],
+            "time": "2016-05-11 21:11:16"
         },
         {
             "name": "classpreloader/classpreloader",
@@ -260,6 +307,99 @@
                 "string"
             ],
             "time": "2015-11-06 14:35:42"
+        },
+        {
+            "name": "guzzle/guzzle",
+            "version": "v3.8.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/guzzle/guzzle.git",
+                "reference": "4de0618a01b34aa1c8c33a3f13f396dcd3882eba"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/4de0618a01b34aa1c8c33a3f13f396dcd3882eba",
+                "reference": "4de0618a01b34aa1c8c33a3f13f396dcd3882eba",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": ">=5.3.3",
+                "symfony/event-dispatcher": ">=2.1"
+            },
+            "replace": {
+                "guzzle/batch": "self.version",
+                "guzzle/cache": "self.version",
+                "guzzle/common": "self.version",
+                "guzzle/http": "self.version",
+                "guzzle/inflection": "self.version",
+                "guzzle/iterator": "self.version",
+                "guzzle/log": "self.version",
+                "guzzle/parser": "self.version",
+                "guzzle/plugin": "self.version",
+                "guzzle/plugin-async": "self.version",
+                "guzzle/plugin-backoff": "self.version",
+                "guzzle/plugin-cache": "self.version",
+                "guzzle/plugin-cookie": "self.version",
+                "guzzle/plugin-curlauth": "self.version",
+                "guzzle/plugin-error-response": "self.version",
+                "guzzle/plugin-history": "self.version",
+                "guzzle/plugin-log": "self.version",
+                "guzzle/plugin-md5": "self.version",
+                "guzzle/plugin-mock": "self.version",
+                "guzzle/plugin-oauth": "self.version",
+                "guzzle/service": "self.version",
+                "guzzle/stream": "self.version"
+            },
+            "require-dev": {
+                "doctrine/cache": "*",
+                "monolog/monolog": "1.*",
+                "phpunit/phpunit": "3.7.*",
+                "psr/log": "1.0.*",
+                "symfony/class-loader": "*",
+                "zendframework/zend-cache": "<2.3",
+                "zendframework/zend-log": "<2.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "3.8-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Guzzle": "src/",
+                    "Guzzle\\Tests": "tests/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Michael Dowling",
+                    "email": "mtdowling@gmail.com",
+                    "homepage": "https://github.com/mtdowling"
+                },
+                {
+                    "name": "Guzzle Community",
+                    "homepage": "https://github.com/guzzle/guzzle/contributors"
+                }
+            ],
+            "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
+            "homepage": "http://guzzlephp.org/",
+            "keywords": [
+                "client",
+                "curl",
+                "framework",
+                "http",
+                "http client",
+                "rest",
+                "web service"
+            ],
+            "abandoned": "guzzlehttp/guzzle",
+            "time": "2014-01-28 22:29:15"
         },
         {
             "name": "guzzlehttp/guzzle",
@@ -1753,16 +1893,16 @@
         },
         {
             "name": "symfony/event-dispatcher",
-            "version": "v3.1.7",
+            "version": "v3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/event-dispatcher.git",
-                "reference": "28b0832b2553ffb80cabef6a7a812ff1e670c0bc"
+                "reference": "e8f47a327c2f0fd5aa04fa60af2b693006ed7283"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/28b0832b2553ffb80cabef6a7a812ff1e670c0bc",
-                "reference": "28b0832b2553ffb80cabef6a7a812ff1e670c0bc",
+                "url": "https://api.github.com/repos/symfony/event-dispatcher/zipball/e8f47a327c2f0fd5aa04fa60af2b693006ed7283",
+                "reference": "e8f47a327c2f0fd5aa04fa60af2b693006ed7283",
                 "shasum": ""
             },
             "require": {
@@ -1782,7 +1922,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.1-dev"
+                    "dev-master": "3.2-dev"
                 }
             },
             "autoload": {
@@ -1809,7 +1949,7 @@
             ],
             "description": "Symfony EventDispatcher Component",
             "homepage": "https://symfony.com",
-            "time": "2016-10-13 06:28:43"
+            "time": "2016-10-13 06:29:04"
         },
         {
             "name": "symfony/finder",
@@ -3950,7 +4090,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "cdaguerre/php-trello-api": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
