@@ -43,8 +43,8 @@ Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], f
         Route::post('trello/board', 'TrelloController@createBoard');
         Route::post('trello/board/{id}/list', 'TrelloController@createList');
         Route::put('trello/list/{id}/ticket', 'TrelloController@createTicket');
-        Route::put('trello/ticket/{id}/member/{id}/add', 'TrelloController@assignMember');
-        Route::put('trello/ticket/{id}/member/{id}/remove', 'TrelloController@removeMember');
+        Route::put('trello/board/{boardid}/ticket/{ticketid}/member/{memberid}/add', 'TrelloController@assignMember');
+        Route::put('trello/board/{boardid}/ticket/{ticketid}/member/{memberid}/remove', 'TrelloController@removeMember');
         Route::put('trello/ticket/{id}', 'TrelloController@setDueDate');
 
 
