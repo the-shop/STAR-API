@@ -6,6 +6,10 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 
+/**
+ * Class DatabaseController
+ * @package App\Http\Controllers
+ */
 class DatabaseController extends Controller
 {
     /**
@@ -18,7 +22,7 @@ class DatabaseController extends Controller
         $result = [];
 
         foreach ($collectionList as $list) {
-            if ($list->getName() == 'system.indexes') {
+            if ($list->getName() === 'system.indexes') {
                 continue;
             }
             $result[] = $list->getName();
