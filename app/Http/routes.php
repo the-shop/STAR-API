@@ -41,10 +41,14 @@ Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], f
         Route::get('slack/users', 'SlackController@getUsers');
         Route::get('slack/channels', 'SlackController@getChannels');
         Route::post('trello/board', 'TrelloController@createBoard');
+        Route::get('trello/boards', 'TrelloController@getBoardsId');
+        Route::get('trello/board/{id}/members', 'TrelloController@getMembersId');
         Route::post('trello/board/{id}/list', 'TrelloController@createList');
-        Route::put('trello/list/{id}/ticket', 'TrelloController@createTicket');
-        Route::put('trello/board/{boardid}/ticket/{ticketid}/member/{memberid}/add', 'TrelloController@assignMember');
-        Route::put('trello/board/{boardid}/ticket/{ticketid}/member/{memberid}/remove', 'TrelloController@removeMember');
+        Route::get('trello/board/{id}/lists', 'TrelloController@getListsId');
+        Route::put('trello/board/{boardid}/list/{id}/ticket', 'TrelloController@createTicket');
+        Route::get('trello/board/{boardId}/list/{id}/tickets', 'TrelloController@getTicketsId');
+        Route::put('trello/board/{boardId}/ticket/{ticketId}/member/{memberId}/add', 'TrelloController@assignMember');
+        Route::put('trello/board/{boardId}/ticket/{ticketId}/member/{memberId}/remove', 'TrelloController@removeMember');
         Route::put('trello/ticket/{id}', 'TrelloController@setDueDate');
 
 

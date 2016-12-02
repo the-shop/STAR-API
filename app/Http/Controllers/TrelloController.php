@@ -12,6 +12,66 @@ use Trello\Client;
 class TrelloController extends Controller
 {
     /**
+     * Get boards ID
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getBoardsId()
+    {
+        $boards = $this->boardsId();
+
+        return $this->jsonSuccess($boards);
+    }
+
+    /**
+     * Get lists ID
+     * @param null $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getListsId($id = null)
+    {
+        $lists = $this->listsId($id);
+
+        if ($lists === false) {
+            return $this->jsonError(['Invalid board id.'], 404);
+        }
+
+        return $this->jsonSuccess($lists);
+    }
+
+    /**
+     * Get tickets ID
+     * @param null $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getTicketsId($boardId = null, $id = null)
+    {
+        $errors = [];
+        $cards = $this->ticketsId($boardId, $id, $errors);
+
+        if ($cards === false) {
+            return $this->jsonError($errors, 404);
+        }
+
+        return $this->jsonSuccess($cards);
+    }
+
+    /**
+     * Get members ID
+     * @param null $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getMembersId($id = null)
+    {
+        $members = $this->membersId($id);
+
+        if ($members === false) {
+            return $this->jsonError(['Invalid board ID.'], 404);
+        }
+
+        return $this->jsonSuccess($members);
+    }
+
+    /**
      * Create new Board
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -39,7 +99,7 @@ class TrelloController extends Controller
 
         //create new board
         $trello->boards()->create(['name' => $name, 'defaultLists' => false]);
-        $boardID = $this->getBoardId($name);
+        $boardID = $this->boardsId($name);
 
         //check if config/trello has lists defined to generate predefined lists and cards
         $lists = \Config::get('trello.lists');
@@ -66,16 +126,16 @@ class TrelloController extends Controller
                 $name = $request->input('name');
             }
         }
-        
+
         $errors = [];
 
         if (empty($name)) {
             $errors[] = 'Invalid name field.';
         }
 
-        $idlist = $this->getBoardId();
+        $boards = $this->boardsId();
 
-        if (!in_array($id, $idlist)) {
+        if (!key_exists($id, $boards)) {
             $errors[] = 'Invalid board ID.';
         }
 
@@ -95,11 +155,14 @@ class TrelloController extends Controller
 
     /**
      * Create new ticket
+     * @param Request|null $request
+     * @param $boardId
      * @param $id
-     * @param $name
-     * @param $description
+     * @param null $name
+     * @param null $description
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function createTicket(Request $request = null, $id, $name = null, $description = null)
+    public function createTicket(Request $request = null, $boardId, $id, $name = null, $description = null)
     {
         if ($request !== null) {
             if (\Request::has('name')) {
@@ -111,16 +174,9 @@ class TrelloController extends Controller
         }
 
         $errors = [];
-        if (empty($name)) {
-            $errors[] = 'Invalid name field.';
+        $validator = $this->validateCreateTicket($boardId, $id, $name, $description, $errors);
 
-        }
-
-        if (empty($description)) {
-            $errors[] = 'Invalid description field.';
-        }
-
-        if (count($errors) > 0) {
+        if ($validator === false) {
             return $this->jsonError($errors, 400);
         }
 
@@ -132,7 +188,6 @@ class TrelloController extends Controller
             'ticket name' => $name,
             'description' => $description
         ]);
-
     }
 
     /**
@@ -182,7 +237,7 @@ class TrelloController extends Controller
         return $this->jsonSuccess([
             'member removed' => true
         ]);
-        
+
     }
 
     /**
@@ -231,15 +286,15 @@ class TrelloController extends Controller
      * @param null $name
      * @return array|string
      */
-    private function getBoardId($name = null)
+    private function boardsId($name = null)
     {
         $trello = $this->instance();
-        $list = $trello->api('member')->boards()->all('info1x2');
+        $boards = $trello->api('member')->boards()->all('info1x2');
 
-        //get ID for a single Board
+        //get ID for a single Board based on name
         if ($name !== null) {
             $id = '';
-            foreach ($list as $board) {
+            foreach ($boards as $board) {
                 if ($board['name'] === $name) {
                     $id .= $board['id'];
                 }
@@ -250,11 +305,140 @@ class TrelloController extends Controller
 
         //get all Boards ID's
         $id = [];
-        foreach ($list as $board) {
-            $id[] = $board['id'];
+        foreach ($boards as $board) {
+            $id[$board['id']] = $board['name'];
         }
 
         return $id;
+    }
+
+    /**
+     * List validation and get list Id's
+     * @param null $id
+     * @param $errors
+     * @return array|bool
+     */
+    private function listsId($id = null)
+    {
+        if ($id === null) {
+            return false;
+        }
+
+        $boards = $this->boardsId();
+        if (!key_exists($id, $boards)) {
+            return false;
+        }
+
+        $trello = $this->instance();
+        $lists = [];
+        $alllists = $trello->boards()->lists()->all($id);
+        foreach ($alllists as $list) {
+            $lists[$list['id']] = $list['name'];
+        }
+
+        return $lists;
+    }
+
+    /**
+     * Ticket validation and get tickets ID
+     * @param null $boardId
+     * @param null $id
+     * @param $errors
+     * @return array|bool
+     */
+    private function ticketsId($boardId = null, $id = null, &$errors)
+    {
+        if ($boardId === null) {
+            $errors[] = 'Invalid board ID.';
+            return false;
+        }
+
+        $boards = $this->boardsId();
+        if (!key_exists($boardId, $boards)) {
+            $errors[] = 'Invalid board ID.';
+        }
+
+        if ($id === null) {
+            $errors[] = 'Invalid list ID.';
+        }
+
+        $lists = $this->listsId($boardId);
+        if ($lists === false) {
+            $errors[] = 'Invalid list ID.';
+        } elseif (!key_exists($id, $lists)) {
+            $errors[] = 'Invalid list ID.';
+        }
+
+        if (count($errors) > 0) {
+            return false;
+        }
+
+        $trello = $this->instance();
+        $tickets = [];
+        $alltickets = $trello->lists()->cards()->all($id);
+        foreach ($alltickets as $ticket) {
+            $tickets[$ticket['id']] = $ticket['name'];
+        }
+
+        return $tickets;
+    }
+
+    private function membersId($id = null)
+    {
+        if ($id === null) {
+            return false;
+        }
+
+        $boards = $this->boardsId();
+        if (!key_exists($id, $boards)) {
+            return false;
+        }
+
+        $trello = $this->instance();
+        $members = [];
+        $allmembers = $trello->boards()->members()->all($id);
+        foreach ($allmembers as $member) {
+            $members[$member['id']] = $member['username'];
+        }
+
+        return $members;
+    }
+
+    /**
+     * Validate ticket creation
+     * @param $boardId
+     * @param $id
+     * @param $errors
+     * @return bool
+     */
+    private function validateCreateTicket($boardId, $id, $name, $description, &$errors)
+    {
+        $boards = $this->boardsId();
+        if (!key_exists($boardId, $boards)) {
+            $errors[] = 'Invalid board ID.';
+        } else {
+            $lists = $this->listsId($boardId);
+            if ($lists === false) {
+                $errors[] = 'Invalid list ID.';
+            } elseif (!key_exists($id, $lists)) {
+                $errors[] = 'Invalid list ID.';
+            }
+        }
+
+        if (empty($name)) {
+            $errors[] = 'Invalid name field.';
+
+        }
+
+        if (empty($description)) {
+            $errors[] = 'Invalid description field.';
+        }
+
+        if (count($errors) > 0) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -268,8 +452,8 @@ class TrelloController extends Controller
     private function validateCardMember($boardId, $cardId, $memberId, &$errors)
     {
         //check if board id exist
-        $boardslist = $this->getBoardId();
-        if (!in_array($boardId, $boardslist)) {
+        $boardslist = $this->boardsId();
+        if (!key_exists($boardId, $boardslist)) {
             $errors[] = 'Invalid board ID.';
             return false;
         }
@@ -285,7 +469,7 @@ class TrelloController extends Controller
         }
 
         //check if card exist on board
-        if(!in_array($cardId, $cards)) {
+        if (!in_array($cardId, $cards)) {
             $errors[] = 'Invalid Card ID.';
         }
 
@@ -297,7 +481,7 @@ class TrelloController extends Controller
         }
 
         //check if members exists on board
-        if(!in_array($memberId, $memberslist)) {
+        if (!in_array($memberId, $memberslist)) {
             $errors[] = 'Invalid Member ID.';
         }
 
@@ -331,20 +515,14 @@ class TrelloController extends Controller
     private function generateMultipleCards($id)
     {
         $trello = $this->instance();
-        $lists = [];
-
-        //generate list of list-names and ID's
-        $boardlists = $trello->boards()->lists()->all($id);
-        foreach ($boardlists as $list) {
-            $lists[] = [$list['name'] => $list['id']];
-        }
+        $lists  = $this->listsId($id);
 
         //generate predefined cards from config/trello
         $cards = \Config::get('trello.cards');
-        foreach ($lists as $list) {
+        foreach ($lists as $key => $value) {
             foreach ($cards as $card) {
-                if (key_exists($card['list'], $list)) {
-                    $this->createTicket(null, $list[$card['list']], $card['name'], $card['description']);
+                if ($card['list'] === $value) {
+                    $this->createTicket(null, $id, $key, $card['name'], $card['description']);
                 }
             }
         }
