@@ -28,7 +28,7 @@ Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], f
     Route::post('login', 'ProfileController@login');
 
     // Define a group of APIs that require auth (we use JWT Auth for token authorization)
-    Route::group(['middleware' => 'jwt.auth'], function()
+    Route::group(['middleware' => ['jwt.auth', 'jwt.refresh']], function()
     {
         Route::put('profiles/changePassword', 'ProfileController@changePassword');
         Route::resource('profiles', 'ProfileController');

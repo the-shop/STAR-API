@@ -10,6 +10,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
 /**
  * Class Handler
@@ -56,7 +57,17 @@ class Handler extends ExceptionHandler
                 [
                     'error' => true,
                     'errors' => [
-                        'Issue with JWT token'
+                        'JWT invalid'
+                    ]
+                ],
+                400
+            );
+        } else if ($e instanceof TokenExpiredException) {
+            return response()->json(
+                [
+                    'error' => true,
+                    'errors' => [
+                        'JWT expired'
                     ]
                 ],
                 403
