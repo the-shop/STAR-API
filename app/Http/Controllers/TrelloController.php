@@ -2,34 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use Faker\Provider\zh_TW\DateTime;
 use Illuminate\Http\Request;
-
-use App\Http\Requests;
-
 use Trello\Client;
+use Trello\Exception\RuntimeException;
 
 class TrelloController extends Controller
 {
     /**
-     * Get boards ID
+     * Get board IDs
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getBoardsId()
+    public function getBoardIds()
     {
-        $boards = $this->boardsId();
+        $boards = $this->boardIds();
 
         return $this->jsonSuccess($boards);
     }
 
     /**
-     * Get lists ID
+     * Get list IDs
      * @param null $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getListsId($id = null)
+    public function getListIds($id = null)
     {
-        $lists = $this->listsId($id);
+        $lists = $this->listIds($id);
 
         if ($lists === false) {
             return $this->jsonError(['Invalid board id.'], 404);
@@ -39,14 +36,14 @@ class TrelloController extends Controller
     }
 
     /**
-     * Get tickets ID
+     * Get ticket IDs
      * @param null $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getTicketsId($boardId = null, $id = null)
+    public function getTicketIds($boardId = null, $id = null)
     {
         $errors = [];
-        $cards = $this->ticketsId($boardId, $id, $errors);
+        $cards = $this->ticketIds($boardId, $id, $errors);
 
         if ($cards === false) {
             return $this->jsonError($errors, 404);
@@ -56,13 +53,13 @@ class TrelloController extends Controller
     }
 
     /**
-     * Get members ID
+     * Get member IDs
      * @param null $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getMembersId($id = null)
+    public function getMemberIds($id = null)
     {
-        $members = $this->membersId($id);
+        $members = $this->memberIds($id);
 
         if ($members === false) {
             return $this->jsonError(['Invalid board ID.'], 404);
@@ -80,26 +77,34 @@ class TrelloController extends Controller
     {
         $name = $request->input('name');
         $predefined = $request->input('predefined');
-        $trello = $this->instance();
 
         //validate name field
         if (empty($name)) {
             return $this->jsonError(['Empty name field.'], 400);
         }
 
-        //validate predefined field
+        $validator = $this->validateCreateBoard($name);
+        if ($validator !== false) {
+            return $validator;
+        }
+
+        $trello = $this->instance();
+
+        //validate predefined field - create board
         if ($predefined !== 'yes') {
             $trello->boards()->create(['name' => $name, 'defaultLists' => true]);
 
             return $this->jsonSuccess([
                 'created' => true,
-                'board name' => $name
+                'boardName' => $name
             ]);
         }
 
-        //create new board
+        //create new predefined board
         $trello->boards()->create(['name' => $name, 'defaultLists' => false]);
-        $boardID = $this->boardsId($name);
+
+        // Check $response for ID
+        $boardID = $this->boardIds($name);
 
         //check if config/trello has lists defined to generate predefined lists and cards
         $lists = \Config::get('trello.lists');
@@ -110,21 +115,21 @@ class TrelloController extends Controller
 
         return $this->jsonSuccess([
             'created' => true,
-            'board name' => $name
+            'boardName' => $name
         ]);
     }
 
     /**
      * Create new list
-     * @param $id
-     * @param $name
+     * @param Request|null $request
+     * @param null $id
+     * @param null $name
+     * @return \Illuminate\Http\JsonResponse
      */
     public function createList(Request $request = null, $id = null, $name = null)
     {
-        if ($request !== null) {
-            if (\Request::has('name')) {
-                $name = $request->input('name');
-            }
+        if ($request instanceof Request) {
+            $name = $request->input('name');
         }
 
         $errors = [];
@@ -133,7 +138,7 @@ class TrelloController extends Controller
             $errors[] = 'Invalid name field.';
         }
 
-        $boards = $this->boardsId();
+        $boards = $this->boardIds();
 
         if (!key_exists($id, $boards)) {
             $errors[] = 'Invalid board ID.';
@@ -148,7 +153,7 @@ class TrelloController extends Controller
 
         return $this->jsonSuccess([
             'created' => true,
-            'list name' => $name
+            'listName' => $name
         ]);
 
     }
@@ -164,13 +169,9 @@ class TrelloController extends Controller
      */
     public function createTicket(Request $request = null, $boardId, $id, $name = null, $description = null)
     {
-        if ($request !== null) {
-            if (\Request::has('name')) {
-                $name = $request->input('name');
-            }
-            if (\Request::has('description')) {
-                $description = $request->input('description');
-            }
+        if ($request instanceof Request) {
+            $name = $request->input('name', null);
+            $description = $request->input('description', null);
         }
 
         $errors = [];
@@ -185,7 +186,7 @@ class TrelloController extends Controller
 
         return $this->jsonSuccess([
             'created' => 'true',
-            'ticket name' => $name,
+            'ticketName' => $name,
             'description' => $description
         ]);
     }
@@ -207,10 +208,15 @@ class TrelloController extends Controller
         }
 
         $trello = $this->instance();
-        $trello->cards()->members()->add($cardId, $memberId);
+
+        try {
+            $trello->cards()->members()->add($cardId, $memberId);
+        } catch (RuntimeException $e) {
+            // Still good, member already a member
+        }
 
         return $this->jsonSuccess([
-            'member added' => true
+            'memberAdded' => true
         ]);
 
     }
@@ -232,10 +238,15 @@ class TrelloController extends Controller
         }
 
         $trello = $this->instance();
-        $trello->cards()->members()->remove($cardId, $memberId);
+        try {
+            $trello->cards()->members()->remove($cardId, $memberId);
+        } catch (RuntimeException $e) {
+            //still good, member not on the ticket
+        }
+
 
         return $this->jsonSuccess([
-            'member removed' => true
+            'memberRemoved' => true
         ]);
 
     }
@@ -246,25 +257,23 @@ class TrelloController extends Controller
      * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function setDueDate(Request $request, $id)
+    public function setDueDate(Request $request, $boardId, $id)
     {
         $date = $request->input('date');
         $errors = [];
-        if (empty($date)) {
-            $errors[] = 'Empty date field.';
-        }
 
-        if (count($errors) > 0) {
+        $datetime = $this->validateSetDueDate($date, $boardId, $id, $errors);
+
+        if ($datetime === false) {
             return $this->jsonError($errors, 400);
         }
 
-        $datetime = new \DateTime($date);
         $trello = $this->instance();
         $trello->cards()->setDueDate($id, $datetime);
 
         return $this->jsonSuccess([
-            'due date set' => true,
-            'due date' => $datetime
+            'dueDateSet' => true,
+            'dueDate' => $datetime
         ]);
 
     }
@@ -275,8 +284,11 @@ class TrelloController extends Controller
      */
     private function instance()
     {
+        $trelloKey    = \Config::get('trello.trello_key');
+        $trelloSecret = \Config::get('trello.trello_secret');
+
         $client = new Client();
-        $client->authenticate('5c4e5563774606265cdec5c3f34c78ce', 'a1f850650b3ed5fc60c7651dc9aea134512a0fcf22265e0e9c25ef999288cdb0', Client::AUTH_URL_CLIENT_ID);
+        $client->authenticate($trelloKey, $trelloSecret, Client::AUTH_URL_CLIENT_ID);
 
         return $client;
     }
@@ -286,10 +298,11 @@ class TrelloController extends Controller
      * @param null $name
      * @return array|string
      */
-    private function boardsId($name = null)
+    private function boardIds($name = null)
     {
         $trello = $this->instance();
-        $boards = $trello->api('member')->boards()->all('info1x2');
+        $username = \Config::get('trello.trello_username');
+        $boards = $trello->api('member')->boards()->all($username);
 
         //get ID for a single Board based on name
         if ($name !== null) {
@@ -303,7 +316,7 @@ class TrelloController extends Controller
             return $id;
         }
 
-        //get all Boards ID's
+        //get all Board IDs
         $id = [];
         foreach ($boards as $board) {
             $id[$board['id']] = $board['name'];
@@ -315,16 +328,15 @@ class TrelloController extends Controller
     /**
      * List validation and get list Id's
      * @param null $id
-     * @param $errors
      * @return array|bool
      */
-    private function listsId($id = null)
+    private function listIds($id = null)
     {
         if ($id === null) {
             return false;
         }
 
-        $boards = $this->boardsId();
+        $boards = $this->boardIds();
         if (!key_exists($id, $boards)) {
             return false;
         }
@@ -346,14 +358,14 @@ class TrelloController extends Controller
      * @param $errors
      * @return array|bool
      */
-    private function ticketsId($boardId = null, $id = null, &$errors)
+    private function ticketIds($boardId = null, $id = null, &$errors)
     {
         if ($boardId === null) {
             $errors[] = 'Invalid board ID.';
             return false;
         }
 
-        $boards = $this->boardsId();
+        $boards = $this->boardIds();
         if (!key_exists($boardId, $boards)) {
             $errors[] = 'Invalid board ID.';
         }
@@ -362,7 +374,7 @@ class TrelloController extends Controller
             $errors[] = 'Invalid list ID.';
         }
 
-        $lists = $this->listsId($boardId);
+        $lists = $this->listIds($boardId);
         if ($lists === false) {
             $errors[] = 'Invalid list ID.';
         } elseif (!key_exists($id, $lists)) {
@@ -383,13 +395,18 @@ class TrelloController extends Controller
         return $tickets;
     }
 
-    private function membersId($id = null)
+    /**
+     * Get member Ids
+     * @param null $id
+     * @return array|bool
+     */
+    private function memberIds($id = null)
     {
         if ($id === null) {
             return false;
         }
 
-        $boards = $this->boardsId();
+        $boards = $this->boardIds();
         if (!key_exists($id, $boards)) {
             return false;
         }
@@ -405,6 +422,23 @@ class TrelloController extends Controller
     }
 
     /**
+     * Validate board creation
+     * @param null $name
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    private function validateCreateBoard($name = null)
+    {
+        $allBoards = $this->boardIds();
+        foreach ($allBoards as $key => $value) {
+            if ($value === $name) {
+                return $this->jsonError(['Board name already exists.'], 400);
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Validate ticket creation
      * @param $boardId
      * @param $id
@@ -413,11 +447,11 @@ class TrelloController extends Controller
      */
     private function validateCreateTicket($boardId, $id, $name, $description, &$errors)
     {
-        $boards = $this->boardsId();
+        $boards = $this->boardIds();
         if (!key_exists($boardId, $boards)) {
             $errors[] = 'Invalid board ID.';
         } else {
-            $lists = $this->listsId($boardId);
+            $lists = $this->listIds($boardId);
             if ($lists === false) {
                 $errors[] = 'Invalid list ID.';
             } elseif (!key_exists($id, $lists)) {
@@ -452,7 +486,7 @@ class TrelloController extends Controller
     private function validateCardMember($boardId, $cardId, $memberId, &$errors)
     {
         //check if board id exist
-        $boardslist = $this->boardsId();
+        $boardslist = $this->boardIds();
         if (!key_exists($boardId, $boardslist)) {
             $errors[] = 'Invalid board ID.';
             return false;
@@ -474,14 +508,14 @@ class TrelloController extends Controller
         }
 
         //get all board members
-        $memberslist = [];
+        $membersList = [];
         $members = $trello->boards()->members()->all($boardId);
         foreach ($members as $member) {
-            $memberslist[] = $member['id'];
+            $membersList[] = $member['id'];
         }
 
         //check if members exists on board
-        if (!in_array($memberId, $memberslist)) {
+        if (!in_array($memberId, $membersList)) {
             $errors[] = 'Invalid Member ID.';
         }
 
@@ -490,6 +524,51 @@ class TrelloController extends Controller
         }
 
         return true;
+    }
+
+    /**
+     * Validate Due Date
+     * @param $date
+     * @param $boardId
+     * @param $ticketId
+     * @param $errors
+     * @return bool|\DateTime
+     */
+    private function validateSetDueDate($date, $boardId, $ticketId, &$errors)
+    {
+        if (empty($date)) {
+            $errors[] = 'Empty date field.';
+        }
+
+        //validate board ID
+        $boards = $this->boardIds();
+        if (!key_exists($boardId, $boards)) {
+            $errors[] = 'Invalid board ID.';
+            return false;
+        }
+
+        //validate ticket ID
+        $trello  = $this->instance();
+        $tickets = [];
+        $Alltickets = $trello->boards()->cards()->all($boardId);
+        foreach ($Alltickets as $ticket) {
+            $tickets[] = $ticket['id'];
+        }
+        if (!in_array($ticketId, $tickets)) {
+            $errors[] = 'Invalid ticket ID.';
+        }
+
+        try {
+            $datetime = new \DateTime($date);
+        } catch (\Exception $e) {
+            $errors[] = 'Invalid datetime format.';
+        }
+
+        if (count($errors) > 0) {
+            return false;
+        }
+
+        return $datetime;
     }
 
     /**
@@ -514,8 +593,7 @@ class TrelloController extends Controller
      */
     private function generateMultipleCards($id)
     {
-        $trello = $this->instance();
-        $lists  = $this->listsId($id);
+        $lists  = $this->listIds($id);
 
         //generate predefined cards from config/trello
         $cards = \Config::get('trello.cards');
