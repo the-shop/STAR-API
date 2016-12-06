@@ -28,6 +28,7 @@ class Profile extends StarModel implements AuthenticatableContract, CanResetPass
         'github',
         'trello',
         'slack',
+        'valid',
         'xp',
         'xp_id'
     ];
