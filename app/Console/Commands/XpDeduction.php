@@ -45,9 +45,11 @@ class XpDeduction extends Command
 
         $profileHashMap = [];
         foreach ($profiles as $profile) {
-            $profileHashMap[$profile->id] = $profile;
+            $profileHashMap[$profile->_id] = $profile;
         }
 
+        //print_r($profiles);
+        //print_r($profiles);
         $daysChecked = 0;
 
         do {
@@ -61,33 +63,36 @@ class XpDeduction extends Command
             $logs = GenericModel::where('_id', '<', new ObjectID($hexNow . '0000000000000000'))
                 ->where('_id', '>=', new ObjectID($hexDayAgo . '0000000000000000'))
                 ->get();
-            dd($logs);
 
             foreach ($logs as $log) {
-                if (isset($profiles[$log->id]) && $profiles[$log->id]->lastTimeActivityCheck > $unixNow && isset($profileHashMap[$log->id])) {
-                    unset($profiles[$log->id]);
-                } else {
-                    $profile = $profileHashMap[$log->id];
-                    if ($daysChecked > 3) {
-                        if ($profile->xp - 1 === 0) {
-                            // Banned flag
-                        } else {
-                            $profile->xp--;
-                            $profile->lastTimeActivityCheck = $unixNow;
-                            $profile->save();
-                            // New XP record creation and save to DB
+                foreach ($profiles as $prof) {
+                    print_r($prof->_id);
+                    if ($prof->_id === $log->id && $prof->lastTimeActivityCheck > $unixNow && isset($profileHashMap[$log->id])) {
+                        unset($prof);
+                    } else {
+                        $profile = $profileHashMap[$log->id];
+                        if ($daysChecked > 3) {
+                            if ($profile->xp - 1 === 0) {
+                                // Banned flag
+                            } else {
+                                $profile->xp--;
+                                $profile->lastTimeActivityCheck = $unixNow;
+                                $profile->save();
+                                // New XP record creation and save to DB
+                                echo 'XP changed' . PHP_EOL;
+                            }
                         }
-                    }
 
-                    if ($daysChecked > 10) {
-                        if ($profile->xp - 2 < 0) {
-                            // Set xp to 0
-                            // Banned flag
-                        } else {
-                            $profile->xp -= 2;
-                            $profile->lastTimeActivityCheck = $unixNow;
-                            $profile->save();
-                            // New XP record creation and save to DB
+                        if ($daysChecked > 10) {
+                            if ($profile->xp - 2 < 0) {
+                                // Set xp to 0
+                                // Banned flag
+                            } else {
+                                $profile->xp -= 2;
+                                $profile->lastTimeActivityCheck = $unixNow;
+                                $profile->save();
+                                // New XP record creation and save to DB
+                            }
                         }
                     }
                 }
@@ -95,6 +100,5 @@ class XpDeduction extends Command
 
             $daysChecked++;
         } while (count($profiles) > 0 && count($logs) > 0);
-
     }
 }
