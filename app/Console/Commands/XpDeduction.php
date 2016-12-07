@@ -49,7 +49,6 @@ class XpDeduction extends Command
         }
 
         //print_r($profiles);
-        //print_r($profiles);
         $daysChecked = 0;
 
         do {
@@ -66,20 +65,25 @@ class XpDeduction extends Command
 
             foreach ($logs as $log) {
                 foreach ($profiles as $prof) {
-                    print_r($prof->_id);
                     if ($prof->_id === $log->id && $prof->lastTimeActivityCheck > $unixNow && isset($profileHashMap[$log->id])) {
                         unset($prof);
-                    } else {
+                    } elseif (key_exists($log->id, $profileHashMap)) {
                         $profile = $profileHashMap[$log->id];
+                        if ($daysChecked < 3) {
+                            $profile->lastTimeActivityCheck = $unixNow;
+                            $profile->save();
+                            $this->info('LastTimeActivityCheck updated!');
+                        }
                         if ($daysChecked > 3) {
                             if ($profile->xp - 1 === 0) {
-                                // Banned flag
+                                //set banned flag and save to DB
+                                $profile->banned = true;
+                                $profile->save();
                             } else {
+                                // New XP record creation and save to DB
                                 $profile->xp--;
                                 $profile->lastTimeActivityCheck = $unixNow;
                                 $profile->save();
-                                // New XP record creation and save to DB
-                                echo 'XP changed' . PHP_EOL;
                             }
                         }
 
@@ -87,13 +91,18 @@ class XpDeduction extends Command
                             if ($profile->xp - 2 < 0) {
                                 // Set xp to 0
                                 // Banned flag
+                                $profile->xp = 0;
+                                $profile->banned = true;
                             } else {
+                                // New XP record creation and save to DB
                                 $profile->xp -= 2;
                                 $profile->lastTimeActivityCheck = $unixNow;
                                 $profile->save();
-                                // New XP record creation and save to DB
+
                             }
                         }
+                    } else {
+                        continue;
                     }
                 }
             }
