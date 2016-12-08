@@ -49,11 +49,13 @@ class XpDeduction extends Command
         }
 
         //print_r($profiles);
+        //print_r($profiles);
         $daysChecked = 0;
 
         do {
             // Check for the following day
             $date = new \DateTime();
+            $cronTime = $date->format('U');
             GenericModel::setCollection('logs');
             $unixNow = $date->format('U') - (24 * 60 * 60 * $daysChecked);
             $unixDayAgo = $unixNow - 24 * 60 * 60;
@@ -63,20 +65,19 @@ class XpDeduction extends Command
                 ->where('_id', '>=', new ObjectID($hexDayAgo . '0000000000000000'))
                 ->get();
 
+
             foreach ($logs as $log) {
-                foreach ($profiles as $prof) {
-                    if ($prof->_id === $log->id && $prof->lastTimeActivityCheck > $unixNow && isset($profileHashMap[$log->id])) {
-                        unset($prof);
+                foreach ($profileHashMap as $prof) {
+                    if ($prof->_id === $log->id && $prof->lastTimeActivityCheck < $unixNow) {
+                        $profileHashMap[$log->id]->lastTimeActivityCheck = $unixNow;
+                        $profileHashMap[$log->id]->save();
+                        unset($profileHashMap[$log->id]);
                     } elseif (key_exists($log->id, $profileHashMap)) {
                         $profile = $profileHashMap[$log->id];
-                        if ($daysChecked < 3) {
-                            $profile->lastTimeActivityCheck = $unixNow;
-                            $profile->save();
-                            $this->info('LastTimeActivityCheck updated!');
-                        }
-                        if ($daysChecked > 3) {
+                        if ($daysChecked >= 3 && $daysChecked < 11) {
                             if ($profile->xp - 1 === 0) {
                                 //set banned flag and save to DB
+                                $profile->xp = 0;
                                 $profile->banned = true;
                                 $profile->save();
                             } else {
@@ -93,21 +94,19 @@ class XpDeduction extends Command
                                 // Banned flag
                                 $profile->xp = 0;
                                 $profile->banned = true;
+                                $profile->save();
                             } else {
                                 // New XP record creation and save to DB
                                 $profile->xp -= 2;
                                 $profile->lastTimeActivityCheck = $unixNow;
                                 $profile->save();
-
                             }
                         }
-                    } else {
-                        continue;
                     }
                 }
             }
 
             $daysChecked++;
-        } while (count($profiles) > 0 && count($logs) > 0);
+        } while (count($profileHashMap) > 0 || $daysChecked > 15);
     }
 }
