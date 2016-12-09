@@ -7,7 +7,7 @@ return [
     'internal' => [
         'projects' => [
             'reservation' => [
-                'maxReservationTime' => env('RESERVATION_TIME', 30)
+                'maxReservationTime' => env('PROJECT_RESERVATION_TIME', 30)
             ]
         ],
 //        'slack' => [
@@ -22,10 +22,26 @@ return [
         'slack' => [
             [
                 'resolver' => [
-                    'class' => \App\ExternalServices\Slack::class,
-                    'method' => 'getTeamInfo'
+                    'class' => \Vluzrmos\SlackApi\Facades\SlackTeam::class,
+                    'method' => 'info'
                 ],
                 'settingName' => 'teamInfo'// tu spremi return value iz ...\Slack->getNestaId
+            ]
+        ],
+        'bla' => [
+            [
+                'bla' => [
+                    'class' => \Vluzrmos\SlackApi\Facades\SlackTeam::class,
+                    'method' => 'info'
+                ],
+                'settingName' => 'teamInfo'// tu spremi return value iz ...\Slack->getNestaId
+            ],
+            [
+                'resolver' => [
+                    'class' => \Vluzrmos\SlackApi\Facades\SlackTeam::class,
+                    'method' => 'info'
+                ],
+                'settingName' => 'blabla'// tu spremi return value iz ...\Slack->getNestaId
             ]
         ]
     ]
