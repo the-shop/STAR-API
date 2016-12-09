@@ -4,15 +4,12 @@ return [
     /**
      * Fixed Star API configuration
      */
-    'internal' => [
+    'internalConfiguration' => [
         'projects' => [
             'reservation' => [
                 'maxReservationTime' => env('PROJECT_RESERVATION_TIME', 30)
             ]
         ],
-//        'slack' => [
-//            'teamInfo' => '' // stagod da vrati resolver method
-//        ]
     ],
 
     /**
@@ -25,23 +22,7 @@ return [
                     'class' => \Vluzrmos\SlackApi\Facades\SlackTeam::class,
                     'method' => 'info'
                 ],
-                'settingName' => 'teamInfo'// tu spremi return value iz ...\Slack->getNestaId
-            ]
-        ],
-        'bla' => [
-            [
-                'resolver' => [
-                    'class' => \Vluzrmos\SlackApi\Facades\SlackTeam::class,
-                    'method' => 'info'
-                ],
-                'settingName' => 'BLAAAAAAAAA'// tu spremi return value iz ...\Slack->getNestaId
-            ],
-            [
-                'resolver' => [
-                    'class' => \Vluzrmos\SlackApi\Facades\SlackTeam::class,
-                    'method' => 'info'
-                ],
-                'settingName' => 'blabla'// tu spremi return value iz ...\Slack->getNestaId
+                'settingName' => 'teamInfo'
             ]
         ],
     ]
