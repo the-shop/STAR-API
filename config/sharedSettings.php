@@ -30,11 +30,11 @@ return [
         ],
         'bla' => [
             [
-                'bla' => [
+                'resolver' => [
                     'class' => \Vluzrmos\SlackApi\Facades\SlackTeam::class,
                     'method' => 'info'
                 ],
-                'settingName' => 'teamInfo'// tu spremi return value iz ...\Slack->getNestaId
+                'settingName' => 'BLAAAAAAAAA'// tu spremi return value iz ...\Slack->getNestaId
             ],
             [
                 'resolver' => [
@@ -43,7 +43,7 @@ return [
                 ],
                 'settingName' => 'blabla'// tu spremi return value iz ...\Slack->getNestaId
             ]
-        ]
+        ],
     ]
 
 ];
