@@ -62,6 +62,20 @@ class ProfileController extends Controller
 
         JWTAuth::setToken($token);
 
+        //send confirmation E-mail upon profile creation on the platform
+        $data = [
+            'name'   => $profile->name,
+            'email'  => $profile->email,
+            'github' => $profile->github,
+            'trello' => $profile->trello,
+            'slack'  => $profile->slack
+        ];
+
+        \Mail::send('emails.registration', $data, function ($message) use ($profile) {
+            $message->from('mladen@the-shop.io', 'The Shop');
+            $message->to($profile->email, $profile->name)->subject('Welcome to The Shop platform!');
+        });
+
         return $this->jsonSuccess($profile);
     }
 
