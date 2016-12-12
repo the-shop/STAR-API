@@ -107,8 +107,10 @@ class ProfileController extends Controller
         // Send email with XP status change
         if ($request->has('xp')) {
             $xpDifference = $profile->xp - $oldXp;
+            $emailMessage = \Config::get('sharedSettings.internalConfiguration.email_xp_message');
             $data = [
-                'xpDifference' => $xpDifference
+                'xpDifference' => $xpDifference,
+                'emailMessage' => $emailMessage
             ];
             $emailFrom = \Config::get('mail.private_mail_from');
             $emailName = \Config::get('mail.private_mail_name');
