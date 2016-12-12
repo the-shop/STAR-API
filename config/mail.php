@@ -108,4 +108,13 @@ return [
 
     'sendmail' => '/usr/sbin/sendmail -bs',
 
+
+    /*
+     * Private email settings for sending email upon new user registration,
+     * upon XP awarded/deducted
+     *
+     */
+
+    'private_mail_from' => env('PRIVATE_MAIL_FROM', 'mladen@the-shop.io'),
+    'private_mail_name' => env('PRIVATE_MAIL_NAME', 'TheShop')
 ];
