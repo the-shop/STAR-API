@@ -10,6 +10,7 @@ return [
                 'maxReservationTime' => env('PROJECT_RESERVATION_TIME', 30)
             ]
         ],
+        'default_role' => 'standard'
     ],
 
     /**

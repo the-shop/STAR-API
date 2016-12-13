@@ -30,7 +30,8 @@ class Profile extends StarModel implements AuthenticatableContract, CanResetPass
         'slack',
         'valid',
         'xp',
-        'xp_id'
+        'xp_id',
+        'aclId'
     ];
 
     /**

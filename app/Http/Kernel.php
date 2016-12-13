@@ -52,5 +52,6 @@ class Kernel extends HttpKernel
         'jwt.refresh' => \App\Http\Middleware\JwtRefresh::class,
         'the-shop.genericResource' => \App\Http\Middleware\GenericResource::class,
         'the-shop.requestLogger' => \App\Http\Middleware\RequestLogger::class,
+        'acl' => \App\Http\Middleware\Acl::class
     ];
 }
