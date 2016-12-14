@@ -11,6 +11,10 @@ class AclCollectionSeeder extends Seeder
      */
     public function run()
     {
+        // delete records from acl collection
+        DB::collection('acl')->delete();
+
+        // insert records into acl collection
         DB::collection('acl')->insert([
 
             'name'   => 'standard',
@@ -29,5 +33,7 @@ class AclCollectionSeeder extends Seeder
                 ]
             ]
             ]);
+
+        $this->command->info("acl collection seeded!");
     }
 }

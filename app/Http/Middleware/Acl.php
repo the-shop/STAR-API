@@ -5,16 +5,15 @@ namespace App\Http\Middleware;
 use App\GenericModel;
 use Closure;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\Routing\Exception\MethodNotAllowedException;
-
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 class Acl
 {
     /**
      * Handle an incoming request. Check user route permissions.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param  \Illuminate\Http\Request $request
+     * @param  \Closure $next
      * @return mixed
      */
     public function handle($request, Closure $next)
@@ -31,27 +30,24 @@ class Acl
 
         GenericModel::setCollection('acl');
 
+        //check if user has aclId field set, otherwise use default role
         if ($user->aclId) {
             $acl = GenericModel::where('_id', '=', $user->aclId)->first();
-            if ($acl !== null) {
-                $aclAttributes = $acl->getAttributes();
-                if (key_exists($routeMethod, $aclAttributes['allows'])) {
-                    if (!in_array($routeUri, $aclAttributes['allows'][$routeMethod])) {
-                        return response(['Insufficient permissions.', 403]);
-                    }
-                }
-            } else {
-                throw new MethodNotAllowedException([]);
-            }
         } else {
             $acl = GenericModel::where('name', '=', $defaultRole)->first();
-            $aclAttributes = $acl->getAttributes();
-            if (key_exists($routeMethod, $aclAttributes['allows'])) {
-                if (!in_array($routeUri, $aclAttributes['allows'][$routeMethod])) {
-                    return response(['Insufficient permissions.', 403]);
-                }
+        }
+
+        //validate permissions
+        if (!$acl instanceof GenericModel) {
+            throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
+        }
+
+        if (!key_exists($routeMethod, $acl->allows)) {
+            throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
             }
 
+        if (!in_array($routeUri, $acl->allows[$routeMethod])) {
+            throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
         }
 
         return $next($request);
