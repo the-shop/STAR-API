@@ -44,7 +44,7 @@ class Acl
 
         if (!key_exists($routeMethod, $acl->allows)) {
             throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
-            }
+        }
 
         if (!in_array($routeUri, $acl->allows[$routeMethod])) {
             throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
