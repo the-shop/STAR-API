@@ -70,10 +70,12 @@ class ProfileController extends Controller
             'trello' => $profile->trello,
             'slack'  => $profile->slack
         ];
+        $emailFrom = \Config::get('mail.private_mail_from');
+        $emailName = \Config::get('mail.private_mail_name');
 
-        \Mail::send('emails.registration', $data, function ($message) use ($profile) {
-            $message->from('mladen@the-shop.io', 'The Shop');
-            $message->to($profile->email, $profile->name)->subject('Welcome to The Shop platform!');
+        \Mail::send('emails.registration', $data, function ($message) use ($profile, $emailFrom, $emailName) {
+            $message->from($emailFrom, $emailName);
+            $message->to($profile->email, $profile->name)->subject($emailName . ' - Welcome to The Shop platform!');
         });
 
         return $this->jsonSuccess($profile);
