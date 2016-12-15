@@ -10,6 +10,7 @@ return [
                 'maxReservationTime' => env('PROJECT_RESERVATION_TIME', 30)
             ]
         ],
+        'email_xp_message' => 'Hey, your XP changed by {N}',
         'default_role' => 'standard'
     ],
 
