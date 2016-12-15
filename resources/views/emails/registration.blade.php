@@ -17,10 +17,10 @@
     @endif
 
 </ul>
-<p> We would like to invite you to our slack team!</p>
-    @if(empty($slack))
-        <p>Please, go visit <a href="https://slack.com/signin">https://slack.com/signin</a></p>
-        @endif
+<p> We would like to invite you to our slack team.</p>
+
+<p>Please, go visit <a href="https://slack.com/signin">https://slack.com/signin</a> and join us!</p>
+
 <ul>
     <li> Slack name: The Shop</li>
     <li> Slack domain: the-shop-company</li>
