@@ -63,6 +63,7 @@ class ProfileController extends Controller
         JWTAuth::setToken($token);
 
         //send confirmation E-mail upon profile creation on the platform
+
         $data = [
             'name'   => $profile->name,
             'email'  => $profile->email,

@@ -1,19 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Helpers;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
-use App\Http\Requests;
-use Symfony\Component\Debug\Exception\FatalErrorException;
-
-class ConfigurationController extends Controller
+class Configuration extends Controller
 {
-    /**
-     * Get Configuration from sharedSettings
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getConfiguration($email = false)
+
+    public function configuration($email = null)
     {
         $internalSettings = \Config::get('sharedSettings.internalConfiguration', []);
         $externalSettings = \Config::get('sharedSettings.externalConfiguration', []);
@@ -23,7 +17,7 @@ class ConfigurationController extends Controller
         if (empty($internalSettings) && empty($externalSettings)) {
             return $this->jsonError(['Empty settings list.'], 404);
         }
-        
+
         foreach ($externalSettings as $name => $configs) {
             foreach ($configs as $config) {
                 if (!key_exists('resolver', $config)) {
@@ -38,11 +32,12 @@ class ConfigurationController extends Controller
             }
         }
 
-        if ($email !== false) {
+        // return slack company fields for email upon new user registration
+        if ($email !== null) {
             $response = [];
-            $response['teamName']   = $allsettings['slack']['teamInfo']->team->name;
+            $response['teamName'] = $allsettings['slack']['teamInfo']->team->name;
             $response['teamDomain'] = $allsettings['slack']['teamInfo']->team->domain;
-            $response['teamDomain'] = $allsettings['slack']['teamInfo']->team->domain;
+            $response['EmailDomain'] = $allsettings['slack']['teamInfo']->team->email_domain;
 
             return $response;
         }
