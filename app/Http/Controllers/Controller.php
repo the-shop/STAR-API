@@ -96,6 +96,7 @@ class Controller extends BaseController
         }
 
         $checkValidations = [];
+
         foreach ($validations as $field => $value) {
             if (!isset($fields[$field])) {
                 continue;

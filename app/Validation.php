@@ -18,7 +18,8 @@ class Validation extends Eloquent
     protected $fillable = [
         'resource',
         'fields',
-        'messages'
+        'messages',
+        'acl'
     ];
 
     /**
