@@ -7,15 +7,15 @@ use App\Http\Controllers\Controller;
 class Configuration extends Controller
 {
 
-    public function configuration($email = null)
+    public static function getConfiguration($email = null)
     {
         $internalSettings = \Config::get('sharedSettings.internalConfiguration', []);
         $externalSettings = \Config::get('sharedSettings.externalConfiguration', []);
-        $allsettings = [];
-        $allsettings['internal'] = $internalSettings;
+        $allSettings = [];
+        $allSettings['internal'] = $internalSettings;
 
         if (empty($internalSettings) && empty($externalSettings)) {
-            return $this->jsonError(['Empty settings list.'], 404);
+            return false;
         }
 
         foreach ($externalSettings as $name => $configs) {
@@ -28,20 +28,20 @@ class Configuration extends Controller
                 } catch (\Exception $e) {
                     continue;
                 }
-                $allsettings[$name][$config['settingName']] = $value;
+                $allSettings[$name][$config['settingName']] = $value;
             }
         }
 
         // return slack company fields for email upon new user registration
         if ($email !== null) {
             $response = [];
-            $response['teamName'] = $allsettings['slack']['teamInfo']->team->name;
-            $response['teamDomain'] = $allsettings['slack']['teamInfo']->team->domain;
-            $response['EmailDomain'] = $allsettings['slack']['teamInfo']->team->email_domain;
+            $response['teamName'] = $allSettings['slack']['teamInfo']->team->name;
+            $response['teamDomain'] = $allSettings['slack']['teamInfo']->team->domain;
+            $response['emailDomain'] = $allSettings['slack']['teamInfo']->team->email_domain;
 
             return $response;
         }
 
-        return $this->jsonSuccess($allsettings);
+        return $allSettings;
     }
 }
