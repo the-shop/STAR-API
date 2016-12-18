@@ -11,6 +11,8 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Helpers\AclHelper;
+use App\GenericModel;
 
 /**
  * Class Controller
@@ -90,6 +92,28 @@ class Controller extends BaseController
         }
 
         $validations = $validationModel->getFields();
+
+        $user = \Auth::user();
+
+        //dynamic validations per user role
+        if (!$user->admin === true) {
+            $acl = AclHelper::getAcl($user);
+
+            if (!$acl instanceof GenericModel) {
+                return false;
+            }
+
+            if (!key_exists($acl->name, $validationModel->acl)) {
+                return false;
+            }
+
+            $editableFields = $validationModel->acl[$acl->name]['editable'];
+
+            if (count(array_intersect_key(array_flip($editableFields), $fields)) !== count($fields)) {
+                return false;
+            }
+
+        }
 
         foreach ($inputOverrides as $field => $value) {
             $validations[$field] = $value;

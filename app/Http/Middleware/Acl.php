@@ -6,7 +6,7 @@ use App\GenericModel;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use App\Helpers\AclValidator;
+use App\Helpers\AclHelper;
 
 class Acl
 {
@@ -23,9 +23,25 @@ class Acl
         $routeMethod = $request->method();
 
         $user = Auth::user();
-        $defaultRole = \Config::get('sharedSettings.internalConfiguration.default_role');
 
-        AclValidator::validateRoute($user, $defaultRole, $routeUri, $routeMethod);
+        if ($user->admin === true) {
+            return $next($request);
+        }
+
+        $acl = AclHelper::getAcl($user);
+
+        //validate permissions
+        if (!$acl instanceof GenericModel) {
+            throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
+        }
+
+        if (!key_exists($routeMethod, $acl->allows)) {
+            throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
+        }
+
+        if (!in_array($routeUri, $acl->allows[$routeMethod])) {
+            throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
+        }
 
         return $next($request);
     }
