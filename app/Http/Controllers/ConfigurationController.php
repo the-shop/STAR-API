@@ -14,7 +14,7 @@ class ConfigurationController extends Controller
     {
         $allSettings = Configuration::getConfiguration();
 
-        if ($allSettings === false ) {
+        if ($allSettings === false) {
             $this->jsonError(['Empty settings list.'], 404);
         }
 

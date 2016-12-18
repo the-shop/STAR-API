@@ -66,16 +66,16 @@ class ProfileController extends Controller
         //send confirmation E-mail upon profile creation on the platform
 
         $teamSlackInfo = Configuration::getConfiguration(true);
-        if ($teamSlackInfo === false ) {
+        if ($teamSlackInfo === false) {
             $teamSlackInfo = [];
         }
 
         $data = [
-            'name'   => $profile->name,
-            'email'  => $profile->email,
+            'name' => $profile->name,
+            'email' => $profile->email,
             'github' => $profile->github,
             'trello' => $profile->trello,
-            'slack'  => $profile->slack,
+            'slack' => $profile->slack,
             'teamSlack' => $teamSlackInfo
         ];
 
