@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use App\GenericModel;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 
 class AclHelper
 {
@@ -21,6 +22,11 @@ class AclHelper
         } else {
             $defaultRole = \Config::get('sharedSettings.internalConfiguration.default_role');
             $acl = GenericModel::where('name', '=', $defaultRole)->first();
+        }
+
+        //check if user has role
+        if (!$acl instanceof GenericModel) {
+            throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
         }
 
         return $acl;

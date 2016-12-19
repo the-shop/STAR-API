@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use App\GenericModel;
 use Closure;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -31,9 +30,6 @@ class Acl
         $acl = AclHelper::getAcl($user);
 
         //validate permissions
-        if (!$acl instanceof GenericModel) {
-            throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
-        }
 
         if (!key_exists($routeMethod, $acl->allows)) {
             throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');

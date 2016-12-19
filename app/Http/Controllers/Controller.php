@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\DynamicValidationException;
+use Illuminate\Http\Request;
 use App\Profile;
 use App\Validation;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -12,7 +13,6 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Helpers\AclHelper;
-use App\GenericModel;
 
 /**
  * Class Controller
@@ -21,6 +21,17 @@ use App\GenericModel;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+    private $request;
+
+    /**
+     * Controller constructor.
+     * @param Request $request
+     */
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+    }
 
     /**
      * @param $data
@@ -95,24 +106,37 @@ class Controller extends BaseController
 
         $user = \Auth::user();
 
-        //dynamic validations per user role
-        if (!$user->admin === true) {
+        //Validations per user role
+        if ($user->admin !== true) {
+
             $acl = AclHelper::getAcl($user);
+            $userRole = $acl->name;
 
-            if (!$acl instanceof GenericModel) {
+            //check if validation rules exists for use role
+            if (!key_exists($userRole, $validationModel->acl)) {
                 return false;
             }
 
-            if (!key_exists($acl->name, $validationModel->acl)) {
+            //check permissions based on method
+            if ($this->request->isMethod('post') && $validationModel->acl[$userRole]['canCreate'] !== true) {
                 return false;
             }
 
-            $editableFields = $validationModel->acl[$acl->name]['editable'];
+            $editableFields = $validationModel->acl[$userRole]['editable'];
 
-            if (count(array_intersect_key(array_flip($editableFields), $fields)) !== count($fields)) {
+            if ($this->request->isMethod('put') && count(array_intersect_key(array_flip($editableFields), $fields))
+                !== count($fields)
+            ) {
                 return false;
             }
 
+            if ($this->request->isMethod('get') && $validationModel->acl[$userRole]['canRead'] !== true) {
+                return false;
+            }
+
+            if ($this->request->isMethod('delete') && $validationModel->acl[$userRole]['canDelete'] !== true) {
+                return false;
+            }
         }
 
         foreach ($inputOverrides as $field => $value) {
