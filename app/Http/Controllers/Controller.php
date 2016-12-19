@@ -117,25 +117,28 @@ class Controller extends BaseController
                 return false;
             }
 
-            //check permissions based on method
-            if ($this->request->isMethod('post') && $validationModel->acl[$userRole]['canCreate'] !== true) {
-                return false;
-            }
-
-            $editableFields = $validationModel->acl[$userRole]['editable'];
-
-            if ($this->request->isMethod('put') && count(array_intersect_key(array_flip($editableFields), $fields))
-                !== count($fields)
-            ) {
-                return false;
-            }
-
-            if ($this->request->isMethod('get') && $validationModel->acl[$userRole]['canRead'] !== true) {
-                return false;
-            }
-
-            if ($this->request->isMethod('delete') && $validationModel->acl[$userRole]['canDelete'] !== true) {
-                return false;
+            switch ($this->request->method()) {
+                case 'POST':
+                    if ($validationModel->acl[$userRole]['canCreate'] !== true) {
+                        return false;
+                    }
+                    break;
+                case 'PUT':
+                    $editableFields = $validationModel->acl[$userRole]['editable'];
+                    if (count(array_intersect_key(array_flip($editableFields), $fields)) !== count($fields)) {
+                        return false;
+                    }
+                    break;
+                case 'GET':
+                    if ($validationModel->acl[$userRole]['canRead'] !== true) {
+                        return false;
+                    }
+                    break;
+                case 'DELETE':
+                    if ($validationModel->acl[$userRole]['canDelete'] !== true) {
+                        return false;
+                    }
+                    break;
             }
         }
 
