@@ -133,11 +133,13 @@ class Controller extends BaseController
                     if ($validationModel->acl[$userRole]['canRead'] !== true) {
                         return false;
                     }
+                    return true;
                     break;
                 case 'DELETE':
                     if ($validationModel->acl[$userRole]['canDelete'] !== true) {
                         return false;
                     }
+                    return true;
                     break;
             }
         }
