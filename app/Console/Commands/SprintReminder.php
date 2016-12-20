@@ -43,23 +43,42 @@ class SprintReminder extends Command
 
         $activeProjects = [];
         $sprints = [];
+        $tasks = [];
 
+        GenericModel::setCollection('sprints');
         foreach ($projects as $project) {
-            if (isset($project->acceptedBy) && $project->isComplete !== true) {
+            if (!empty($project->acceptedBy) && $project->isComplete !== true) {
                 $activeProjects[$project->id] = $project;
-                if (isset($project->sprints)) {
-                    GenericModel::setCollection('sprints');
+                if (!empty($project->sprints)) {
                     foreach ($project->sprints as $sprintId) {
-                        $sprints[$sprintId] = GenericModel::where('_id', '=', $sprintId)->get();
+                        $sprints[$sprintId] = GenericModel::where('_id', '=', $sprintId)->first();
                     }
                 }
             }
         }
 
+        GenericModel::setCollection('tasks');
+        foreach ($sprints as $sprint) {
+            if (!empty($sprint->tasks)) {
+                foreach ($sprint->tasks as $taskId) {
+                    $tasks[$taskId] = GenericModel::where('_id', '=', $taskId)->first();
+                }
+            }
+        }
+
+        //check due dates and ping user 2 days before sprint end
         $date = new \DateTime();
         $unixNow = $date->format('U');
         $unix2DaysAhead = $unixNow + 48 * 60 * 60;
-        $unix1DayAhead  = $unixNow + 24 * 60 * 60;
+        $unix1DayAhead = $unixNow + 24 * 60 * 60;
 
+        $howMany = [];
+        foreach ($sprints as $sprint) {
+            if ($sprint->end <= $unix2DaysAhead) {
+                $howMany[] = date('m-d-Y', $sprint->end);
+            }
+        }
+
+        print_r($howMany);
     }
 }
