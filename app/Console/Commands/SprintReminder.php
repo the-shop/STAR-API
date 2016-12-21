@@ -19,7 +19,7 @@ class SprintReminder extends Command
      *
      * @var string
      */
-    protected $description = 'Check sprints due dates and ping project users 2 days and 1 day before sprint end';
+    protected $description = 'Check sprint tasks due dates and ping task owner 1 day before task end_due_date';
 
     /**
      * Create a new command instance.
@@ -45,18 +45,18 @@ class SprintReminder extends Command
         $sprints = [];
         $tasks = [];
 
+        //get all active projects and sprints
         GenericModel::setCollection('sprints');
         foreach ($projects as $project) {
-            if (!empty($project->acceptedBy) && $project->isComplete !== true) {
+            if (!empty($project->acceptedBy) && $project->isComplete !== true && !empty($project->sprints)) {
                 $activeProjects[$project->id] = $project;
-                if (!empty($project->sprints)) {
-                    foreach ($project->sprints as $sprintId) {
-                        $sprints[$sprintId] = GenericModel::where('_id', '=', $sprintId)->first();
-                    }
+                foreach ($project->sprints as $sprintId) {
+                    $sprints[$sprintId] = GenericModel::where('_id', '=', $sprintId)->first();
                 }
             }
         }
 
+        //get all active tasks
         GenericModel::setCollection('tasks');
         foreach ($sprints as $sprint) {
             if (!empty($sprint->tasks)) {
@@ -66,19 +66,22 @@ class SprintReminder extends Command
             }
         }
 
-        //check due dates and ping user 2 days before sprint end
+        //check tasks due date and ping task owner 1 day before task end
         $date = new \DateTime();
-        $unixNow = $date->format('U');
-        $unix2DaysAhead = $unixNow + 48 * 60 * 60;
-        $unix1DayAhead = $unixNow + 24 * 60 * 60;
+        $unixCheckDate = $date->format('U') + 24 * 60 * 60;
+        $checkDate = date('d-m-Y', $unixCheckDate);
 
-        $howMany = [];
-        foreach ($sprints as $sprint) {
-            if ($sprint->end <= $unix2DaysAhead) {
-                $howMany[] = date('m-d-Y', $sprint->end);
+        GenericModel::setCollection('profiles');
+        foreach ($tasks as $task) {
+            $taskDueDate = date('d-m-Y', $task->due_date);
+            if ($taskDueDate === $checkDate) {
+                $user = GenericModel::where('_id', '=', $task->owner)->first();
+                $recipient = '@' . $user['slack'];
+                $project = $activeProjects[$task->project_id]->name;
+                $message = '::REMINDER:: Project ' . $project . ' due date on task ' . $task->title .
+                    ' is ::TOMORROW:: ' . $taskDueDate;
+                \SlackChat::message($recipient, $message);
             }
         }
-
-        print_r($howMany);
     }
 }
