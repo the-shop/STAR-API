@@ -44,19 +44,19 @@ return [
     */
 
     'connections' => [
-
 	
-	'mongodb' => [
-    'driver'   => 'mongodb',
-    'host'     => env('DB_HOST', '192.168.33.10'),
-    'port'     => env('DB_PORT', 27017),
-    'database' => env('DB_DATABASE', 'starapi'),
-    'username' => env('DB_USERNAME', ''),
-    'password' => env('DB_PASSWORD', ''),
-    'options' => [
-        'db' => 'admin' // sets the authentication database required by mongo 3
-    ]
-],
+        'mongodb' => [
+            'driver'   => 'mongodb',
+            'host'     => env('DB_HOST', '127.0.0.1'),
+            'port'     => env('DB_PORT', 27017),
+            'database' => null,
+            'username' => env('DB_USERNAME', ''),
+            'password' => env('DB_PASSWORD', ''),
+            'options' => [
+                'db' => 'admin' // sets the authentication database required by mongo 3
+            ]
+        ],
+
         'sqlite' => [
             'driver'   => 'sqlite',
             'database' => database_path('database.sqlite'),
