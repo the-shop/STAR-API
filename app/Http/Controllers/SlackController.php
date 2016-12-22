@@ -70,7 +70,7 @@ class SlackController extends Controller
         if ($users->ok === true) {
             $result = [];
             foreach ($users->members as $user) {
-                $result[] = $user->name;
+                $result[$user->id] = $user->name;
             }
             return $result;
         }
