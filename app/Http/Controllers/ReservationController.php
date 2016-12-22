@@ -129,7 +129,7 @@ class ReservationController extends Controller
             return $this->jsonError(['ID not found.'], 404);
         }
 
-        if (isset($project->acceptedBy)) {
+        if (!empty($project->acceptedBy)) {
             return $this->jsonError(['Project already accepted.'], 403);
         }
 
