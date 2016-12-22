@@ -65,16 +65,20 @@ class XpDeduction extends Command
                 ->where('_id', '>=', new ObjectID($hexDayAgo . '0000000000000000'))
                 ->get();
 
-
+            $logHashMap = [];
             foreach ($logs as $log) {
-                foreach ($profileHashMap as $user) {
-                    if ($user->_id === $log->id &&) {
-                        $profileHashMap[$log->id]->lastTimeActive = $cronTime;
+                $logHashMap[$log->id] = $log;
+            }
+
+            foreach ($profileHashMap as $user) {
+                foreach ($logs as $log) {
+                    if ($user->_id === $log->id && $daysChecked < 3) {
+                        $profileHashMap[$log->id]->lastTimeActivityCheck = $cronTime;
                         $profileHashMap[$log->id]->save();
                         unset($profileHashMap[$log->id]);
-                    } elseif (key_exists($log->id, $profileHashMap)) {
+                    } elseif (key_exists($user->_id, $logHashMap)) {
                         $profile = $profileHashMap[$log->id];
-                        if ($daysChecked >= 3) {
+                        if ($daysChecked === 3) {
                             if ($profile->xp - 1 === 0) {
                                 //set banned flag and save to DB
                                 $profile->xp = 0;
@@ -83,14 +87,26 @@ class XpDeduction extends Command
                             } else {
                                 // New XP record creation and save to DB
                                 $profile->xp--;
-                                $profile->lastTimeActive = $cronTime;
+                                $profile->lastTimeActivityCheck = $cronTime;
                                 $profile->save();
+                            }
+                            if ($daysChecked === 4) {
+                                if ($profile->xp -2 <= 0) {
+                                    $profile->xp = 0;
+                                    $profile->banned = true;
+                                    $profile->save();
+                                } else {
+                                    $profile->xp -= 2;
+                                    $profile->lastTimeActivityCheck = $cronTime;
+                                    $profile->save();
+                                }
                             }
                         }
                     }
                 }
             }
             $daysChecked++;
-        } while (count($profileHashMap) > 0 || $daysChecked > 4);
+            unset ($logHashMap);
+        } while (count($profileHashMap) > 0 || $daysChecked === 4);
     }
 }
