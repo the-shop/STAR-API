@@ -16,12 +16,16 @@ class AclCollectionSeeder extends Seeder
 
         // insert records into acl collection
         DB::collection('acl')->insert([
-
             'name'   => 'standard',
             'allows' => [
                 'GET' => [
                     'api/v1/configuration',
-                    'api/v1/profiles/{profiles}'
+                    'api/v1/profiles/{profiles}',
+                    'api/v1/projects',
+                    'api/v1/projects/{profiles}',
+                    'api/v1/xp',
+                    'api/v1/xp/{xp}',
+                    'api/v1/comments',
 
                 ],
                 'PUT' => [
