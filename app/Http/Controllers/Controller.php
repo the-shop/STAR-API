@@ -107,41 +107,43 @@ class Controller extends BaseController
         $user = \Auth::user();
 
         //Validations per user role
-        if ($user->admin !== true) {
+        if ($user->admin === true) {
+            return true;
+        }
 
-            $acl = AclHelper::getAcl($user);
-            $userRole = $acl->name;
+        $acl = AclHelper::getAcl($user);
+        $userRole = $acl->name;
 
-            //check if validation rules exists for use role
-            if (!key_exists($userRole, $validationModel->acl)) {
-                return false;
-            }
+        //check if validation rules exists for use role
+        if (!key_exists($userRole, $validationModel->acl)) {
+            return false;
+        }
 
-            switch ($this->request->method()) {
-                case 'POST':
-                    if ($validationModel->acl[$userRole]['canCreate'] !== true) {
-                        return false;
-                    }
-                    break;
-                case 'PUT':
-                    $editableFields = $validationModel->acl[$userRole]['editable'];
-                    if (count(array_intersect_key(array_flip($editableFields), $fields)) !== count($fields)) {
-                        return false;
-                    }
-                    break;
-                case 'GET':
-                    if ($validationModel->acl[$userRole]['canRead'] !== true) {
-                        return false;
-                    }
-                    return true;
-                    break;
-                case 'DELETE':
-                    if ($validationModel->acl[$userRole]['canDelete'] !== true) {
-                        return false;
-                    }
-                    return true;
-                    break;
-            }
+        switch ($this->request->method()) {
+            case 'POST':
+                if ($validationModel->acl[$userRole]['canCreate'] !== true) {
+                    return false;
+                }
+                return true;
+
+            case 'PUT':
+                $editableFields = $validationModel->acl[$userRole]['editable'];
+                if (count(array_intersect_key(array_flip($editableFields), $fields)) !== count($fields)) {
+                    return false;
+                }
+                return true;
+
+            case 'GET':
+                if ($validationModel->acl[$userRole]['canRead'] !== true) {
+                    return false;
+                }
+                return true;
+
+            case 'DELETE':
+                if ($validationModel->acl[$userRole]['canDelete'] !== true) {
+                    return false;
+                }
+                return true;
         }
 
         foreach ($inputOverrides as $field => $value) {
