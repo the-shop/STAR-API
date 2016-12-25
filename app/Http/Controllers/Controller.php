@@ -95,6 +95,13 @@ class Controller extends BaseController
      */
     protected function validateInputsForResource($fields, $resourceName, array $inputOverrides = [])
     {
+        $user = \Auth::user();
+
+        //Validations per user role
+        if ($user && $user->admin === true) {
+            return true;
+        }
+
         $validationModel = Validation::where('resource', $resourceName)
             ->first();
 
@@ -103,13 +110,6 @@ class Controller extends BaseController
         }
 
         $validations = $validationModel->getFields();
-
-        $user = \Auth::user();
-
-        //Validations per user role
-        if ($user->admin === true) {
-            return true;
-        }
 
         $acl = AclHelper::getAcl($user);
         $userRole = $acl->name;
