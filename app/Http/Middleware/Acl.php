@@ -30,12 +30,7 @@ class Acl
         $acl = AclHelper::getAcl($user);
 
         //validate permissions
-
-        if (!key_exists($routeMethod, $acl->allows)) {
-            throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
-        }
-
-        if (!in_array($routeUri, $acl->allows[$routeMethod])) {
+        if (!key_exists($routeMethod, $acl->allows) || !in_array($routeUri, $acl->allows[$routeMethod])) {
             throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
         }
 
