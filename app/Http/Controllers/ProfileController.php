@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Profile;
 use Illuminate\Http\Request;
+use App\Helpers\Configuration;
 
 /**
  * Class ProfileController
@@ -63,17 +64,27 @@ class ProfileController extends Controller
         JWTAuth::setToken($token);
 
         //send confirmation E-mail upon profile creation on the platform
+
+        $teamSlackInfo = Configuration::getConfiguration(true);
+        if ($teamSlackInfo === false) {
+            $teamSlackInfo = [];
+        }
+
         $data = [
-            'name'   => $profile->name,
-            'email'  => $profile->email,
+            'name' => $profile->name,
+            'email' => $profile->email,
             'github' => $profile->github,
             'trello' => $profile->trello,
-            'slack'  => $profile->slack
+            'slack' => $profile->slack,
+            'teamSlack' => $teamSlackInfo
         ];
 
-        \Mail::send('emails.registration', $data, function ($message) use ($profile) {
-            $message->from('mladen@the-shop.io', 'The Shop');
-            $message->to($profile->email, $profile->name)->subject('Welcome to The Shop platform!');
+        $emailFrom = \Config::get('mail.private_mail_from');
+        $emailName = \Config::get('mail.private_mail_name');
+
+        \Mail::send('emails.registration', $data, function ($message) use ($profile, $emailFrom, $emailName) {
+            $message->from($emailFrom, $emailName);
+            $message->to($profile->email, $profile->name)->subject($emailName . ' - Welcome to The Shop platform!');
         });
 
         return $this->jsonSuccess($profile);

@@ -17,4 +17,16 @@
     @endif
 
 </ul>
+@if (!empty($teamSlack))
+<p> We would like to invite you to our slack team.</p>
+
+<p>Please, go visit <a href="https://slack.com/signin">https://slack.com/signin</a> and join us!</p>
+
+<ul>
+    <li> Slack name: {{ $teamSlack['teamName'] }}</li>
+    <li> Slack domain: {{ $teamSlack['teamDomain'] }}</li>
+    <li> Slack email domain: {{ $teamSlack['emailDomain'] }}</li>
+</ul>
+@endif
+
 
