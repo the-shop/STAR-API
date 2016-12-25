@@ -48,9 +48,10 @@ class Kernel extends HttpKernel
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
-        'jwt.auth' => \Tymon\JWTAuth\Middleware\GetUserFromToken::class,
-        'jwt.refresh' => \Tymon\JWTAuth\Middleware\RefreshToken::class,
+        'jwt.auth' => \App\Http\Middleware\JwtAuth::class,
+        'jwt.refresh' => \App\Http\Middleware\JwtRefresh::class,
         'the-shop.genericResource' => \App\Http\Middleware\GenericResource::class,
         'the-shop.requestLogger' => \App\Http\Middleware\RequestLogger::class,
+        'acl' => \App\Http\Middleware\Acl::class
     ];
 }

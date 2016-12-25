@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Profile;
 use Illuminate\Http\Request;
+use App\Helpers\Configuration;
 
 /**
  * Class ProfileController
@@ -62,6 +63,30 @@ class ProfileController extends Controller
 
         JWTAuth::setToken($token);
 
+        //send confirmation E-mail upon profile creation on the platform
+
+        $teamSlackInfo = Configuration::getConfiguration(true);
+        if ($teamSlackInfo === false) {
+            $teamSlackInfo = [];
+        }
+
+        $data = [
+            'name' => $profile->name,
+            'email' => $profile->email,
+            'github' => $profile->github,
+            'trello' => $profile->trello,
+            'slack' => $profile->slack,
+            'teamSlack' => $teamSlackInfo
+        ];
+
+        $emailFrom = \Config::get('mail.private_mail_from');
+        $emailName = \Config::get('mail.private_mail_name');
+
+        \Mail::send('emails.registration', $data, function ($message) use ($profile, $emailFrom, $emailName) {
+            $message->from($emailFrom, $emailName);
+            $message->to($profile->email, $profile->name)->subject($emailName . ' - Welcome to The Shop platform!');
+        });
+
         return $this->jsonSuccess($profile);
     }
 
@@ -96,11 +121,30 @@ class ProfileController extends Controller
             return $this->jsonError('Not enough permissions.', 403);
         }
 
+        $oldXp = $profile->xp;
+
         $this->validateInputsForResource($request->all(), 'profiles', ['email' => 'required|email']);
 
         $profile->fill($request->all());
 
         $profile->save();
+
+        // Send email with XP status change
+        if ($request->has('xp')) {
+            $xpDifference = $profile->xp - $oldXp;
+            $emailMessage = \Config::get('sharedSettings.internalConfiguration.email_xp_message');
+            $data = [
+                'xpDifference' => $xpDifference,
+                'emailMessage' => $emailMessage
+            ];
+            $emailFrom = \Config::get('mail.private_mail_from');
+            $emailName = \Config::get('mail.private_mail_name');
+
+            \Mail::send('emails.xp', $data, function ($message) use ($profile, $emailFrom, $emailName) {
+                $message->from($emailFrom, $emailName);
+                $message->to($profile->email, $profile->name)->subject($emailName . ' - Xp status changed!');
+            });
+        }
 
         return $this->jsonSuccess($profile);
     }

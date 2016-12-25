@@ -8,7 +8,9 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
 /**
  * Class Handler
@@ -25,6 +27,7 @@ class Handler extends ExceptionHandler
         AuthorizationException::class,
         HttpException::class,
         ModelNotFoundException::class,
+        MethodNotAllowedHttpException::class,
         ValidationException::class
     ];
 
@@ -54,7 +57,29 @@ class Handler extends ExceptionHandler
             return response()->json(
                 [
                     'error' => true,
-                    'message' => $e->getMessage()
+                    'errors' => [
+                        'JWT invalid'
+                    ]
+                ],
+                400
+            );
+        } else if ($e instanceof TokenExpiredException) {
+            return response()->json(
+                [
+                    'error' => true,
+                    'errors' => [
+                        'JWT expired'
+                    ]
+                ],
+                403
+            );
+        } else if ($e instanceof MethodNotAllowedHttpException) {
+            return response()->json(
+                [
+                    'error' => true,
+                    'errors' => [
+                        $e->getMessage() ? $e->getMessage() : 'Method not allowed'
+                    ]
                 ],
                 403
             );
@@ -65,9 +90,24 @@ class Handler extends ExceptionHandler
             );
         }
 
-        return parent::render(
-            $request,
-            $e
+        $errors = ['Internal server error.'];
+
+        if (empty($e->getMessage()) === false) {
+            $errors[] = $e->getMessage();
+        }
+
+        $response = ['errors' =>$errors];
+
+        if (getenv('APP_DEBUG')) {
+            $response['exceptionClass'] = get_class($e);
+            $response['line'] = $e->getLine();
+            $response['file'] = $e->getFile();
+            $response['trace'] = $e->getTrace();
+        }
+
+        return response()->json(
+            $response,
+            500
         );
     }
 }

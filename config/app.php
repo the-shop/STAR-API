@@ -213,6 +213,8 @@ return [
         'SlackStar'             => Vluzrmos\SlackApi\Facades\SlackStar::class,
         'SlackUserAdmin'        => Vluzrmos\SlackApi\Facades\SlackUserAdmin::class,
         'SlackRealTimeMessage'  => Vluzrmos\SlackApi\Facades\SlackRealTimeMessage::class,
-        'SlackTeam'             => Vluzrmos\SlackApi\Facades\SlackTeam::class
+        'SlackTeam'             => Vluzrmos\SlackApi\Facades\SlackTeam::class,
+        'Helper'    => App\Helpers\Helper::class,
+
     ],
 ];

@@ -11,7 +11,8 @@
         "jenssegers/mongodb-session": "^1.1",
         "jenssegers/mongodb-sentry": "^1.0",
         "tymon/jwt-auth": "^0.5.9",
-        "vluzrmos/slack-api": "^0.4.8"
+        "vluzrmos/slack-api": "^0.4.8",
+        "cdaguerre/php-trello-api": "@dev"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
