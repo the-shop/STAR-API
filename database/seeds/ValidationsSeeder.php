@@ -62,16 +62,7 @@ class ValidationsSeeder extends Seeder
                 "resource" => 'projects',
                 "acl" => [
                     "standard" => [
-                        "editable" => [
-                            "name",
-                            "description",
-                            "start",
-                            "end",
-                            "price",
-                            "trello_link",
-                            "sprints",
-                            "members"
-                        ],
+                        "editable" => [],
                         "canRead" => true,
                         "canDelete" => false,
                         "canCreate" => false
