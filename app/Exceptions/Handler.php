@@ -27,6 +27,7 @@ class Handler extends ExceptionHandler
         AuthorizationException::class,
         HttpException::class,
         ModelNotFoundException::class,
+        MethodNotAllowedHttpException::class,
         ValidationException::class
     ];
 
@@ -77,7 +78,7 @@ class Handler extends ExceptionHandler
                 [
                     'error' => true,
                     'errors' => [
-                        'Method not allowed'
+                        $e->getMessage() ? $e->getMessage() : 'Method not allowed'
                     ]
                 ],
                 403
