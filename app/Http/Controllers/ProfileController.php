@@ -52,10 +52,10 @@ class ProfileController extends Controller
      */
     public function store(Request $request)
     {
-        $fileds = $request->all()
-        $this->validateInputsForResource(, 'profiles');
+        $fields = $request->all();
+        $this->validateInputsForResource($fields, 'profiles');
 
-        $profile = Profile::create($fileds);
+        $profile = Profile::create($fields);
 
         $credentials = $request->only('email', 'password');
         if (!$token = JWTAuth::attempt($credentials)) {
