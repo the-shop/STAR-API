@@ -16,7 +16,7 @@ class MailSend
      */
     public static function send($view, $data, $profileEmail, $profileName, $subject)
     {
-        $mailConfig = \Config::get('mail.private_mail_send');
+        $mailConfig = \Config::get('mail.emails_enabled');
 
         if ($mailConfig === true) {
             $emailFrom = \Config::get('mail.private_mail_from');
