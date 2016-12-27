@@ -68,11 +68,13 @@ class GenericResourceController extends Controller
             return $this->jsonError(['Model not found.'], 404);
         }
 
-        if ($this->validateInputsForResource($request->all(), $request->route('resource')) === false) {
+        $updateFields = $request->all();
+
+        if ($this->validateInputsForResource($updateFields, $request->route('resource')) === false) {
             return $this->jsonError(['Insufficient permissions.'], 403);
         }
 
-        $model->fill($request->all());
+        $model->fill($updateFields);
         if ($model->save()) {
             return $this->jsonSuccess($model);
         }
