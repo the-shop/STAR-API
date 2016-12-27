@@ -116,5 +116,6 @@ return [
      */
 
     'private_mail_from' => env('PRIVATE_MAIL_FROM', 'no-reply@the-shop.io'),
-    'private_mail_name' => env('PRIVATE_MAIL_NAME', 'The Shop')
+    'private_mail_name' => env('PRIVATE_MAIL_NAME', 'The Shop'),
+    'private_mail_send' => env('PRIVATE_MAIL_SEND' , true)
 ];
