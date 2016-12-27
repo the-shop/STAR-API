@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "31d77971ea81eb59e9395c04b68fce59",
-    "content-hash": "35bed0aca55c588bd2c9cfd9fae62be7",
+    "hash": "9f3c6fd0105ea588be695ab191ff81c6",
+    "content-hash": "3195fb2d94d7f1571a462193d77456c9",
     "packages": [
         {
             "name": "cartalyst/sentry",
@@ -2931,6 +2931,37 @@
             "time": "2016-12-19 14:50:55"
         },
         {
+            "name": "mofodojodino/git-hooks",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mofodojodino/git-hooks.git",
+                "reference": "41b77db1180db7610afcfe2dbcbd30b528c84cef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mofodojodino/git-hooks/zipball/41b77db1180db7610afcfe2dbcbd30b528c84cef",
+                "reference": "41b77db1180db7610afcfe2dbcbd30b528c84cef",
+                "shasum": ""
+            },
+            "require": {
+                "squizlabs/php_codesniffer": "2.*"
+            },
+            "type": "project",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dean Tedesco",
+                    "email": "dino@tedesco.net.au"
+                }
+            ],
+            "description": "Git hooks for installing into PHP projects. Include linting and code style checking, etc.",
+            "time": "2016-11-24 04:36:34"
+        },
+        {
             "name": "phpdocumentor/reflection-common",
             "version": "1.0",
             "source": {
@@ -4178,7 +4209,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "cdaguerre/php-trello-api": 20
+        "cdaguerre/php-trello-api": 20,
+        "mofodojodino/git-hooks": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
