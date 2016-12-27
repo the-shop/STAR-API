@@ -21,7 +21,7 @@
 | except for login and signup.
 |
 */
-Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], function()
+Route::group(['prefix' => 'api/v1/app/{handle}', 'middleware' => ['multiple-app-support', 'the-shop.requestLogger']], function()
 {
     // API calls we allow without token authorization
     Route::post('register', 'ProfileController@store');
