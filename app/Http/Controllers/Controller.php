@@ -129,7 +129,8 @@ class Controller extends BaseController
 
             case 'PUT':
                 $allowedFields = [];
-                $editableFields = array_flip($validationModel->acl[$userRole]['editable']);
+                $editableFields = $validationModel->acl[$userRole]['editable'];
+                $editableFields = array_flip($editableFields);
                 foreach ($fields as $field => $value) {
                     if (isset($editableFields[$field])) {
                         $allowedFields[$field] = $value;
