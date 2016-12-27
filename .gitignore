@@ -3,6 +3,7 @@
 /public/storage
 Homestead.yaml
 Homestead.json
-phpcs-full.tmp
+
 .env
 .idea/
+phpcs-full.tmp
