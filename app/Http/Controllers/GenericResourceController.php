@@ -14,9 +14,40 @@ class GenericResourceController extends Controller
     /**
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        $models = GenericModel::all();
+        $query = GenericModel::query();
+
+        //default query params values
+        $orderBy = '_id';
+        $orderDirection = 'desc';
+        $offset = 0;
+        $limit = 20;
+
+        //
+        if ($request instanceof Request) {
+            if ($request->has('orderBy')) {
+                $orderBy = $request->get('orderBy');
+            }
+
+            if ($request->has('orderDirection')) {
+                $orderDirection = $request->get('orderDirection');
+            }
+
+            if ($request->has('offset') && is_int($request->get('offset')) && $request->get('offset') >= 0) {
+                $offset = $request->get('offset');
+            } else {
+                return $this->jsonError(['Invalid offset input.'], 400);
+            }
+
+            if ($request->has('limit')) {
+                $limit = $request->get('limit');
+            }
+        }
+
+        $query->orderBy($orderBy, $orderDirection)->offset($offset)->limit($limit);
+        $models = $query->get();
+
         return $this->jsonSuccess($models);
     }
 
