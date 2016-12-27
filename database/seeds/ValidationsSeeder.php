@@ -68,6 +68,30 @@ class ValidationsSeeder extends Seeder
                         "canCreate" => false
                     ]
                 ]
+            ], [
+                "fields" => [
+                ],
+                "resource" => 'comments',
+                "acl" => [
+                    "standard" => [
+                        "editable" => [],
+                        "canRead" => true,
+                        "canDelete" => false,
+                        "canCreate" => false
+                    ]
+                ]
+            ], [
+                "fields" => [
+                ],
+                "resource" => 'xps',
+                "acl" => [
+                    "standard" => [
+                        "editable" => [],
+                        "canRead" => true,
+                        "canDelete" => false,
+                        "canCreate" => false
+                    ]
+                ]
             ]
         ]);
 

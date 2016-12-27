@@ -28,12 +28,12 @@ class GenericResourceController extends Controller
     {
         $model = GenericModel::find($request->route('id'));
 
-        if (!$model instanceof GenericModel) {
-            return $this->jsonError(['Model not found.'], 404);
-        }
-
         if ($this->validateInputsForResource($request->all(), $request->route('resource')) === false) {
             return $this->jsonError(['Insufficient permissions.'], 403);
+        }
+
+        if (!$model instanceof GenericModel) {
+            return $this->jsonError(['Model not found.'], 404);
         }
 
         return $this->jsonSuccess($model);
