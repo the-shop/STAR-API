@@ -83,7 +83,7 @@ class ProfileController extends Controller
         $view = 'emails.registration';
         $subject = 'Welcome to The Shop platform!';
 
-        MailSend::Send($view, $data, $profile->email, $profile->name, $subject);
+        MailSend::send($view, $data, $profile->email, $profile->name, $subject);
 
         return $this->jsonSuccess($profile);
     }
@@ -139,7 +139,7 @@ class ProfileController extends Controller
             $view = 'emails.xp';
             $subject = 'Xp status changed!';
 
-            MailSend::Send($view, $data, $profile->email, $profile->name, $subject);
+            MailSend::send($view, $data, $profile->email, $profile->name, $subject);
         }
 
         return $this->jsonSuccess($profile);

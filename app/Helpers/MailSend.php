@@ -5,7 +5,16 @@ namespace App\Helpers;
 
 class MailSend
 {
-    public static function Send($view, $data, $profileEmail, $profileName, $subject)
+    /**
+     * Send email to user
+     * @param $view
+     * @param $data
+     * @param $profileEmail
+     * @param $profileName
+     * @param $subject
+     * @return bool
+     */
+    public static function send($view, $data, $profileEmail, $profileName, $subject)
     {
         $mailConfig = \Config::get('mail.private_mail_send');
 
