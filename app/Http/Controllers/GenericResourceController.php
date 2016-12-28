@@ -27,35 +27,33 @@ class GenericResourceController extends Controller
         $errors = [];
 
         //validate query params based on request params
-        if ($request instanceof Request) {
-            if ($request->has('orderBy')) {
-                $orderBy = $request->get('orderBy');
-            }
+        if ($request->has('orderBy')) {
+            $orderBy = $request->get('orderBy');
+        }
 
-            if ($request->has('orderDirection')) {
-                if (strtolower(substr($request->get('orderDirection'), 0, 3)) === 'asc' ||
-                    strtolower(substr($request->get('orderDirection'), 0, 4)) === 'desc'
-                ) {
-                    $orderDirection = $request->get('orderDirection');
-                } else {
-                    $errors[] = 'Invalid orderDirection input.';
-                }
+        if ($request->has('orderDirection')) {
+            if (strtolower(substr($request->get('orderDirection'), 0, 3)) === 'asc' ||
+                strtolower(substr($request->get('orderDirection'), 0, 4)) === 'desc'
+            ) {
+                $orderDirection = $request->get('orderDirection');
+            } else {
+                $errors[] = 'Invalid orderDirection input.';
             }
+        }
 
-            if ($request->has('offset')) {
-                if (ctype_digit($request->get('offset')) && $request->get('offset') >= 0) {
-                    $offset = (int)$request->get('offset');
-                } else {
-                    $errors[] = 'Invalid offset input.';
-                }
+        if ($request->has('offset')) {
+            if (ctype_digit($request->get('offset')) && $request->get('offset') >= 0) {
+                $offset = (int)$request->get('offset');
+            } else {
+                $errors[] = 'Invalid offset input.';
             }
+        }
 
-            if ($request->has('limit')) {
-                if (ctype_digit($request->get('limit')) && $request->get('limit') >= 0) {
-                    $limit = (int)$request->get('limit');
-                } else {
-                    $errors[] = 'Invalid limit input.';
-                }
+        if ($request->has('limit')) {
+            if (ctype_digit($request->get('limit')) && $request->get('limit') >= 0) {
+                $limit = (int)$request->get('limit');
+            } else {
+                $errors[] = 'Invalid limit input.';
             }
         }
 
