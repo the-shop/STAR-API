@@ -20,7 +20,8 @@
         "phpunit/phpunit": "~4.0",
         "symfony/css-selector": "2.8.*|3.0.*",
         "symfony/dom-crawler": "2.8.*|3.0.*",
-        "squizlabs/php_codesniffer": "2.*"
+        "squizlabs/php_codesniffer": "2.*",
+        "ams/git-hooks-installer": "dev-master"
     },
     "autoload": {
         "classmap": [
@@ -55,5 +56,8 @@
     },
     "config": {
         "preferred-install": "dist"
+    },
+    "extra": {
+        "git-root-dir": "."
     }
 }
