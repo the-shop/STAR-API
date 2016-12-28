@@ -22,7 +22,7 @@ class DatabaseController extends Controller
         $result = [];
 
         foreach ($collectionList as $list) {
-            if ($list->getName()==='system.indexes') {
+            if ($list->getName() === 'system.indexes') {
                 continue;
             }
             $result[] = $list->getName();
