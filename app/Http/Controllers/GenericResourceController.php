@@ -49,7 +49,7 @@ class GenericResourceController extends Controller
         $fields = $request->all();
         if ($this->validateInputsForResource($fields, $request->route('resource')) === false) {
             return $this->jsonError(['Insufficient permissions.'], 403);
-        //}
+        }
 
         $model = GenericModel::create($fields);
         if ($model->save()) {

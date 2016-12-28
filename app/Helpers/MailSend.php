@@ -9,12 +9,11 @@ class MailSend
      * Send email to user
      * @param $view
      * @param $data
-     * @param $profileEmail
-     * @param $profileName
+     * @param $profile
      * @param $subject
      * @return bool
      */
-    public static function send($view, $data, $profileEmail, $profileName, $subject)
+    public static function send($view, $data, $profile, $subject)
     {
         $mailConfig = \Config::get('mail.emails_enabled');
 
@@ -23,11 +22,11 @@ class MailSend
             $emailName = \Config::get('mail.private_mail_name');
 
             \Mail::send($view, $data, function ($message) use (
-                $profileEmail, $profileName, $emailFrom, $emailName,
+                $profile, $emailFrom, $emailName,
                 $subject
             ) {
                 $message->from($emailFrom, $emailName);
-                $message->to($profileEmail, $profileName)->subject($emailName . ' - ' . $subject);
+                $message->to($profile->email, $profile->name)->subject($emailName . ' - ' . $subject);
             });
 
             return true;
