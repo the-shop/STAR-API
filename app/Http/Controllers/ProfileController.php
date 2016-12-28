@@ -9,6 +9,7 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Profile;
 use Illuminate\Http\Request;
 use App\Helpers\Configuration;
+use App\Helpers\MailSend;
 
 /**
  * Class ProfileController
@@ -79,14 +80,10 @@ class ProfileController extends Controller
             'slack' => $profile->slack,
             'teamSlack' => $teamSlackInfo
         ];
+        $view = 'emails.registration';
+        $subject = 'Welcome to The Shop platform!';
 
-        $emailFrom = \Config::get('mail.private_mail_from');
-        $emailName = \Config::get('mail.private_mail_name');
-
-        \Mail::send('emails.registration', $data, function ($message) use ($profile, $emailFrom, $emailName) {
-            $message->from($emailFrom, $emailName);
-            $message->to($profile->email, $profile->name)->subject($emailName . ' - Welcome to The Shop platform!');
-        });
+        MailSend::send($view, $data, $profile, $subject);
 
         return $this->jsonSuccess($profile);
     }
@@ -139,13 +136,10 @@ class ProfileController extends Controller
                 'xpDifference' => $xpDifference,
                 'emailMessage' => $emailMessage
             ];
-            $emailFrom = \Config::get('mail.private_mail_from');
-            $emailName = \Config::get('mail.private_mail_name');
+            $view = 'emails.xp';
+            $subject = 'Xp status changed!';
 
-            \Mail::send('emails.xp', $data, function ($message) use ($profile, $emailFrom, $emailName) {
-                $message->from($emailFrom, $emailName);
-                $message->to($profile->email, $profile->name)->subject($emailName . ' - Xp status changed!');
-            });
+            MailSend::send($view, $data, $profile, $subject);
         }
 
         return $this->jsonSuccess($profile);
