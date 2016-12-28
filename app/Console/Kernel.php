@@ -25,6 +25,6 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
          $schedule->command('sprint:remind')
-                  ->twiceDaily(9, 16);
+                  ->twiceDaily(8, 14);
     }
 }
