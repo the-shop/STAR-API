@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "307baf9696f4ee4cd9e01c863b45ae6f",
-    "content-hash": "b7c6bf001407837235b256bd5aaff9d8",
+    "hash": "9a37b3e6cddf01b7990ac8f72fda7cfa",
+    "content-hash": "3195fb2d94d7f1571a462193d77456c9",
     "packages": [
         {
             "name": "cartalyst/sentry",
@@ -2931,6 +2931,37 @@
             "time": "2016-12-19 14:50:55"
         },
         {
+            "name": "mofodojodino/git-hooks",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mofodojodino/git-hooks.git",
+                "reference": "41b77db1180db7610afcfe2dbcbd30b528c84cef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mofodojodino/git-hooks/zipball/41b77db1180db7610afcfe2dbcbd30b528c84cef",
+                "reference": "41b77db1180db7610afcfe2dbcbd30b528c84cef",
+                "shasum": ""
+            },
+            "require": {
+                "squizlabs/php_codesniffer": "2.*"
+            },
+            "type": "project",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Dean Tedesco",
+                    "email": "dino@tedesco.net.au"
+                }
+            ],
+            "description": "Git hooks for installing into PHP projects. Include linting and code style checking, etc.",
+            "time": "2016-11-24 04:36:34"
+        },
+        {
             "name": "phpdocumentor/reflection-common",
             "version": "1.0",
             "source": {
@@ -3744,51 +3775,6 @@
             "time": "2016-06-17 09:04:28"
         },
         {
-            "name": "sebastian/git",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/sebastianbergmann/git.git",
-                "reference": "644f12e320dfbd00930202b256a785169c83c539"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/git/zipball/644f12e320dfbd00930202b256a785169c83c539",
-                "reference": "644f12e320dfbd00930202b256a785169c83c539",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.3"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.0.x-dev"
-                }
-            },
-            "autoload": {
-                "classmap": [
-                    "src/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Sebastian Bergmann",
-                    "email": "sebastian@phpunit.de"
-                }
-            ],
-            "description": "Simple wrapper for Git",
-            "homepage": "http://www.github.com/sebastianbergmann/git",
-            "keywords": [
-                "git"
-            ],
-            "time": "2013-05-29 10:07:56"
-        },
-        {
             "name": "sebastian/global-state",
             "version": "1.1.1",
             "source": {
@@ -4170,53 +4156,6 @@
             "time": "2016-12-10 10:07:06"
         },
         {
-            "name": "wcm/git-php-hooks",
-            "version": "v1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wecodemore/GitPHPHooks.git",
-                "reference": "0bc8649f346f68b24a3c4887818058ebe0c5d7c5"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/wecodemore/GitPHPHooks/zipball/0bc8649f346f68b24a3c4887818058ebe0c5d7c5",
-                "reference": "0bc8649f346f68b24a3c4887818058ebe0c5d7c5",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3"
-            },
-            "suggest": {
-                "wcm/git-php-hooks-library": "A convenient library of pre made hooks and tasks."
-            },
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    ""
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Kaiser Franz Josef",
-                    "email": "wecodemore@gmail.com",
-                    "homepage": "http://unserkaiser.com"
-                }
-            ],
-            "description": "Write git hooks with PHP, organize them on a per-project base and automatically add them",
-            "homepage": "https://github.com/wecodemore/GitPHPHooks",
-            "keywords": [
-                "git",
-                "git hook",
-                "hooks",
-                "php"
-            ],
-            "time": "2015-01-11 21:34:42"
-        },
-        {
             "name": "webmozart/assert",
             "version": "1.2.0",
             "source": {
@@ -4270,7 +4209,8 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "cdaguerre/php-trello-api": 20
+        "cdaguerre/php-trello-api": 20,
+        "mofodojodino/git-hooks": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,
