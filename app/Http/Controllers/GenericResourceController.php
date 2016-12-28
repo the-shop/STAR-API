@@ -24,25 +24,43 @@ class GenericResourceController extends Controller
         $offset = 0;
         $limit = 20;
 
-        //
+        $errors = [];
+
+        //build query based on requested params
         if ($request instanceof Request) {
             if ($request->has('orderBy')) {
                 $orderBy = $request->get('orderBy');
             }
 
             if ($request->has('orderDirection')) {
-                $orderDirection = $request->get('orderDirection');
+                if (strtolower(substr($request->get('orderDirection'), 0, 3)) === 'asc' ||
+                    strtolower(substr($request->get('orderDirection'), 0, 4)) === 'desc'
+                ) {
+                    $orderDirection = $request->get('orderDirection');
+                } else {
+                    $errors[] = 'Invalid orderDirection input.';
+                }
             }
 
-            if ($request->has('offset') && is_int($request->get('offset')) && $request->get('offset') >= 0) {
-                $offset = $request->get('offset');
-            } else {
-                return $this->jsonError(['Invalid offset input.'], 400);
+            if ($request->has('offset')) {
+                if (ctype_digit($request->get('offset')) && $request->get('offset') >= 0) {
+                    $offset = (int)$request->get('offset');
+                } else {
+                    $errors[] = 'Invalid offset input.';
+                }
             }
 
             if ($request->has('limit')) {
-                $limit = $request->get('limit');
+                if (ctype_digit($request->get('limit')) && $request->get('limit') >= 0) {
+                    $limit = (int)$request->get('limit');
+                } else {
+                    $errors[] = 'Invalid limit input.';
+                }
             }
+        }
+
+        if (count($errors) > 0) {
+            return $this->jsonError($errors, 400);
         }
 
         $query->orderBy($orderBy, $orderDirection)->offset($offset)->limit($limit);
