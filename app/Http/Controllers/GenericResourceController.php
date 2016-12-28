@@ -26,7 +26,7 @@ class GenericResourceController extends Controller
 
         $errors = [];
 
-        //build query based on requested params
+        //validate query params based on request params
         if ($request instanceof Request) {
             if ($request->has('orderBy')) {
                 $orderBy = $request->get('orderBy');
