@@ -20,7 +20,8 @@
         "phpunit/phpunit": "~4.0",
         "symfony/css-selector": "2.8.*|3.0.*",
         "symfony/dom-crawler": "2.8.*|3.0.*",
-        "squizlabs/php_codesniffer": "2.*"
+        "squizlabs/php_codesniffer": "2.*",
+        "mofodojodino/git-hooks": "dev-master"
     },
     "autoload": {
         "classmap": [
@@ -44,13 +45,15 @@
         ],
         "post-install-cmd": [
             "php artisan clear-compiled",
-            "php artisan optimize"
+            "php artisan optimize",
+            "bash ./vendor/mofodojodino/git-hooks/install_hooks.sh"
         ],
         "pre-update-cmd": [
             "php artisan clear-compiled"
         ],
         "post-update-cmd": [
-            "php artisan optimize"
+            "php artisan optimize",
+            "bash ./vendor/mofodojodino/git-hooks/install_hooks.sh"
         ]
     },
     "config": {
