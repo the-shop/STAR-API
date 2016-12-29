@@ -26,7 +26,10 @@ class MailSend
                 $subject
             ) {
                 $message->from($emailFrom, $emailName);
-                $message->to($profile->email, $profile->name)->subject($emailName . ' - ' . $subject);
+                if (is_object($profile)) {
+                    $message->to($profile->email, $profile->name)->subject($emailName . ' - ' . $subject);
+                }
+                $message->to($profile['email'], $profile['name'])->subject($emailName . ' - ' . $subject);
             });
 
             return true;

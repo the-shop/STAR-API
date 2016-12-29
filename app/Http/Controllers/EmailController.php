@@ -10,36 +10,55 @@ use App\Helpers\MailSend;
 
 class EmailController extends Controller
 {
+
+    /**
+     * Send emails to list of user Ids
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function sendEmail(Request $request)
     {
         $to = $request->input('to');
         $message = $request->input('message');
+        $subject = $request->input('subject');
 
         $errors = [];
 
-        $recipient = $this->validateInput($to, $message, $errors);
+        $recipients = $this->validateInput($to, $message, $errors);
 
-        if ($recipient === false) {
+        if ($recipients === false) {
             return $this->jsonError($errors, 400);
         }
 
         //send email to list of users
         $data = [
-            'message' => $message
+            'email' => $message
         ];
         $view = 'emails.message';
-        $subject = 'This is an email!';
-
-        if (is_array($recipient)) {
-            foreach ($recipient as $user) {
-                MailSend::send($view, $data, $user, $subject);
-            }
-        } else {
-            MailSend::send($view, $data, $user, $subject);
+        if (empty($subject)) {
+            $subject = \Config::get('mail.private_mail_subject');
         }
 
+        foreach ($recipients as $recipient) {
+            MailSend::send($view, $data, $recipient, $subject);
+        }
+
+        return $this->jsonSuccess(
+            [
+                'sent' => true,
+                'to' => $recipients,
+                'message' => $message
+            ]
+        );
     }
 
+    /**
+     * Validate input for sending emails
+     * @param $to
+     * @param $message
+     * @param $errors
+     * @return array|bool
+     */
     private function validateInput($to, $message, &$errors)
     {
         if (empty($to)) {
@@ -51,41 +70,30 @@ class EmailController extends Controller
             $errors[] = 'Empty message field.';
         }
 
-        GenericModel::setCollection('profiles');
-        $recipient = [];
+        $recipients = [];
 
         if (is_array($to)) {
+            GenericModel::setCollection('profiles');
             foreach ($to as $t) {
                 $profile = GenericModel::find($t);
                 if ($profile !== null) {
-                    $recipient['name'] = $profile->name;
-                    $recipient['email'] = $profile->email;
+                    $recipients[] = [
+                        'name' => $profile->name,
+                        'email' => $profile->email
+                    ];
                 }
             }
-            if (empty($recipient)) {
-                $errors[] = 'Users does not exist.';
+            if (empty($recipients)) {
+                $errors[] = 'Invalid recipient input. Ids not found.';
             }
-
-            if (count($errors) > 0) {
-                return false;
-            }
-
-            return $recipient;
-        }
-
-        $profile = GenericModel::find($to);
-
-        if ($profile === null) {
-            $errors[] = 'User does not exist.';
+        } else {
+            $errors[] = 'Invalid recipient input. Must be type of array.';
         }
 
         if (count($errors) > 0) {
             return false;
         }
 
-        $recipient['name'] = $profile->name;
-        $recipient['email'] = $profile->email;
-
-        return $recipient;
+        return $recipients;
     }
 }
