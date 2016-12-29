@@ -56,11 +56,19 @@ class SlackController extends Controller
             return $this->jsonError($errors, 400);
         }
 
-        \SlackChat::message($recipient, $message);
+        //send message to list of users
+        if (is_array($recipient)) {
+            foreach ($recipient as $user) {
+                \SlackChat::message('@' . $user, $message);
+            }
+        } else {
+            \SlackChat::message($recipient, $message);
+        }
+
         return $this->jsonSuccess(
             [
                 'sent' => true,
-                'to' => $to,
+                'to' => is_array($recipient) ? $recipient : $to,
                 'message' => $message
             ]
         );
@@ -121,12 +129,43 @@ class SlackController extends Controller
             $errors[] = 'Empty message field.';
         }
 
-        //validate input
+        //validate input if recipient is list of user IDs
+        $userNames = [];
+        if (is_array($to)) {
+            $users = $this->users();
+            if ($users === false) {
+                $errors[] = 'Unable to get users.';
+            } else {
+                foreach ($to as $t) {
+                    foreach ($users as $user) {
+                        if ($t === $user['id']) {
+                            $userNames[] = $user['name'];
+                        }
+                    }
+                }
+            }
+            if (empty($userNames)) {
+                $errors[] = 'Users does not exist';
+            }
+
+            if (count($errors) > 0) {
+                return false;
+            }
+
+            return $userNames;
+        }
+
+        //Validate input if recipient is single user or channel
         if (strpos($to, '@') !== false) {
             $users = $this->users();
             if ($users === false) {
                 $errors[] = 'Unable to get users.';
-            } elseif (!in_array(substr($to, 1), $users)) {
+            } else {
+                foreach ($users as $user) {
+                    $userNames[] = $user['name'];
+                }
+            }
+            if (!in_array(substr($to, 1), $userNames)) {
                 $errors[] = 'User does not exist.';
             }
         } elseif (strpos($to, '#') !== false) {
