@@ -85,7 +85,7 @@ class ValidationsSeeder extends Seeder
             ], [
                 'fields' => [
                 ],
-                'resource' => 'xps',
+                'resource' => 'xp',
                 'acl' => [
                     'standard' => [
                         'editable' => [],
