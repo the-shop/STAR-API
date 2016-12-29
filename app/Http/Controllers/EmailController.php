@@ -24,7 +24,7 @@ class EmailController extends Controller
 
         $errors = [];
 
-        $recipients = $this->validateInput($to, $message, $errors);
+        $recipients = $this->loadProfiles($to, $message, $errors);
 
         if ($recipients === false) {
             return $this->jsonError($errors, 400);
@@ -38,15 +38,19 @@ class EmailController extends Controller
         if (empty($subject)) {
             $subject = \Config::get('mail.private_mail_subject');
         }
-
+        $sentTo = [];
         foreach ($recipients as $recipient) {
             MailSend::send($view, $data, $recipient, $subject);
+            $sentTo[] = [
+                'name' => $recipient->name,
+                'email' => $recipient->email
+            ];
         }
 
         return $this->jsonSuccess(
             [
                 'sent' => true,
-                'to' => $recipients,
+                'to' => $sentTo,
                 'message' => $message
             ]
         );
@@ -59,7 +63,7 @@ class EmailController extends Controller
      * @param $errors
      * @return array|bool
      */
-    private function validateInput($to, $message, &$errors)
+    private function loadProfiles($to, $message, &$errors)
     {
         if (empty($to)) {
             $errors[] = 'Empty recipient field.';
@@ -77,10 +81,7 @@ class EmailController extends Controller
             foreach ($to as $t) {
                 $profile = GenericModel::find($t);
                 if ($profile !== null) {
-                    $recipients[] = [
-                        'name' => $profile->name,
-                        'email' => $profile->email
-                    ];
+                    $recipients[] = $profile;
                 }
             }
             if (empty($recipients)) {
