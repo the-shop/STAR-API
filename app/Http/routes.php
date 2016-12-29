@@ -28,7 +28,7 @@ Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], f
     Route::post('login', 'ProfileController@login');
 
     // Define a group of APIs that require auth (we use JWT Auth for token authorization)
-    Route::group(['middleware' => ['jwt.auth', 'jwt.refresh', 'acl']], function()
+    Route::group(['middleware' => ['jwt.auth', 'jwt.refresh']], function()
     {
         Route::put('profiles/changePassword', 'ProfileController@changePassword');
         Route::resource('profiles', 'ProfileController');
@@ -51,6 +51,7 @@ Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], f
         Route::put('trello/board/{boardId}/ticket/{ticketId}/member/{memberId}/remove', 'TrelloController@removeMember');
         Route::put('trello/board/{boardid}/ticket/{id}', 'TrelloController@setDueDate');
         Route::get('configuration', 'ConfigurationController@getConfiguration');
+        Route::post('email', 'EmailController@sendEmail');
 
 
 
