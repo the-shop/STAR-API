@@ -8,6 +8,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class TaskUpdateMessage
 {
+
+    protected $task;
     /**
      * Create the event listener.
      *
@@ -26,6 +28,7 @@ class TaskUpdateMessage
      */
     public function handle(TaskUpdate $event)
     {
-        //
+        $this->task = $event->task;
+        echo "<b> Task ". $this->task . "updated";
     }
 }
