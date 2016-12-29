@@ -50,17 +50,21 @@ class SlackController extends Controller
 
         $errors = [];
 
-        $recipient = $this->validateInput($to, $message, $errors);
+        $recipients = $this->validateInput($to, $message, $errors);
 
-        if ($recipient === false) {
+        if ($recipients === false) {
             return $this->jsonError($errors, 400);
         }
 
-        \SlackChat::message($recipient, $message);
+        //send message to list of users
+        foreach ($recipients as $recipient) {
+            \SlackChat::message($recipient, $message);
+        }
+
         return $this->jsonSuccess(
             [
                 'sent' => true,
-                'to' => $to,
+                'to' => $recipients,
                 'message' => $message
             ]
         );
@@ -96,7 +100,10 @@ class SlackController extends Controller
         if ($channels->ok === true) {
             $result = [];
             foreach ($channels->channels as $channel) {
-                $result[] = $channel->name;
+                $result[] = [
+                    'id' => $channel->id,
+                    'name' => $channel->name
+                ];
             }
             return $result;
         }
@@ -121,29 +128,38 @@ class SlackController extends Controller
             $errors[] = 'Empty message field.';
         }
 
-        //validate input
-        if (strpos($to, '@') !== false) {
+        //validate input if recipient is list of IDs
+        $recipients = [];
+        if (is_array($to)) {
             $users = $this->users();
-            if ($users === false) {
-                $errors[] = 'Unable to get users.';
-            } elseif (!in_array(substr($to, 1), $users)) {
-                $errors[] = 'User does not exist.';
-            }
-        } elseif (strpos($to, '#') !== false) {
             $channels = $this->channels();
-            if ($channels === false) {
-                $errors[] = 'Unable to get channels.';
-            } elseif (!in_array(substr($to, 1), $channels)) {
-                $errors[] = 'Channel does not exist.';
+            if ($users === false || $channels === false) {
+                $errors[] = 'Unable to get list of Ids. Check if token is provided.';
+            } else {
+                foreach ($to as $t) {
+                    foreach ($users as $user) {
+                        if ($t === $user['id']) {
+                            $recipients[] = '@' . $user['name'];
+                        }
+                    }
+                    foreach ($channels as $channel) {
+                        if ($t === $channel['id']) {
+                            $recipients[] = '#' . $channel['name'];
+                        }
+                    }
+                }
+            }
+            if (empty($recipients)) {
+                $errors[] = 'Invalid recipient input. Ids not found.';
             }
         } else {
-            $errors[] = 'Invalid recipient input.';
+            $errors[] = 'Invalid recipient input. Must be type of array.';
         }
 
         if (count($errors) > 0) {
             return false;
         }
 
-        return $to;
+        return $recipients;
     }
 }
