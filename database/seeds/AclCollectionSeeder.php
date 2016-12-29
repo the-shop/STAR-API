@@ -1,5 +1,7 @@
 <?php
 
+namespace Illuminate\Support\Facades\DB;
+
 use Illuminate\Database\Seeder;
 
 class AclCollectionSeeder extends Seeder
@@ -19,14 +21,12 @@ class AclCollectionSeeder extends Seeder
             'name'   => 'standard',
             'allows' => [
                 'GET' => [
-                    'api/v1/configuration',
-                    'api/v1/profiles/{profiles}',
-                    'api/v1/projects',
-                    'api/v1/projects/{profiles}',
-                    'api/v1/xp',
-                    'api/v1/xp/{xp}',
-                    'api/v1/comments',
-
+                    "api/v1/{resource}",
+                    "api/v1/{resource}/{id}",
+                    "api/v1/configuration",
+                    "api/v1/profiles",
+                    "api/v1/profiles/{profiles}",
+                    "api/v1/slack/users"
                 ],
                 'PUT' => [
                     'api/v1/profiles/changePassword',

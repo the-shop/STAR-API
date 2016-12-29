@@ -1,0 +1,7 @@
+#!/bin/sh
+
+echo "Running migrations"
+php artisan migrate
+
+echo "Running seeders"
+php artisan db:seed

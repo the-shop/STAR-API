@@ -18,7 +18,7 @@ class Acl
      */
     public function handle($request, Closure $next)
     {
-        $routeUri = $request->path();
+        $routeUri = $request->route()->getUri();
         $routeMethod = $request->method();
 
         $user = Auth::user();

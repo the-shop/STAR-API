@@ -52,9 +52,10 @@ class ProfileController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validateInputsForResource($request->all(), 'profiles');
+        $fields = $request->all();
+        $this->validateInputsForResource($fields, 'profiles');
 
-        $profile = Profile::create($request->all());
+        $profile = Profile::create($fields);
 
         $credentials = $request->only('email', 'password');
         if (!$token = JWTAuth::attempt($credentials)) {
@@ -123,9 +124,10 @@ class ProfileController extends Controller
 
         $oldXp = $profile->xp;
 
-        $this->validateInputsForResource($request->all(), 'profiles', ['email' => 'required|email']);
+        $fields = $request->all();
+        $this->validateInputsForResource($fields, 'profiles', ['email' => 'required|email']);
 
-        $profile->fill($request->all());
+        $profile->fill($fields);
 
         $profile->save();
 
@@ -214,6 +216,5 @@ class ProfileController extends Controller
 
         $profile->delete();
         return $this->jsonSuccess(['id' => $profile->id]);
-
     }
 }
