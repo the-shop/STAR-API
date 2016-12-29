@@ -210,6 +210,5 @@ class ProfileController extends Controller
 
         $profile->delete();
         return $this->jsonSuccess(['id' => $profile->id]);
-
     }
 }

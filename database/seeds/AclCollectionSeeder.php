@@ -1,5 +1,7 @@
 <?php
 
+namespace Illuminate\Support\Facades\DB;
+
 use Illuminate\Database\Seeder;
 
 class AclCollectionSeeder extends Seeder
