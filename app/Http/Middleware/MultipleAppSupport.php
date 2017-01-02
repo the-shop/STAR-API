@@ -15,7 +15,7 @@ class MultipleAppSupport
      */
     public function handle($request, Closure $next)
     {
-        $requestDbName = strtolower($request->route('handle'));
+        $requestDbName = strtolower($request->route('appName'));
         $dbName = \Config::get('database.connections.mongodb.database');
 
         if ($dbName !== $requestDbName) {
