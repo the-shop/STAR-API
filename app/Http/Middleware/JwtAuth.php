@@ -22,7 +22,10 @@ class JwtAuth extends BaseMiddleware
 
         $user = $this->auth->authenticate($token);
 
-        if ($user === false) {
+        GenericModel::setCollection('profiles');
+        $userEmail = $request->get('email');
+
+        if (GenericModel::where('email', '=', $userEmail)->first() === null) {
             return $this->respond('tymon.jwt.absent', 'User does not exist in database.', 404);
         };
 
