@@ -31,6 +31,7 @@ class Profile extends StarModel implements AuthenticatableContract, CanResetPass
         'valid',
         'employee',
         'xp',
+        'active',
         'xp_id'
     ];
 

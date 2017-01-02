@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\DynamicValidationException;
+use Illuminate\Http\Request;
 use App\Profile;
 use App\Validation;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -10,7 +11,9 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Helpers\AclHelper;
 
 /**
  * Class Controller
@@ -19,6 +22,17 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+
+    private $request;
+
+    /**
+     * Controller constructor.
+     * @param Request $request
+     */
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+    }
 
     /**
      * @param $data
@@ -80,22 +94,74 @@ class Controller extends BaseController
      * @return bool
      * @throws DynamicValidationException
      */
-    protected function validateInputsForResource($fields, $resourceName, array $inputOverrides = [])
+    protected function validateInputsForResource(&$fields, $resourceName, array $inputOverrides = [])
     {
+        $user = \Auth::user();
+
+        //Validations per user role
+        if ($user && $user->admin === true) {
+            return true;
+        }
+
         $validationModel = Validation::where('resource', $resourceName)
             ->first();
 
         if (!$validationModel instanceof Validation) {
-            return false;
+            throw new MethodNotAllowedHttpException([], 'Validation definition is missing for this resource.');
         }
 
         $validations = $validationModel->getFields();
+
+        $acl = AclHelper::getAcl($user);
+        $userRole = $acl->name;
+
+        // Check if validation rules exists for use role
+        if (!key_exists($userRole, $validationModel->acl)) {
+            return false;
+        }
+
+        switch ($this->request->method()) {
+            case 'POST':
+                if ($validationModel->acl[$userRole]['canCreate'] !== true) {
+                    return false;
+                }
+                return true;
+
+            case 'PUT':
+                $allowedFields = [];
+                $editableFields = $validationModel->acl[$userRole]['editable'];
+                $editableFields = array_flip($editableFields);
+                foreach ($fields as $field => $value) {
+                    if (isset($editableFields[$field])) {
+                        $allowedFields[$field] = $value;
+                    }
+                }
+                $fields = $allowedFields;
+
+                if (count(array_intersect_key(array_flip($editableFields), $fields)) !== count($fields)) {
+                    return false;
+                }
+                return true;
+
+            case 'GET':
+                if ($validationModel->acl[$userRole]['canRead'] !== true) {
+                    return false;
+                }
+                return true;
+
+            case 'DELETE':
+                if ($validationModel->acl[$userRole]['canDelete'] !== true) {
+                    return false;
+                }
+                return true;
+        }
 
         foreach ($inputOverrides as $field => $value) {
             $validations[$field] = $value;
         }
 
         $checkValidations = [];
+
         foreach ($validations as $field => $value) {
             if (!isset($fields[$field])) {
                 continue;

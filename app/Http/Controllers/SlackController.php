@@ -55,7 +55,7 @@ class SlackController extends Controller
         if ($recipient === false) {
             return $this->jsonError($errors, 400);
         }
-        
+
         \SlackChat::message($recipient, $message);
         return $this->jsonSuccess(
             [
@@ -76,7 +76,10 @@ class SlackController extends Controller
         if ($users->ok === true) {
             $result = [];
             foreach ($users->members as $user) {
-                $result[] = $user->name;
+                $result[] = [
+                    'id' => $user->id,
+                    'name' => $user->name
+                ];
             }
             return $result;
         }
@@ -123,26 +126,24 @@ class SlackController extends Controller
             $users = $this->users();
             if ($users === false) {
                 $errors[] = 'Unable to get users.';
-            }
-            elseif (!in_array(substr($to, 1), $users)) {
+            } elseif (!in_array(substr($to, 1), $users)) {
                 $errors[] = 'User does not exist.';
             }
         } elseif (strpos($to, '#') !== false) {
             $channels = $this->channels();
             if ($channels === false) {
                 $errors[] = 'Unable to get channels.';
-            }
-            elseif (!in_array(substr($to, 1), $channels)) {
+            } elseif (!in_array(substr($to, 1), $channels)) {
                 $errors[] = 'Channel does not exist.';
             }
         } else {
             $errors[] = 'Invalid recipient input.';
         }
-        
+
         if (count($errors) > 0) {
             return false;
         }
-        
+
         return $to;
     }
 }

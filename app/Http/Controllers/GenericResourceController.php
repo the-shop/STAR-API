@@ -28,6 +28,11 @@ class GenericResourceController extends Controller
     {
         $model = GenericModel::find($request->route('id'));
 
+        $fields = $request->all();
+        if ($this->validateInputsForResource($fields, $request->route('resource')) === false) {
+            return $this->jsonError(['Insufficient permissions.'], 403);
+        }
+
         if (!$model instanceof GenericModel) {
             return $this->jsonError(['Model not found.'], 404);
         }
@@ -41,9 +46,12 @@ class GenericResourceController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validateInputsForResource($request->all(), $request->route('resource'));
+        $fields = $request->all();
+        if ($this->validateInputsForResource($fields, $request->route('resource')) === false) {
+            return $this->jsonError(['Insufficient permissions.'], 403);
+        }
 
-        $model = GenericModel::create($request->all());
+        $model = GenericModel::create($fields);
         if ($model->save()) {
             return $this->jsonSuccess($model);
         }
@@ -62,9 +70,13 @@ class GenericResourceController extends Controller
             return $this->jsonError(['Model not found.'], 404);
         }
 
-        $this->validateInputsForResource($request->all(), $request->route('resource'));
+        $updateFields = $request->all();
 
-        $model->fill($request->all());
+        if ($this->validateInputsForResource($updateFields, $request->route('resource')) === false) {
+            return $this->jsonError(['Insufficient permissions.'], 403);
+        }
+
+        $model->fill($updateFields);
         if ($model->save()) {
             return $this->jsonSuccess($model);
         }
@@ -82,6 +94,11 @@ class GenericResourceController extends Controller
 
         if (!$model instanceof GenericModel) {
             return $this->jsonError(['Model not found.'], 404);
+        }
+
+        $fields = $request->all();
+        if ($this->validateInputsForResource($fields, $request->route('resource')) === false) {
+            return $this->jsonError(['Insufficient permissions.'], 403);
         }
 
         if ($model->delete()) {

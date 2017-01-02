@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Profile;
 use Illuminate\Http\Request;
+use App\Helpers\Configuration;
+use App\Helpers\MailSend;
 
 /**
  * Class ProfileController
@@ -51,9 +53,10 @@ class ProfileController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validateInputsForResource($request->all(), 'profiles');
+        $fields = $request->all();
+        $this->validateInputsForResource($fields, 'profiles');
 
-        $profile = Profile::create($request->all());
+        $profile = Profile::create($fields);
 
         $credentials = $request->only('email', 'password');
         if (!$token = JWTAuth::attempt($credentials)) {
@@ -63,18 +66,24 @@ class ProfileController extends Controller
         JWTAuth::setToken($token);
 
         //send confirmation E-mail upon profile creation on the platform
+
+        $teamSlackInfo = Configuration::getConfiguration(true);
+        if ($teamSlackInfo === false) {
+            $teamSlackInfo = [];
+        }
+
         $data = [
-            'name'   => $profile->name,
-            'email'  => $profile->email,
+            'name' => $profile->name,
+            'email' => $profile->email,
             'github' => $profile->github,
             'trello' => $profile->trello,
-            'slack'  => $profile->slack
+            'slack' => $profile->slack,
+            'teamSlack' => $teamSlackInfo
         ];
+        $view = 'emails.registration';
+        $subject = 'Welcome to The Shop platform!';
 
-        \Mail::send('emails.registration', $data, function ($message) use ($profile) {
-            $message->from('mladen@the-shop.io', 'The Shop');
-            $message->to($profile->email, $profile->name)->subject('Welcome to The Shop platform!');
-        });
+        MailSend::send($view, $data, $profile, $subject);
 
         return $this->jsonSuccess($profile);
     }
@@ -112,9 +121,10 @@ class ProfileController extends Controller
 
         $oldXp = $profile->xp;
 
-        $this->validateInputsForResource($request->all(), 'profiles', ['email' => 'required|email']);
+        $fields = $request->all();
+        $this->validateInputsForResource($fields, 'profiles', ['email' => 'required|email']);
 
-        $profile->fill($request->all());
+        $profile->fill($fields);
 
         $profile->save();
 
@@ -126,13 +136,10 @@ class ProfileController extends Controller
                 'xpDifference' => $xpDifference,
                 'emailMessage' => $emailMessage
             ];
-            $emailFrom = \Config::get('mail.private_mail_from');
-            $emailName = \Config::get('mail.private_mail_name');
+            $view = 'emails.xp';
+            $subject = 'Xp status changed!';
 
-            \Mail::send('emails.xp', $data, function ($message) use ($profile, $emailFrom, $emailName) {
-                $message->from($emailFrom, $emailName);
-                $message->to($profile->email, $profile->name)->subject($emailName . ' - Xp status changed!');
-            });
+            MailSend::send($view, $data, $profile, $subject);
         }
 
         return $this->jsonSuccess($profile);
