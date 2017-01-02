@@ -11,16 +11,16 @@ class TaskUpdate extends Event
 {
     use SerializesModels;
 
-    public $task;
+    public $tasks;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(GenericModel $task)
+    public function __construct(GenericModel $tasks)
     {
-        $this->task = $task;
+        $this->tasks = $tasks;
     }
 
     /**

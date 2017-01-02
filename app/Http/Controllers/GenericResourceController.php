@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\GenericModel;
 use Illuminate\Http\Request;
 use App\Events\TaskUpdate;
+use Route;
 
 /**
  * Class GenericResourceController
@@ -125,9 +126,14 @@ class GenericResourceController extends Controller
         }
 
         $model->fill($updateFields);
+
+        if ($model->passed_qa == true) {
+            $tasks = $model;
+            event(new TaskUpdate($tasks));
+        }
+
         if ($model->save()) {
             return $this->jsonSuccess($model);
-            event(new TaskUpdate($task));
         }
 
         return $this->jsonError('Issue with updating resource.');
