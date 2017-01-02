@@ -78,8 +78,13 @@ class SprintReminder extends Command
                 $user = GenericModel::where('_id', '=', $task->owner)->first();
                 $recipient = '@' . $user['slack'];
                 $project = $activeProjects[$task->project_id]->name;
-                $message = '::REMINDER:: Project ' . $project . ' due date on task ' . $task->title .
-                    ' is ::TOMORROW:: ' . $taskDueDate;
+                $message = '*Reminder*: task *'
+                    . $task->title
+                    . '* is due *tomorrow* (on '
+                    . $taskDueDate
+                    . ', for project *'
+                    . $project
+                    . '*)';
                 \SlackChat::message($recipient, $message);
             }
         }
