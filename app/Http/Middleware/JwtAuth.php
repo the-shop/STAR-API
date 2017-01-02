@@ -28,7 +28,7 @@ class JwtAuth extends BaseMiddleware
 
         $userCheck = \Auth::user();
         if ($userCheck === null) {
-            return $this->respond('tymon.jwt.absent', 'Not logged in.', 400);)
+            return $this->respond('tymon.jwt.absent', 'Not logged in.', 400);
         }
 
         if (GenericModel::where('email', '=', $userCheck->email)->first() === null) {
