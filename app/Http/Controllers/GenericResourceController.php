@@ -27,6 +27,13 @@ class GenericResourceController extends Controller
         $errors = [];
 
         //validate query params based on request params
+
+        if ($request->has('searchField') && $request->has('searchQuery')) {
+            $searchField = $request->get('searchField');
+            $searchQuery = '%' . $request->get('searchQuery') . '%';
+            $query->where($searchField, 'LIKE', $searchQuery);
+        }
+
         if ($request->has('orderBy')) {
             $orderBy = $request->get('orderBy');
         }
