@@ -13,10 +13,16 @@ namespace {
          */
         public function run()
         {
-            // delete records from acl collection
+            // Delete seeded records from validations collection
+            DB::collection('validations')->where('resource', 'profiles')->delete();
+            DB::collection('validations')->where('resource', 'projects')->delete();
+            DB::collection('validations')->where('resource', 'sprints')->delete();
+            DB::collection('validations')->where('resource', 'tasks')->delete();
+            DB::collection('validations')->where('resource', 'xp')->delete();
+            DB::collection('validations')->where('resource', 'comments')->delete();
             DB::collection('validations')->delete();
 
-            // insert records into acl collection
+            // Insert records into validations collection
             DB::collection('validations')->insert(
                 [
                     [
@@ -30,6 +36,7 @@ namespace {
                             'xp' => 'alpha_num',
                             'xp_id' => 'alpha_num',
                             'active' => 'boolean',
+                            'valid' => 'boolean',
                             'employee' => 'boolean'
 
                         ],
@@ -46,7 +53,8 @@ namespace {
                                     'slack',
                                     'trello',
                                     'github',
-                                    'active'
+                                    'active',
+                                    'valid'
                                 ],
                                 'GET' => true,
                                 'DELETE' => false,
@@ -59,79 +67,83 @@ namespace {
                                 'POST' => true
                             ]
                         ]
-                    ], [
-                    'fields' => [
-                        'name' => 'required|alpha_num',
-                        'description' => 'alpha_num',
-                        'start' => 'date',
-                        'end' => 'date',
-                        'price' => 'alpha_num',
-                        'trello_link' => 'alpha_dash',
-                        'acceptedBy' => 'alpha_num',
-                        'sprints' => 'alpha_num',
-                        'members' => 'alpha_num',
                     ],
-                    'resource' => 'projects',
-                    'acl' => [
-                        'standard' => [
-                            'editable' => [],
-                            'GET' => true,
-                            'DELETE' => false,
-                            'POST' => false
+                    [
+                        'fields' => [
+                            'name' => 'required|alpha_num',
+                            'description' => 'alpha_num',
+                            'start' => 'date',
+                            'end' => 'date',
+                            'price' => 'alpha_num',
+                            'trello_link' => 'alpha_dash',
+                            'acceptedBy' => 'alpha_num',
+                            'sprints' => 'alpha_num',
+                            'members' => 'alpha_num',
+                        ],
+                        'resource' => 'projects',
+                        'acl' => [
+                            'standard' => [
+                                'editable' => [],
+                                'GET' => true,
+                                'DELETE' => false,
+                                'POST' => false
+                            ]
                         ]
-                    ]
-                    ], [
-                    'fields' => [
                     ],
-                    'resource' => 'comments',
-                    'acl' => [
-                        'standard' => [
-                            'editable' => [],
-                            'GET' => true,
-                            'DELETE' => false,
-                            'POST' => false
+                    [
+                        'fields' => [
+                        ],
+                        'resource' => 'comments',
+                        'acl' => [
+                            'standard' => [
+                                'editable' => [],
+                                'GET' => true,
+                                'DELETE' => false,
+                                'POST' => false
+                            ]
                         ]
-                    ]
-                    ], [
-                    'fields' => [
+                        ], [
+                        'fields' => [
+                        ],
+                        'resource' => 'xp',
+                        'acl' => [
+                            'standard' => [
+                                'editable' => [],
+                                'GET' => true,
+                                'DELETE' => false,
+                                'POST' => false
+                            ]
+                        ]
+                        ],
+                    [
+                        'fields' => [
+                        ],
+                        'resource' => 'sprints',
+                        'acl' => [
+                            'standard' => [
+                                'editable' => [],
+                                'GET' => true,
+                                'DELETE' => false,
+                                'POST' => false
+                            ]
+                        ]
                     ],
-                    'resource' => 'xp',
-                    'acl' => [
-                        'standard' => [
-                            'editable' => [],
-                            'GET' => true,
-                            'DELETE' => false,
-                            'POST' => false
+                    [
+                        'fields' => [
+                            'submitted_for_qa' => 'boolean',
+                        ],
+                        'resource' => 'tasks',
+                        'acl' => [
+                            'standard' => [
+                                'editable' => [
+                                    'submitted_for_qa',
+                                    'task_history',
+                                ],
+                                'GET' => true,
+                                'DELETE' => false,
+                                'POST' => false
+                            ]
                         ]
-                    ]
-                    ], [
-                    'fields' => [
-                    ],
-                    'resource' => 'sprints',
-                    'acl' => [
-                        'standard' => [
-                            'editable' => [],
-                            'GET' => true,
-                            'DELETE' => false,
-                            'POST' => false
-                        ]
-                    ]
-                    ], [
-                    'fields' => [
-                        'submitted_for_qa' => 'boolean',
-                    ],
-                    'resource' => 'tasks',
-                    'acl' => [
-                        'standard' => [
-                            'editable' => [
-                                'submitted_for_qa',
-                                'task_history',
-                            ],
-                            'GET' => true,
-                            'DELETE' => false,
-                            'POST' => false
-                        ]
-                    ]
                     ]
                 ]
             );

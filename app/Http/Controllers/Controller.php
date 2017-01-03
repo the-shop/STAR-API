@@ -126,7 +126,7 @@ class Controller extends BaseController
             case 'GET':
             case 'DELETE':
                 if (!$validationModel->acl[$userRole][$requestMethod]) {
-                    throw new DynamicValidationException(['Request method ' . $requestMethod . ' not permitted.'], 400);
+                    throw new DynamicValidationException(['Request method ' . $requestMethod . ' not permitted.'], 403);
                 }
                 break;
 
@@ -137,17 +137,15 @@ class Controller extends BaseController
                 foreach ($fields as $field => $value) {
                     if (isset($editableFields[$field])) {
                         $allowedFields[$field] = $value;
+                    } else {
+                        throw new DynamicValidationException(['No permissions to edit "' . $field . '"'], 403);
                     }
                 }
                 $fields = $allowedFields;
-
-                if (count(array_intersect_key(array_flip($editableFields), $fields)) !== count($fields)) {
-                    throw new DynamicValidationException(['Validation failed for given input.'], 400);
-                }
                 break;
 
             default:
-                throw new DynamicValidationException(['Request method ' . $requestMethod . ' not supported.'], 400);
+                throw new DynamicValidationException(['Request method ' . $requestMethod . ' not supported.'], 501);
                 break;
         }
 

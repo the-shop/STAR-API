@@ -114,7 +114,6 @@ class ProfileController extends Controller
             return $this->jsonError('Model not found.', 404);
         }
 
-        // TODO: replace with Gate after ACL is implemented
         if ($profile->id !== $this->getCurrentProfile()->id && $this->getCurrentProfile()->admin !== true) {
             return $this->jsonError('Not enough permissions.', 403);
         }

@@ -29,7 +29,7 @@ class Acl
 
         $acl = AclHelper::getAcl($user);
 
-        //validate permissions
+        // If there's no ACL defined, presume no permissions
         if (!key_exists($routeMethod, $acl->allows) || !in_array($routeUri, $acl->allows[$routeMethod])) {
             throw new MethodNotAllowedHttpException([], 'Insufficient permissions.');
         }
