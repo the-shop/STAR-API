@@ -1,10 +1,12 @@
 <?php
 
-namespace
+namespace {
 
-{
     use Illuminate\Database\Seeder;
 
+    /**
+     * Class AclCollectionSeeder
+     */
     class AclCollectionSeeder extends Seeder
     {
         /**
@@ -14,32 +16,44 @@ namespace
          */
         public function run()
         {
-            // delete records from acl collection
-            DB::collection('acl')->delete();
+            // Delete previously seeded records from acl collection
+            DB::collection('acl')->where('name', 'guest')->delete();
+            DB::collection('acl')->where('name', 'standard')->delete();
 
-            // insert records into acl collection
-            DB::collection('acl')->insert([
-                'name'   => 'standard',
-                'allows' => [
-                    'GET' => [
-                        "api/v1/{resource}",
-                        "api/v1/{resource}/{id}",
-                        "api/v1/configuration",
-                        "api/v1/profiles",
-                        "api/v1/profiles/{profiles}",
-                        "api/v1/slack/users"
+            // Insert records into acl collection
+            DB::collection('acl')->insert(
+                [
+                    [
+                        'name' => 'standard',
+                        'allows' => [
+                            'GET' => [
+                                "api/v1/{resource}",
+                                "api/v1/{resource}/{id}",
+                                "api/v1/configuration",
+                                "api/v1/profiles",
+                                "api/v1/profiles/{profiles}",
+                                "api/v1/slack/users"
+                            ],
+                            'PUT' => [
+                                'api/v1/profiles/changePassword',
+                                'api/v1/profiles/{profiles}'
+                            ],
+                            'PATCH' => [
+                                'api/v1/profiles/{profiles}'
+                            ]
+                        ]
                     ],
-                    'PUT' => [
-                        'api/v1/profiles/changePassword',
-                        'api/v1/profiles/{profiles}'
-                    ],
-                    'PATCH' => [
-                        'api/v1/profiles/{profiles}'
+                    [
+                        'name' => 'guest',
+                        'allows' => [
+                            'POST' => [
+                                'api/v1/register',
+                                'api/v1/login'
+                            ],
+                        ]
                     ]
                 ]
-            ]);
-
-            $this->command->info("acl collection seeded!");
+            );
         }
     }
 }

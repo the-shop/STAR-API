@@ -1,8 +1,7 @@
 <?php
 
-namespace
+namespace {
 
-{
     use Illuminate\Database\Seeder;
 
     class ValidationsSeeder extends Seeder
@@ -18,39 +17,49 @@ namespace
             DB::collection('validations')->delete();
 
             // insert records into acl collection
-            DB::collection('validations')->insert([
+            DB::collection('validations')->insert(
                 [
-                    'fields' => [
-                        'name' => 'required|regex:/\\w+ \\w+/',
-                        'password' => 'required|min:8',
-                        'email' => 'required|email|unique:profiles',
-                        'slack' => 'alpha_dash',
-                        'trello' => 'alpha_dash',
-                        'github' => 'alpha_dash',
-                        'xp' => 'alpha_num',
-                        'xp_id' => 'alpha_num',
-                        'active' => 'boolean',
-                        'employee' => 'boolean'
+                    [
+                        'fields' => [
+                            'name' => 'required|regex:/\\w+ \\w+/',
+                            'password' => 'required|min:8',
+                            'email' => 'required|email|unique:profiles',
+                            'slack' => 'alpha_dash',
+                            'trello' => 'alpha_dash',
+                            'github' => 'alpha_dash',
+                            'xp' => 'alpha_num',
+                            'xp_id' => 'alpha_num',
+                            'active' => 'boolean',
+                            'employee' => 'boolean'
 
-                    ],
-                    'resource' => 'profiles',
-                    'acl' => [
-                        'standard' => [
-                            'editable' => [
-                                'name',
-                                'password',
-                                'email',
-                                'slack',
-                                'trello',
-                                'github',
-                                'active'
+                        ],
+                        'messages' => [
+                            'name.regex' => 'Full name needed, at least 2 words.'
+                        ],
+                        'resource' => 'profiles',
+                        'acl' => [
+                            'standard' => [
+                                'editable' => [
+                                    'name',
+                                    'password',
+                                    'email',
+                                    'slack',
+                                    'trello',
+                                    'github',
+                                    'active'
+                                ],
+                                'GET' => true,
+                                'DELETE' => false,
+                                'POST' => false
                             ],
-                            'canRead' => true,
-                            'canDelete' => false,
-                            'canCreate' => false
+                            'guest' => [
+                                'editable' => [],
+                                'GET' => true,
+                                'DELETE' => false,
+                                'POST' => true
+                            ]
                         ]
-                    ]
-                ], [
+                    ], [
                     'fields' => [
                         'name' => 'required|alpha_num',
                         'description' => 'alpha_num',
@@ -66,48 +75,48 @@ namespace
                     'acl' => [
                         'standard' => [
                             'editable' => [],
-                            'canRead' => true,
-                            'canDelete' => false,
-                            'canCreate' => false
+                            'GET' => true,
+                            'DELETE' => false,
+                            'POST' => false
                         ]
                     ]
-                ], [
+                    ], [
                     'fields' => [
                     ],
                     'resource' => 'comments',
                     'acl' => [
                         'standard' => [
                             'editable' => [],
-                            'canRead' => true,
-                            'canDelete' => false,
-                            'canCreate' => false
+                            'GET' => true,
+                            'DELETE' => false,
+                            'POST' => false
                         ]
                     ]
-                ], [
+                    ], [
                     'fields' => [
                     ],
                     'resource' => 'xp',
                     'acl' => [
                         'standard' => [
                             'editable' => [],
-                            'canRead' => true,
-                            'canDelete' => false,
-                            'canCreate' => false
+                            'GET' => true,
+                            'DELETE' => false,
+                            'POST' => false
                         ]
                     ]
-                ], [
+                    ], [
                     'fields' => [
                     ],
                     'resource' => 'sprints',
                     'acl' => [
                         'standard' => [
                             'editable' => [],
-                            'canRead' => true,
-                            'canDelete' => false,
-                            'canCreate' => false
+                            'GET' => true,
+                            'DELETE' => false,
+                            'POST' => false
                         ]
                     ]
-                ], [
+                    ], [
                     'fields' => [
                         'submitted_for_qa' => 'boolean',
                     ],
@@ -118,15 +127,14 @@ namespace
                                 'submitted_for_qa',
                                 'task_history',
                             ],
-                            'canRead' => true,
-                            'canDelete' => false,
-                            'canCreate' => false
+                            'GET' => true,
+                            'DELETE' => false,
+                            'POST' => false
                         ]
                     ]
+                    ]
                 ]
-            ]);
-
-            $this->command->info('validations collection seeded!');
+            );
         }
     }
 }

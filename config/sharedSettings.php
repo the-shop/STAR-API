@@ -11,7 +11,8 @@ return [
             ]
         ],
         'email_xp_message' => 'Hey, your XP changed by {N}',
-        'default_role' => 'standard'
+        'guestRole' => 'guest',
+        'defaultRole' => 'standard'
     ],
 
     /**

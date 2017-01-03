@@ -98,7 +98,7 @@ class Controller extends BaseController
     {
         $user = \Auth::user();
 
-        //Validations per user role
+        // Validations per user role
         if ($user && $user->admin === true) {
             return true;
         }
@@ -107,7 +107,7 @@ class Controller extends BaseController
             ->first();
 
         if (!$validationModel instanceof Validation) {
-            throw new MethodNotAllowedHttpException([], 'Validation definition is missing for this resource.');
+            throw new DynamicValidationException(['Validation definition is missing for this resource.'], 500);
         }
 
         $validations = $validationModel->getFields();
@@ -117,15 +117,18 @@ class Controller extends BaseController
 
         // Check if validation rules exists for use role
         if (!key_exists($userRole, $validationModel->acl)) {
-            return false;
+            throw new DynamicValidationException(['Validation rules missing for user role: ' . $userRole], 500);
         }
 
-        switch ($this->request->method()) {
+        $requestMethod = $this->request->method();
+        switch ($requestMethod) {
             case 'POST':
-                if ($validationModel->acl[$userRole]['canCreate'] !== true) {
-                    return false;
+            case 'GET':
+            case 'DELETE':
+                if (!$validationModel->acl[$userRole][$requestMethod]) {
+                    throw new DynamicValidationException(['Request method ' . $requestMethod . ' not permitted.'], 400);
                 }
-                return true;
+                break;
 
             case 'PUT':
                 $allowedFields = [];
@@ -139,21 +142,13 @@ class Controller extends BaseController
                 $fields = $allowedFields;
 
                 if (count(array_intersect_key(array_flip($editableFields), $fields)) !== count($fields)) {
-                    return false;
+                    throw new DynamicValidationException(['Validation failed for given input.'], 400);
                 }
-                return true;
+                break;
 
-            case 'GET':
-                if ($validationModel->acl[$userRole]['canRead'] !== true) {
-                    return false;
-                }
-                return true;
-
-            case 'DELETE':
-                if ($validationModel->acl[$userRole]['canDelete'] !== true) {
-                    return false;
-                }
-                return true;
+            default:
+                throw new DynamicValidationException(['Request method ' . $requestMethod . ' not supported.'], 400);
+                break;
         }
 
         foreach ($inputOverrides as $field => $value) {

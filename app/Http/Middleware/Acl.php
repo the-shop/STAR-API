@@ -23,7 +23,7 @@ class Acl
 
         $user = Auth::user();
 
-        if ($user->admin === true) {
+        if ($user && $user->admin === true) {
             return $next($request);
         }
 
