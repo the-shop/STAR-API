@@ -21,7 +21,7 @@
 | except for login and signup.
 |
 */
-Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], function()
+Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app-support', 'the-shop.requestLogger']], function()
 {
     // API calls we allow without token authorization
     Route::post('register', 'ProfileController@store');
@@ -45,11 +45,11 @@ Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], f
         Route::get('trello/board/{id}/members', 'TrelloController@getMemberIds');
         Route::post('trello/board/{id}/list', 'TrelloController@createList');
         Route::get('trello/board/{id}/lists', 'TrelloController@getListIds');
-        Route::put('trello/board/{boardid}/list/{id}/ticket', 'TrelloController@createTicket');
+        Route::put('trello/board/{boardId}/list/{id}/ticket', 'TrelloController@createTicket');
         Route::get('trello/board/{boardId}/list/{id}/tickets', 'TrelloController@getTicketIds');
         Route::put('trello/board/{boardId}/ticket/{ticketId}/member/{memberId}/add', 'TrelloController@assignMember');
         Route::put('trello/board/{boardId}/ticket/{ticketId}/member/{memberId}/remove', 'TrelloController@removeMember');
-        Route::put('trello/board/{boardid}/ticket/{id}', 'TrelloController@setDueDate');
+        Route::put('trello/board/{boardId}/ticket/{id}', 'TrelloController@setDueDate');
         Route::get('configuration', 'ConfigurationController@getConfiguration');
         Route::post('email', 'EmailController@sendEmail');
 
