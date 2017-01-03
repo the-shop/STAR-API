@@ -32,7 +32,7 @@ class JwtAuth extends BaseMiddleware
         }
 
         if (GenericModel::where('email', '=', $userCheck->email)->first() === null) {
-            return $this->respond('tymon.jwt.absent', 'User does not exist in database.', 404);
+            return $this->respond('tymon.jwt.absent', 'User does not exist in database.', 403);
         }
 
         return $next($request);
