@@ -32,15 +32,7 @@ class Profile extends StarModel implements AuthenticatableContract, CanResetPass
         'employee',
         'xp',
         'active',
-        'xp_id'
-    ];
-
-    /**
-     * The model's attributes.
-     *
-     * @var array
-     */
-    protected $attributes = [
+        'xp_id',
         'admin',
     ];
 
