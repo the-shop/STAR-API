@@ -47,23 +47,23 @@ class TaskUpdateMessage
         if ($profile->id == $user_id) {
             switch ($coefficient) {
                 case ($coefficient <= 0.75):
-                    $profile->xp = $task_xp + 3;
+                    $profile->xp += $task_xp + 3;
                     $profile->save();
                     break;
                 case ($coefficient >= 0.75 && $coefficient <= 1):
-                    $profile->xp = $task_xp;
+                    $profile->xp += $task_xp;
                     $profile->save();
                     break;
                 case ($coefficient >= 1.01 && $coefficient <= 1.1):
-                    $profile->xp = $task_xp - 1;
+                    $profile->xp += $task_xp - 1;
                     $profile->save();
                     break;
                 case ($coefficient >= 1.11 && $coefficient <= 1.25):
-                    $profile->xp = $task_xp - 2;
+                    $profile->xp += $task_xp - 2;
                     $profile->save();
                     break;
                 case ($coefficient >= 1.26 && $coefficient < 1.4):
-                    $profile->xp = $task_xp - 3;
+                    $profile->xp += $task_xp - 3;
                     $profile->save();
                     break;
             }
