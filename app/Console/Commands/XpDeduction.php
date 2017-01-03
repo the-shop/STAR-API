@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 
 use App\GenericModel;
 use MongoDB\BSON\ObjectID;
+use phpDocumentor\Reflection\DocBlock\Tags\Generic;
 
 class XpDeduction extends Command
 {
@@ -50,7 +51,7 @@ class XpDeduction extends Command
 
         //print_r($profiles);
         $daysChecked = 0;
-        $profilesInactive = [];
+        $logHashMap = [];
 
         do {
             // Check for the following day
@@ -65,12 +66,16 @@ class XpDeduction extends Command
                 ->where('_id', '>=', new ObjectID($hexDayAgo . '0000000000000000'))
                 ->get();
 
-            $logHashMap = [];
+
             foreach ($logs as $log) {
                 $logHashMap[$log->id] = $log;
             }
 
+
             foreach ($profileHashMap as $user) {
+                if (isset($user->banned) && $user->banned === true) {
+                    unset ($profileHashMap[$user->_id]);
+                }
                 foreach ($logs as $log) {
                     if ($user->_id === $log->id && $daysChecked < 3) {
                         $profileHashMap[$log->id]->lastTimeActivityCheck = $cronTime;
@@ -86,25 +91,43 @@ class XpDeduction extends Command
                                 $profile->save();
                             } else {
                                 // New XP record creation and save to DB
+                                GenericModel::setCollection('xp');
+                                $userXP = GenericModel::find($profile->xp_id);
+                                $userXP->records[] = [
+                                    'xp' => '-1',
+                                    'details' => 'Xp deducted for inactivity.',
+                                    'timestamp' => $cronTime
+                                ];
+                                $userXP->save();
                                 $profile->xp--;
                                 $profile->lastTimeActivityCheck = $cronTime;
                                 $profile->save();
                             }
-                            if ($daysChecked === 4) {
-                                if ($profile->xp -2 <= 0) {
-                                    $profile->xp = 0;
-                                    $profile->banned = true;
-                                    $profile->save();
-                                } else {
-                                    $profile->xp -= 2;
-                                    $profile->lastTimeActivityCheck = $cronTime;
-                                    $profile->save();
-                                }
+                        }
+
+                        if ($daysChecked === 4) {
+                            if ($profile->xp - 2 <= 0) {
+                                $profile->xp = 0;
+                                $profile->banned = true;
+                                $profile->save();
+                            } else {
+                                GenericModel::setCollection('xp');
+                                $userXP = GenericModel::find($profile->xp_id);
+                                $userXP->records[] = [
+                                    'xp' => '-2',
+                                    'details' => 'Xp deducted for inactivity.',
+                                    'timestamp' => $cronTime
+                                ];
+                                $userXP->save();
+                                $profile->xp -= 2;
+                                $profile->lastTimeActivityCheck = $cronTime;
+                                $profile->save();
                             }
                         }
                     }
                 }
             }
+
             $daysChecked++;
             unset ($logHashMap);
         } while (count($profileHashMap) > 0 || $daysChecked === 4);
