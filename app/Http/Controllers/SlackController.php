@@ -111,24 +111,26 @@ class SlackController extends Controller
     }
 
     /**
-     * Validate input
+     * Validate input and return list of recipients if there is a valid one
+     *
      * @param $to
+     * @param $message
      * @param $errors
-     * @return bool
+     * @return array|bool
      */
     private function validateInput($to, $message, &$errors)
     {
-        //check if recipient field is empty
+        // Check if recipient field is empty
         if (empty($to)) {
             $errors[] = 'Empty recipient field.';
         }
 
-        //check if message field is empty
+        // Check if message field is empty
         if (empty($message)) {
             $errors[] = 'Empty message field.';
         }
 
-        //validate input if recipient is list of IDs
+        // Validate input if recipient is list of IDs
         $recipients = [];
         if (is_array($to)) {
             $users = $this->users();
@@ -136,14 +138,20 @@ class SlackController extends Controller
             if ($users === false || $channels === false) {
                 $errors[] = 'Unable to get list of Ids. Check if token is provided.';
             } else {
-                foreach ($to as $t) {
+                foreach ($to as $singleRecipient) {
                     foreach ($users as $user) {
-                        if ($t === $user['id']) {
+                        if (substr($singleRecipient, 0, 1) === '@' && $user['name'] === substr($singleRecipient, 1)) {
+                            $recipients[] = $singleRecipient;
+                        }
+                        if ($singleRecipient === $user['id']) {
                             $recipients[] = '@' . $user['name'];
                         }
                     }
                     foreach ($channels as $channel) {
-                        if ($t === $channel['id']) {
+                        if (substr($singleRecipient, 0, 1) === '#' && $channel['name'] === substr($singleRecipient, 1)) {
+                            $recipients[] = $singleRecipient;
+                        }
+                        if ($singleRecipient === $channel['id']) {
                             $recipients[] = '#' . $channel['name'];
                         }
                     }

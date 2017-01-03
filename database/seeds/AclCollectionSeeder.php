@@ -38,6 +38,9 @@ namespace {
                                 'api/v1/profiles/changePassword',
                                 'api/v1/profiles/{profiles}'
                             ],
+                            'POST' => [
+                                'api/v1/slack/message'
+                            ],
                             'PATCH' => [
                                 'api/v1/profiles/{profiles}'
                             ]
