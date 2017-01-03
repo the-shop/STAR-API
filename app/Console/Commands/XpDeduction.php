@@ -65,12 +65,10 @@ class XpDeduction extends Command
             $logs = GenericModel::where('_id', '<', new ObjectID($hexNow . '0000000000000000'))
                 ->where('_id', '>=', new ObjectID($hexDayAgo . '0000000000000000'))
                 ->get();
-
-
+            
             foreach ($logs as $log) {
                 $logHashMap[$log->id] = $log;
             }
-
 
             foreach ($profileHashMap as $user) {
                 if (isset($user->banned) && $user->banned === true) {
@@ -83,6 +81,7 @@ class XpDeduction extends Command
                         unset($profileHashMap[$log->id]);
                     } elseif (key_exists($user->_id, $logHashMap)) {
                         $profile = $profileHashMap[$log->id];
+                        print_r($profile);
                         if ($daysChecked === 3) {
                             if ($profile->xp - 1 === 0) {
                                 //set banned flag and save to DB
@@ -92,16 +91,18 @@ class XpDeduction extends Command
                             } else {
                                 // New XP record creation and save to DB
                                 GenericModel::setCollection('xp');
-                                $userXP = GenericModel::find($profile->xp_id);
+                                $userXP = GenericModel::where('_id', '=', $profile->xp_id)->first();
                                 $userXP->records[] = [
                                     'xp' => '-1',
                                     'details' => 'Xp deducted for inactivity.',
                                     'timestamp' => $cronTime
                                 ];
                                 $userXP->save();
+
                                 $profile->xp--;
                                 $profile->lastTimeActivityCheck = $cronTime;
                                 $profile->save();
+                                $this->info('Xp deducted -1 to : '. $profile->email);
                             }
                         }
 
@@ -112,16 +113,18 @@ class XpDeduction extends Command
                                 $profile->save();
                             } else {
                                 GenericModel::setCollection('xp');
-                                $userXP = GenericModel::find($profile->xp_id);
+                                $userXP = GenericModel::where('_id', '=', $profile->xp_id)->first();
                                 $userXP->records[] = [
                                     'xp' => '-2',
                                     'details' => 'Xp deducted for inactivity.',
                                     'timestamp' => $cronTime
                                 ];
                                 $userXP->save();
+
                                 $profile->xp -= 2;
                                 $profile->lastTimeActivityCheck = $cronTime;
                                 $profile->save();
+                                $this->info('Xp deducted -2 to : '. $profile->email);
                             }
                         }
                     }
