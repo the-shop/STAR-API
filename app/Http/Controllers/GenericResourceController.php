@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\TaskUpdateSlackNotify;
 use App\GenericModel;
 use Illuminate\Http\Request;
 
@@ -12,6 +13,7 @@ use Illuminate\Http\Request;
 class GenericResourceController extends Controller
 {
     /**
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
@@ -131,6 +133,12 @@ class GenericResourceController extends Controller
         }
 
         $model->fill($updateFields);
+
+        if ($model->isDirty()) {
+            $tasks = $model;
+            event(new TaskUpdateSlackNotify($tasks));
+        }
+
         if ($model->save()) {
             return $this->jsonSuccess($model);
         }
