@@ -4,8 +4,6 @@ namespace App\Listeners;
 
 use App\Events\TaskUpdateSlackNotify;
 use App\GenericModel;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 class TaskUpdateSlackNotification
 {
@@ -27,6 +25,7 @@ class TaskUpdateSlackNotification
      */
     public function handle(TaskUpdateSlackNotify $event)
     {
+        $preSetCollection = GenericModel::getCollection();
         GenericModel::setCollection('projects');
         $project = GenericModel::where('_id', '=', $event->tasks->project_id)->first();
 
@@ -46,5 +45,6 @@ class TaskUpdateSlackNotification
         foreach ($recipients as $recipient) {
             \SlackChat::message($recipient, $message);
         }
+        GenericModel::setCollection($preSetCollection);
     }
 }

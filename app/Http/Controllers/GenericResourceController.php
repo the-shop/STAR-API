@@ -108,6 +108,12 @@ class GenericResourceController extends Controller
         }
 
         $model = GenericModel::create($fields);
+
+        if ($model->getCollection() === 'tasks' && $request->has('owner') && !empty($request->get('owner'))) {
+            $tasks = $model;
+            event(new TaskUpdateSlackNotify($tasks));
+        }
+
         if ($model->save()) {
             return $this->jsonSuccess($model);
         }
@@ -134,7 +140,7 @@ class GenericResourceController extends Controller
 
         $model->fill($updateFields);
 
-        if ($model->isDirty()) {
+        if ($model->getCollection() === 'tasks' && $model->isDirty()) {
             $tasks = $model;
             event(new TaskUpdateSlackNotify($tasks));
         }
