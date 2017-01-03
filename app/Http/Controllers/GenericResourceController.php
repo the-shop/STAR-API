@@ -14,9 +14,63 @@ class GenericResourceController extends Controller
     /**
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        $models = GenericModel::all();
+        $query = GenericModel::query();
+
+        //default query params values
+        $orderBy = '_id';
+        $orderDirection = 'desc';
+        $offset = 0;
+        $limit = 20;
+
+        $errors = [];
+
+        //validate query params based on request params
+
+        if ($request->has('searchField') && $request->has('searchQuery')) {
+            $searchField = $request->get('searchField');
+            $searchQuery = '%' . $request->get('searchQuery') . '%';
+            $query->where($searchField, 'LIKE', $searchQuery);
+        }
+
+        if ($request->has('orderBy')) {
+            $orderBy = $request->get('orderBy');
+        }
+
+        if ($request->has('orderDirection')) {
+            if (strtolower(substr($request->get('orderDirection'), 0, 3)) === 'asc' ||
+                strtolower(substr($request->get('orderDirection'), 0, 4)) === 'desc'
+            ) {
+                $orderDirection = $request->get('orderDirection');
+            } else {
+                $errors[] = 'Invalid orderDirection input.';
+            }
+        }
+
+        if ($request->has('offset')) {
+            if (ctype_digit($request->get('offset')) && $request->get('offset') >= 0) {
+                $offset = (int)$request->get('offset');
+            } else {
+                $errors[] = 'Invalid offset input.';
+            }
+        }
+
+        if ($request->has('limit')) {
+            if (ctype_digit($request->get('limit')) && $request->get('limit') >= 0) {
+                $limit = (int)$request->get('limit');
+            } else {
+                $errors[] = 'Invalid limit input.';
+            }
+        }
+
+        if (count($errors) > 0) {
+            return $this->jsonError($errors, 400);
+        }
+
+        $query->orderBy($orderBy, $orderDirection)->offset($offset)->limit($limit);
+        $models = $query->get();
+
         return $this->jsonSuccess($models);
     }
 
@@ -27,6 +81,11 @@ class GenericResourceController extends Controller
     public function show(Request $request)
     {
         $model = GenericModel::find($request->route('id'));
+
+        $fields = $request->all();
+        if ($this->validateInputsForResource($fields, $request->route('resource')) === false) {
+            return $this->jsonError(['Insufficient permissions.'], 403);
+        }
 
         if (!$model instanceof GenericModel) {
             return $this->jsonError(['Model not found.'], 404);
@@ -41,9 +100,12 @@ class GenericResourceController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validateInputsForResource($request->all(), $request->route('resource'));
+        $fields = $request->all();
+        if ($this->validateInputsForResource($fields, $request->route('resource')) === false) {
+            return $this->jsonError(['Insufficient permissions.'], 403);
+        }
 
-        $model = GenericModel::create($request->all());
+        $model = GenericModel::create($fields);
         if ($model->save()) {
             return $this->jsonSuccess($model);
         }
@@ -62,9 +124,13 @@ class GenericResourceController extends Controller
             return $this->jsonError(['Model not found.'], 404);
         }
 
-        $this->validateInputsForResource($request->all(), $request->route('resource'));
+        $updateFields = $request->all();
 
-        $model->fill($request->all());
+        if ($this->validateInputsForResource($updateFields, $request->route('resource')) === false) {
+            return $this->jsonError(['Insufficient permissions.'], 403);
+        }
+
+        $model->fill($updateFields);
         if ($model->save()) {
             return $this->jsonSuccess($model);
         }
@@ -82,6 +148,11 @@ class GenericResourceController extends Controller
 
         if (!$model instanceof GenericModel) {
             return $this->jsonError(['Model not found.'], 404);
+        }
+
+        $fields = $request->all();
+        if ($this->validateInputsForResource($fields, $request->route('resource')) === false) {
+            return $this->jsonError(['Insufficient permissions.'], 403);
         }
 
         if ($model->delete()) {

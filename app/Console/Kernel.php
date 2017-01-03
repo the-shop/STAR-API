@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        // Commands\Inspire::class,
+        Commands\SprintReminder::class,
         Commands\XpDeduction::class
     ];
 
@@ -25,7 +25,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+         $schedule->command('sprint:remind')
+                  ->twiceDaily(8, 14);
          $schedule->command('XpDeduction')
-                  ->cron('* * * * *');
+                  ->dailyAt('13:00');
     }
 }

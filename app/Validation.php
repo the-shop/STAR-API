@@ -2,13 +2,11 @@
 
 namespace App;
 
-use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
-
 /**
  * Class GenericValidation
  * @package App
  */
-class Validation extends Eloquent
+class Validation extends StarModel
 {
     /**
      * The attributes that are mass assignable.
@@ -18,7 +16,8 @@ class Validation extends Eloquent
     protected $fillable = [
         'resource',
         'fields',
-        'messages'
+        'messages',
+        'acl'
     ];
 
     /**

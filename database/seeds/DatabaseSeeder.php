@@ -1,16 +1,21 @@
 <?php
 
-use Illuminate\Database\Seeder;
+namespace
 
-class DatabaseSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
-    public function run()
+    use Illuminate\Database\Seeder;
+
+    class DatabaseSeeder extends Seeder
     {
-        // $this->call(UserTableSeeder::class);
+        /**
+         * Run the database seeds.
+         *
+         * @return void
+         */
+        public function run()
+        {
+            $this->call(AclCollectionSeeder::class);
+            $this->call(ValidationsSeeder::class);
+        }
     }
 }

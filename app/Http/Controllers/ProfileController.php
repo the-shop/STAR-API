@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Profile;
 use Illuminate\Http\Request;
+use App\Helpers\Configuration;
+use App\Helpers\MailSend;
 
 /**
  * Class ProfileController
@@ -51,9 +53,10 @@ class ProfileController extends Controller
      */
     public function store(Request $request)
     {
-        $this->validateInputsForResource($request->all(), 'profiles');
+        $fields = $request->all();
+        $this->validateInputsForResource($fields, 'profiles');
 
-        $profile = Profile::create($request->all());
+        $profile = Profile::create($fields);
 
         $credentials = $request->only('email', 'password');
         if (!$token = JWTAuth::attempt($credentials)) {
@@ -61,6 +64,26 @@ class ProfileController extends Controller
         }
 
         JWTAuth::setToken($token);
+
+        //send confirmation E-mail upon profile creation on the platform
+
+        $teamSlackInfo = Configuration::getConfiguration(true);
+        if ($teamSlackInfo === false) {
+            $teamSlackInfo = [];
+        }
+
+        $data = [
+            'name' => $profile->name,
+            'email' => $profile->email,
+            'github' => $profile->github,
+            'trello' => $profile->trello,
+            'slack' => $profile->slack,
+            'teamSlack' => $teamSlackInfo
+        ];
+        $view = 'emails.registration';
+        $subject = 'Welcome to The Shop platform!';
+
+        MailSend::send($view, $data, $profile, $subject);
 
         return $this->jsonSuccess($profile);
     }
@@ -91,16 +114,32 @@ class ProfileController extends Controller
             return $this->jsonError('Model not found.', 404);
         }
 
-        // TODO: replace with Gate after ACL is implemented
         if ($profile->id !== $this->getCurrentProfile()->id && $this->getCurrentProfile()->admin !== true) {
             return $this->jsonError('Not enough permissions.', 403);
         }
 
-        $this->validateInputsForResource($request->all(), 'profiles', ['email' => 'required|email']);
+        $oldXp = $profile->xp;
 
-        $profile->fill($request->all());
+        $fields = $request->all();
+        $this->validateInputsForResource($fields, 'profiles', ['email' => 'required|email']);
+
+        $profile->fill($fields);
 
         $profile->save();
+
+        // Send email with XP status change
+        if ($request->has('xp')) {
+            $xpDifference = $profile->xp - $oldXp;
+            $emailMessage = \Config::get('sharedSettings.internalConfiguration.email_xp_message');
+            $data = [
+                'xpDifference' => $xpDifference,
+                'emailMessage' => $emailMessage
+            ];
+            $view = 'emails.xp';
+            $subject = 'Xp status changed!';
+
+            MailSend::send($view, $data, $profile, $subject);
+        }
 
         return $this->jsonSuccess($profile);
     }
@@ -170,6 +209,5 @@ class ProfileController extends Controller
 
         $profile->delete();
         return $this->jsonSuccess(['id' => $profile->id]);
-
     }
 }

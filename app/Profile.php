@@ -28,16 +28,11 @@ class Profile extends StarModel implements AuthenticatableContract, CanResetPass
         'github',
         'trello',
         'slack',
+        'valid',
+        'employee',
         'xp',
-        'xp_id'
-    ];
-
-    /**
-     * The model's attributes.
-     *
-     * @var array
-     */
-    protected $attributes = [
+        'active',
+        'xp_id',
         'admin',
     ];
 

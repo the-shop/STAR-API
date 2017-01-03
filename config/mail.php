@@ -108,4 +108,15 @@ return [
 
     'sendmail' => '/usr/sbin/sendmail -bs',
 
+
+    /*
+     * Private email settings for sending email upon new user registration,
+     * upon XP awarded/deducted, mass send email
+     *
+     */
+
+    'private_mail_from' => env('PRIVATE_MAIL_FROM', 'no-reply@the-shop.io'),
+    'private_mail_name' => env('PRIVATE_MAIL_NAME', 'The Shop'),
+    'emails_enabled' => env('EMAILS_ENABLED', true),
+    'private_mail_subject' => env('PRIVATE_MAIL_SUBJECT', 'New email from The Shop platform')
 ];

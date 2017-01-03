@@ -21,14 +21,14 @@
 | except for login and signup.
 |
 */
-Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], function()
+Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app-support', 'the-shop.requestLogger']], function()
 {
     // API calls we allow without token authorization
     Route::post('register', 'ProfileController@store');
     Route::post('login', 'ProfileController@login');
 
     // Define a group of APIs that require auth (we use JWT Auth for token authorization)
-    Route::group(['middleware' => ['jwt.auth', 'jwt.refresh']], function()
+    Route::group(['middleware' => ['jwt.auth', 'jwt.refresh', 'acl']], function()
     {
         Route::put('profiles/changePassword', 'ProfileController@changePassword');
         Route::resource('profiles', 'ProfileController');
@@ -40,6 +40,19 @@ Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], f
         Route::post('slack/message', 'SlackController@sendMessage');
         Route::get('slack/users', 'SlackController@getUsers');
         Route::get('slack/channels', 'SlackController@getChannels');
+        Route::post('trello/board', 'TrelloController@createBoard');
+        Route::get('trello/boards', 'TrelloController@getBoardIds');
+        Route::get('trello/board/{id}/members', 'TrelloController@getMemberIds');
+        Route::post('trello/board/{id}/list', 'TrelloController@createList');
+        Route::get('trello/board/{id}/lists', 'TrelloController@getListIds');
+        Route::put('trello/board/{boardId}/list/{id}/ticket', 'TrelloController@createTicket');
+        Route::get('trello/board/{boardId}/list/{id}/tickets', 'TrelloController@getTicketIds');
+        Route::put('trello/board/{boardId}/ticket/{ticketId}/member/{memberId}/add', 'TrelloController@assignMember');
+        Route::put('trello/board/{boardId}/ticket/{ticketId}/member/{memberId}/remove', 'TrelloController@removeMember');
+        Route::put('trello/board/{boardId}/ticket/{id}', 'TrelloController@setDueDate');
+        Route::get('configuration', 'ConfigurationController@getConfiguration');
+        Route::post('email', 'EmailController@sendEmail');
+
 
 
         /**

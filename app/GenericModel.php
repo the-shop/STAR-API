@@ -13,7 +13,7 @@ class GenericModel extends StarModel
      *
      * @var string
      */
-    protected $collection;
+    protected $collection = 'genericModels';
 
     /**
      * Collection name that's set statically to be reused on each instance creation
@@ -21,16 +21,6 @@ class GenericModel extends StarModel
      * @var string
      */
     protected static $collectionName;
-
-    /**
-     * Get the guarded attributes for the model.
-     *
-     * @return array
-     */
-    public function getGuarded()
-    {
-        return $this->guarded = [];
-    }
 
     /**
      * Custom constructor so that we can set correct collection for each created instance
@@ -46,11 +36,28 @@ class GenericModel extends StarModel
     }
 
     /**
+     * Get the guarded attributes for the model.
+     *
+     * @return array
+     */
+    public function getGuarded()
+    {
+        return $this->guarded = [];
+    }
+
+    /**
      * @param $resourceName
-     * @return $this
      */
     public static function setCollection($resourceName)
     {
         self::$collectionName = $resourceName;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getCollection()
+    {
+        return self::$collectionName;
     }
 }
