@@ -120,7 +120,7 @@ class ProfileController extends Controller
         $oldXp = $profile->xp;
 
         $fields = $request->all();
-        $this->validateInputsForResource($fields, 'profiles', ['email' => 'required|email']);
+        $this->validateInputsForResource($fields, 'profiles', null, ['email' => 'required|email']);
 
         $profile->fill($fields);
 
