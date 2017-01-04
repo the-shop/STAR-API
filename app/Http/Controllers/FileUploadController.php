@@ -12,12 +12,12 @@ class FileUploadController extends Controller
 {
     public function uploadFile(Request $request)
     {
-        $user_id = Auth::user()->id;
+        $userId = Auth::user()->id;
 
         if ($request->has('projectId')) {
-            $project_id = $request->get('projectId');
+            $projectId = $request->get('projectId');
         } else {
-            $project_id = null;
+            $projectId = null;
         }
 
         $files = $request->file();
@@ -26,17 +26,17 @@ class FileUploadController extends Controller
             GenericModel::setCollection('uploads');
             $upload = GenericModel::create();
 
-            $file_name = time() . "." . $file->getClientOriginalExtension();
+            $fileName = time() . "." . $file->getClientOriginalExtension();
 
             $s3 = Storage::disk('s3');
-            $file_path = '/starapi/tests/' . $file_name;
-            $s3->put($file_path, file_get_contents($file), 'public');
+            $filePath = $fileName;
+            $s3->put($filePath, file_get_contents($file), 'public');
 
-            $fileUrl = Storage::url($file);
+            $fileUrl = Storage::cloud()->url($file);
 
-            $upload->profileId = $user_id;
-            $upload->projectId = $project_id;
-            $upload->name = $file_name;
+            $upload->profileId = $userId;
+            $upload->projectId = $projectId;
+            $upload->name = $fileName;
             $upload->fileUrl = $fileUrl;
             $upload->save();
         }
