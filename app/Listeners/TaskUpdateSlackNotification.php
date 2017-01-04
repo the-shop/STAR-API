@@ -8,16 +8,6 @@ use App\GenericModel;
 class TaskUpdateSlackNotification
 {
     /**
-     * Create the event listener.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Handle the event.
      *
      * @param  TaskUpdateSlackNotify $event
@@ -27,17 +17,21 @@ class TaskUpdateSlackNotification
     {
         $preSetCollection = GenericModel::getCollection();
         GenericModel::setCollection('projects');
-        $project = GenericModel::where('_id', '=', $event->tasks->project_id)->first();
+        $project = GenericModel::where('_id', '=', $event->model->project_id)->first();
 
         GenericModel::setCollection('profiles');
-        $projectOwner = GenericModel::where('_id', '=', $project->owner)->first();
-        $taskOwner = GenericModel::where('_id', '=', $event->tasks->owner)->first();
+        $projectOwner = GenericModel::where('_id', '=', $project->acceptedBy)->first();
+        $taskOwner = GenericModel::where('_id', '=', $event->model->owner)->first();
         $recipients = [
             '@' . $projectOwner->slack,
             '@' . $taskOwner->slack
         ];
+
+        // Make sure that we don't double send notifications if task owner is project owner
+        $recipients = array_unique($recipients);
+
         $message = 'Task *'
-            . $event->tasks->title
+            . $event->model->title
             . '* was just updated by *'
             . \Auth::user()->name
             . '*';
@@ -45,6 +39,7 @@ class TaskUpdateSlackNotification
         foreach ($recipients as $recipient) {
             \SlackChat::message($recipient, $message);
         }
+
         GenericModel::setCollection($preSetCollection);
     }
 }

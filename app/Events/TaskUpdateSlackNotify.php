@@ -2,11 +2,13 @@
 
 namespace App\Events;
 
-use App\Events\Event;
 use App\GenericModel;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
+/**
+ * Class TaskUpdateSlackNotify
+ * @package App\Events
+ */
 class TaskUpdateSlackNotify extends Event
 {
     use SerializesModels;
@@ -14,13 +16,12 @@ class TaskUpdateSlackNotify extends Event
     public $tasks;
 
     /**
-     * Create a new event instance.
-     *
-     * @return void
+     * TaskUpdateSlackNotify constructor.
+     * @param GenericModel $model
      */
-    public function __construct(GenericModel $tasks)
+    public function __construct(GenericModel $model)
     {
-        $this->tasks = $tasks;
+        $this->model = $model;
     }
 
     /**

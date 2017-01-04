@@ -6,7 +6,6 @@ use App\Events\TaskUpdateSlackNotify;
 use App\GenericModel;
 use Illuminate\Http\Request;
 use App\Events\TaskUpdate;
-use Route;
 
 /**
  * Class GenericResourceController
@@ -112,8 +111,7 @@ class GenericResourceController extends Controller
         $model = GenericModel::create($fields);
 
         if ($model->getCollection() === 'tasks' && $request->has('owner') && !empty($request->get('owner'))) {
-            $tasks = $model;
-            event(new TaskUpdateSlackNotify($tasks));
+            event(new TaskUpdateSlackNotify($model));
         }
 
         if ($model->save()) {
@@ -143,8 +141,7 @@ class GenericResourceController extends Controller
         $model->fill($updateFields);
 
         if ($model->getCollection() === 'tasks' && $model->isDirty()) {
-            $tasks = $model;
-            event(new TaskUpdateSlackNotify($tasks));
+            event(new TaskUpdateSlackNotify($model));
         }
 
 
