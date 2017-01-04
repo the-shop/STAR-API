@@ -86,7 +86,8 @@ namespace {
                                 'editable' => [],
                                 'GET' => true,
                                 'DELETE' => false,
-                                'POST' => false
+                                'POST' => false,
+                                'updateOwn' => true
                             ]
                         ]
                     ],
@@ -99,7 +100,8 @@ namespace {
                                 'editable' => [],
                                 'GET' => true,
                                 'DELETE' => false,
-                                'POST' => false
+                                'POST' => false,
+                                'updateOwn' => true
                             ]
                         ]
                         ], [
@@ -124,7 +126,8 @@ namespace {
                                 'editable' => [],
                                 'GET' => true,
                                 'DELETE' => false,
-                                'POST' => false
+                                'POST' => false,
+                                'updateOwn' => true
                             ]
                         ]
                     ],
@@ -141,7 +144,8 @@ namespace {
                                 ],
                                 'GET' => true,
                                 'DELETE' => false,
-                                'POST' => false
+                                'POST' => false,
+                                'updateOwn' => true
                             ]
                         ]
                     ]

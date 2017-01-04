@@ -88,13 +88,14 @@ class Controller extends BaseController
     }
 
     /**
+     * @param $model
      * @param $fields
      * @param $resourceName
      * @param array $inputOverrides
      * @return bool
      * @throws DynamicValidationException
      */
-    protected function validateInputsForResource(&$fields, $resourceName, array $inputOverrides = [])
+    protected function validateInputsForResource(&$fields, $resourceName, $model = null, array $inputOverrides = [])
     {
         $user = \Auth::user();
 
@@ -114,6 +115,15 @@ class Controller extends BaseController
 
         $acl = AclHelper::getAcl($user);
         $userRole = $acl->name;
+        $updateOwn = false;
+
+        if (isset($validationModel->acl[$userRole]['updateOwn'])) {
+            $updateOwn = $validationModel->acl[$userRole]['updateOwn'];
+        }
+
+        if (isset($model->ownerId) && $model->ownerId === $user->id && $updateOwn === true) {
+            return true;
+        }
 
         // Check if validation rules exists for use role
         if (!key_exists($userRole, $validationModel->acl)) {
