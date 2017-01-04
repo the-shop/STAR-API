@@ -14,7 +14,7 @@ class EventServiceProvider extends ServiceProvider
      */
     protected $listen = [
         'App\Events\TaskUpdate' => [
-            'App\Listeners\TaskUpdateMessage',
+            'App\Listeners\TaskUpdateXP',
         ],
     ];
 

@@ -50,6 +50,7 @@ Route::group(['prefix' => 'api/v1', 'middleware' => 'the-shop.requestLogger'], f
         Route::put('trello/board/{boardid}/ticket/{id}', 'TrelloController@setDueDate');
         Route::get('configuration', 'ConfigurationController@getConfiguration');
         Route::post('email', 'EmailController@sendEmail');
+        Route::get('upload', 'FileUploadController@uploadFile');
 
 
 

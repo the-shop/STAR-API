@@ -127,7 +127,8 @@ class GenericResourceController extends Controller
 
         $model->fill($updateFields);
 
-        if ($model->passed_qa == true) {
+        $a = $model;
+        if ($model->passed_qa === true) {
             $tasks = $model;
             event(new TaskUpdate($tasks));
         }
