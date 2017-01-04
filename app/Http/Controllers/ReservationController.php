@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\GenericModel;
+
 use Faker\Provider\DateTime;
 use Illuminate\Http\Request;
 use App\Http\Requests;
@@ -32,9 +33,10 @@ class ReservationController extends Controller
 
         $date = new \DateTime();
         $time = $date->getTimestamp();
+        $reservationTime = \Config::get('projectReservation.reservation_time');
         if (isset($project->reservationsBy)) {
             foreach ($project->reservationsBy as $reserved) {
-                if ($time - $reserved['timestamp'] <= 1800) {
+                if ($time - $reserved['timestamp'] <= ($reservationTime * 60)) {
                     return $this->jsonError(['Project already reserved.'], 403);
                 }
             }
@@ -65,9 +67,10 @@ class ReservationController extends Controller
 
         $date = new \DateTime();
         $time = $date->getTimestamp();
+        $reservationTime = \Config::get('projectReservation.reservation_time');
         if (isset($project->reservationsBy)) {
             foreach ($project->reservationsBy as $reserved) {
-                if (($time - $reserved['timestamp']) <= 1800 && !($reserved['user_id'] == \Auth::user()->id)) {
+                if (($time - $reserved['timestamp']) <= ($reservationTime * 60) && !($reserved['user_id'] == \Auth::user()->id)) {
                     return $this->jsonError(['Permission denied.'], 403);
                 }
             }
@@ -96,9 +99,10 @@ class ReservationController extends Controller
 
         $date = new \DateTime();
         $time = $date->getTimestamp();
+        $reservationTime = \Config::get('projectReservation.reservation_time');
         if (isset($project->reservationsBy)) {
             foreach ($project->reservationsBy as $reserved) {
-                if (($time - $reserved['timestamp']) <= 1800 && !($reserved['user_id'] == \Auth::user()->id)) {
+                if (($time - $reserved['timestamp']) <= ($reservationTime * 60) && !($reserved['user_id'] == \Auth::user()->id)) {
                     return $this->jsonError(['Permission denied.'], 403);
                 }
             }
@@ -125,7 +129,7 @@ class ReservationController extends Controller
             return $this->jsonError(['ID not found.'], 404);
         }
 
-        if (isset($project->acceptedBy)) {
+        if (!empty($project->acceptedBy)) {
             return $this->jsonError(['Project already accepted.'], 403);
         }
 
