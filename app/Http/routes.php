@@ -31,6 +31,7 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
         Route::put('profiles/changePassword', 'ProfileController@changePassword');
         Route::resource('profiles', 'ProfileController');
         Route::resource('validations', 'ValidationController');
+        Route::get('projects/{id}/uploads', 'FileUploadController@getProjectUploads');
         Route::put('projects/{id}/makeReservation', 'ReservationController@make');
         Route::put('projects/{id}/acceptReservation', 'ReservationController@accept');
         Route::put('projects/{id}/declineReservation', 'ReservationController@decline');
@@ -51,8 +52,6 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
         Route::get('configuration', 'ConfigurationController@getConfiguration');
         Route::post('email', 'EmailController@sendEmail');
         Route::post('upload', 'FileUploadController@uploadFile');
-
-
 
         /**
          * Generic resources routes

@@ -22,6 +22,7 @@ class FileUploadController extends Controller
 
         $files = $request->file();
 
+        $response = [];
         foreach ($files as $file) {
             GenericModel::setCollection('uploads');
             $upload = GenericModel::create();
@@ -32,13 +33,30 @@ class FileUploadController extends Controller
             $filePath = $fileName;
             $s3->put($filePath, file_get_contents($file), 'public');
 
-            $fileUrl = Storage::cloud()->url($file);
+            $fileUrl = Storage::cloud()->url($fileName);
 
-            $upload->profileId = $userId;
             $upload->projectId = $projectId;
             $upload->name = $fileName;
             $upload->fileUrl = $fileUrl;
             $upload->save();
+
+            $response[] = $upload;
         }
+
+        return $this->jsonSuccess($response);
+    }
+
+    public function getProjectUploads($appName, $id)
+    {
+        GenericModel::setCollection('projects');
+        $project = GenericModel::find($id);
+        if (!$project) {
+            return $this->jsonError(['Project with given ID not found'], 404);
+        }
+
+        GenericModel::setCollection('uploads');
+        $uploads = GenericModel::where('projectId', '=', $id)->get();
+
+        return $this->jsonSuccess($uploads);
     }
 }
