@@ -50,7 +50,7 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
         Route::put('trello/board/{boardId}/ticket/{id}', 'TrelloController@setDueDate');
         Route::get('configuration', 'ConfigurationController@getConfiguration');
         Route::post('email', 'EmailController@sendEmail');
-        Route::get('upload', 'FileUploadController@uploadFile');
+        Route::post('upload', 'FileUploadController@uploadFile');
 
 
 
