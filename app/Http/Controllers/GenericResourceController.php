@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Events\TaskUpdateSlackNotify;
 use App\GenericModel;
 use Illuminate\Http\Request;
+use App\Events\TaskUpdate;
+use Route;
 
 /**
  * Class GenericResourceController
@@ -143,6 +145,12 @@ class GenericResourceController extends Controller
         if ($model->getCollection() === 'tasks' && $model->isDirty()) {
             $tasks = $model;
             event(new TaskUpdateSlackNotify($tasks));
+        }
+
+
+        if ($model->passed_qa === true) {
+            $tasks = $model;
+            event(new TaskUpdate($tasks));
         }
 
         if ($model->save()) {
