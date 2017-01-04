@@ -110,8 +110,8 @@ class GenericResourceController extends Controller
 
         $model = GenericModel::create($fields);
 
-        if ($model->getCollection() === 'tasks' && $request->has('owner') && !empty($request->get('owner'))) {
-            event(new TaskUpdateSlackNotify($model));
+        if ($model->getCollection() === 'tasks' && $request->has('owner') && !empty($request->input('owner'))) {
+            event(new TaskUpdateSlackNotify($model), []);
         }
 
         if ($model->save()) {

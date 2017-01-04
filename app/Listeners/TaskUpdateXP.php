@@ -31,6 +31,8 @@ class TaskUpdateXP
      */
     public function handle(TaskUpdate $event)
     {
+        // I don't always make PRs, but when I do I make one with every code change I have, even work in progress
+        return $this;
         $this->tasks = $event->tasks;
 
         //task user id

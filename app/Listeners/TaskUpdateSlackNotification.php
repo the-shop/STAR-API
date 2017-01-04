@@ -17,15 +17,22 @@ class TaskUpdateSlackNotification
     {
         $preSetCollection = GenericModel::getCollection();
         GenericModel::setCollection('projects');
-        $project = GenericModel::where('_id', '=', $event->model->project_id)->first();
+        $project = GenericModel::find($event->model->project_id);
 
         GenericModel::setCollection('profiles');
-        $projectOwner = GenericModel::where('_id', '=', $project->acceptedBy)->first();
-        $taskOwner = GenericModel::where('_id', '=', $event->model->owner)->first();
-        $recipients = [
-            '@' . $projectOwner->slack,
-            '@' . $taskOwner->slack
-        ];
+        $projectOwner = GenericModel::find($project->acceptedBy);
+        $taskOwner = GenericModel::find($event->model->owner);
+
+        // Let's build a list of recipients
+        $recipients = [];
+
+        if ($projectOwner->slack) {
+            $recipients[] = '@' . $projectOwner->slack;
+        }
+
+        if ($taskOwner->slack) {
+            $recipients[] = '@' . $taskOwner->slack;
+        }
 
         // Make sure that we don't double send notifications if task owner is project owner
         $recipients = array_unique($recipients);
