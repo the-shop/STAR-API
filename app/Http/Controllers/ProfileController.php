@@ -89,12 +89,12 @@ class ProfileController extends Controller
     }
 
     /**
-     * @param $id
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        $profile = Profile::find($id);
+        $profile = Profile::find($request->route('profiles'));
         if (!$profile) {
             return $this->jsonError('User not found.', 404);
         }
@@ -103,12 +103,11 @@ class ProfileController extends Controller
 
     /**
      * @param Request $request
-     * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $profile = Profile::find($id);
+        $profile = Profile::find($request->route('profiles'));
 
         if (!$profile instanceof Profile) {
             return $this->jsonError('Model not found.', 404);
@@ -191,18 +190,17 @@ class ProfileController extends Controller
     }
 
     /**
-     * @param $id
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        $profile = Profile::find($id);
+        $profile = Profile::find($request->route('profiles'));
 
         if (!$profile instanceof Profile) {
             return $this->jsonError('User not found.', 404);
         }
 
-        // TODO: replace with Gate after ACL is implemented
         if ($profile->id !== $this->getCurrentProfile()->id && $this->getCurrentProfile()->admin !== true) {
             return $this->jsonError('Not enough permissions.', 403);
         }

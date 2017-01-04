@@ -46,10 +46,10 @@ class FileUploadController extends Controller
         return $this->jsonSuccess($response);
     }
 
-    public function getProjectUploads($appName, $id)
+    public function getProjectUploads(Request $request)
     {
         GenericModel::setCollection('projects');
-        $project = GenericModel::find($id);
+        $project = GenericModel::find($request->route('id'));
         if (!$project) {
             return $this->jsonError(['Project with given ID not found'], 404);
         }

@@ -19,13 +19,13 @@ class ReservationController extends Controller
     /**
      * Make reservation for selected project
      *
-     * @param $id
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
      */
-    public function make($id)
+    public function make(Request $request)
     {
         GenericModel::setCollection('projects');
-        $project = GenericModel::find($id);
+        $project = GenericModel::find($request->route('id'));
 
         if ($this->validateReservation($project) !== false) {
             return $this->validateReservation($project);
@@ -53,13 +53,13 @@ class ReservationController extends Controller
     /**
      * Accept reservation for selected project
      *
-     * @param $id
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
      */
-    public function accept($id)
+    public function accept(Request $request)
     {
         GenericModel::setCollection('projects');
-        $project = GenericModel::find($id);
+        $project = GenericModel::find($request->route('id'));
 
         if ($this->validateReservation($project) !== false) {
             return $this->validateReservation($project);
@@ -85,13 +85,13 @@ class ReservationController extends Controller
     /**
      * Decline reservation for selected project
      *
-     * @param $id
-     * @return \Illuminate\Http\JsonResponse
+     * @param Request $request
+     * @return bool|\Illuminate\Http\JsonResponse
      */
-    public function decline($id)
+    public function decline(Request $request)
     {
         GenericModel::setCollection('projects');
-        $project = GenericModel::find($id);
+        $project = GenericModel::find($request->route('id'));
 
         if ($this->validateReservation($project) !== false) {
             return $this->validateReservation($project);

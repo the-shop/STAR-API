@@ -37,12 +37,12 @@ class ValidationController extends Controller
     }
 
     /**
-     * @param $id
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        $model = Validation::find($id);
+        $model = Validation::find($request->route('id'));
         if (!$model) {
             return $this->jsonError('Model not found.', 404);
         }
@@ -51,12 +51,11 @@ class ValidationController extends Controller
 
     /**
      * @param Request $request
-     * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
-        $model = Validation::find($id);
+        $model = Validation::find($request->route('id'));
 
         if (!$model) {
             return $this->jsonError('Model not found.', 404);
@@ -71,12 +70,12 @@ class ValidationController extends Controller
     }
 
     /**
-     * @param $id
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        $model = Validation::find($id);
+        $model = Validation::find($request->route('id'));
 
         if (!$model) {
             return $this->jsonError('Model not found.', 404);
