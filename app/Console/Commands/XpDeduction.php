@@ -88,36 +88,21 @@ class XpDeduction extends Command
                 if (!key_exists($user->_id, $logHashMap) && $daysChecked === 4) {
                     $profile = $profileHashMap[$user->_id];
                     if ($profile->xp - 1 == 0) {
-                        //set banned flag and save to DB
-                        GenericModel::setCollection('xp');
-                        $userXP = GenericModel::where('_id', '=', $profile->xp_id)->first();
-                        $records = $userXP->records;
-                        $records[] = [
-                            'xp' => -1,
-                            'details' => 'Xp deducted for inactivity. Profile banned!',
-                            'timestamp' => $cronTime
-                        ];
-                        $userXP->records = $records;
-                        $userXP->save();
-                        $profile->xp = 0;
                         $profile->banned = true;
-                        $profile->save();
-                    } else {
-                        // New XP record creation and save to DB
-                        GenericModel::setCollection('xp');
-                        $userXP = GenericModel::where('_id', '=', $profile->xp_id)->first();
-                        $records = $userXP->records;
-                        $records[] = [
-                            'xp' => -1,
-                            'details' => 'Xp deducted for inactivity.',
-                            'timestamp' => $cronTime
-                        ];
-                        $userXP->records = $records;
-                        $userXP->save();
-                        $profile->xp--;
-                        $profile->lastTimeActivityCheck = $cronTime;
-                        $profile->save();
                     }
+                    GenericModel::setCollection('xp');
+                    $userXP = GenericModel::where('_id', '=', $profile->xp_id)->first();
+                    $records = $userXP->records;
+                    $records[] = [
+                        'xp' => -1,
+                        'details' => 'Xp deducted for inactivity.',
+                        'timestamp' => $cronTime
+                    ];
+                    $userXP->records = $records;
+                    $userXP->save();
+                    $profile->xp--;
+                    $profile->lastTimeActivityCheck = $cronTime;
+                    $profile->save();
                 }
             }
 
