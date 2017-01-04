@@ -21,15 +21,13 @@
 | except for login and signup.
 |
 */
-Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app-support', 'the-shop.requestLogger']], function()
-{
+Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app-support', 'the-shop.requestLogger']], function () {
     // API calls we allow without token authorization
     Route::post('register', 'ProfileController@store');
     Route::post('login', 'ProfileController@login');
 
     // Define a group of APIs that require auth (we use JWT Auth for token authorization)
-    Route::group(['middleware' => ['jwt.auth', 'jwt.refresh', 'acl']], function()
-    {
+    Route::group(['middleware' => ['jwt.auth', 'jwt.refresh', 'acl']], function () {
         Route::put('profiles/changePassword', 'ProfileController@changePassword');
         Route::resource('profiles', 'ProfileController');
         Route::resource('validations', 'ValidationController');
@@ -52,6 +50,7 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
         Route::put('trello/board/{boardId}/ticket/{id}', 'TrelloController@setDueDate');
         Route::get('configuration', 'ConfigurationController@getConfiguration');
         Route::post('email', 'EmailController@sendEmail');
+        Route::get('upload', 'FileUploadController@uploadFile');
 
 
 
