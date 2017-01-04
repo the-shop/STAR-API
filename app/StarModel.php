@@ -19,8 +19,9 @@ class StarModel extends Eloquent
         if (!\Auth::guest()) {
             static::creating(function ($model) {
                 $userId = \Auth::user()->id;
-                $model->ownerID = $userId;
+                $model->ownerId = $userId;
             });
         }
     }
+
 }
