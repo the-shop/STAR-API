@@ -13,7 +13,7 @@ class TaskUpdateSlackNotify extends Event
 {
     use SerializesModels;
 
-    public $tasks;
+    public $model;
 
     /**
      * TaskUpdateSlackNotify constructor.
