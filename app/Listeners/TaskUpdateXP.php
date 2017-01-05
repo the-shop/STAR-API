@@ -44,9 +44,7 @@ class TaskUpdateXP
         //get task's XP value
         $task_xp = $this->tasks->xp;
 
-        //
         $user_profile = Profile::find($user_id);
-        var_dump($user_profile);
         $owner_profile = Profile::find($project_owner_id);
 
         $end = 0;
