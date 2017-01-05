@@ -16,7 +16,7 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\TaskUpdateSlackNotify' => [
             'App\Listeners\TaskUpdateSlackNotification',
         ], 'App\Events\ProfileUpdate' => [
-            'App\Listeners\ProfileChange'
+            'App\Listeners\ProfileUpdate'
         ],
 //        'App\Events\TaskUpdate' => [
 //            'App\Listeners\TaskUpdateXP',

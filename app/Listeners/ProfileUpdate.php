@@ -2,16 +2,13 @@
 
 namespace App\Listeners;
 
-use App\Events\ProfileUpdate;
 use App\Profile;
 use App\Helpers\MailSend;
 
-class ProfileChange
+class ProfileUpdate
 {
     /**
-     * Create the event listener.
-     *
-     * @return void
+     * ProfileUpdate constructor.
      */
     public function __construct()
     {
@@ -19,12 +16,9 @@ class ProfileChange
     }
 
     /**
-     * Handle the event.
-     *
-     * @param  ProfileUpdate $event
-     * @return void
+     * @param \App\Events\ProfileUpdate $event
      */
-    public function handle(ProfileUpdate $event)
+    public function handle(\App\Events\ProfileUpdate $event)
     {
         $profileChanges = $event->profile->getDirty();
         $profileId = $event->profile->_id;
@@ -39,12 +33,12 @@ class ProfileChange
                 'xpDifference' => $xpDifference,
                 'emailMessage' => $emailMessage
             ];
-            $view = 'emails.xp';
+            $view = 'emails.xp-change';
             $subject = 'Xp status changed!';
 
             MailSend::send($view, $data, $event->profile, $subject);
 
-            if (isset($event->profile->slack) && !empty($event->profile->slack)) {
+            if (!empty($event->profile->slack)) {
                 //Send slack message with XP status changed
                 $recipient = '@' . $event->profile->slack;
                 $message = str_replace('{N}', ($xpDifference > 0 ? "+" . $xpDifference : $xpDifference), $emailMessage);

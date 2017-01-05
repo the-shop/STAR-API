@@ -12,9 +12,8 @@ class ProfileUpdate extends Event
     public $profile;
 
     /**
-     * Create a new event instance.
-     *
-     * @return void
+     * ProfileUpdate constructor.
+     * @param Profile $profile
      */
     public function __construct(Profile $profile)
     {
