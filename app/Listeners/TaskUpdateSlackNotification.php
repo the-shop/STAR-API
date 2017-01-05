@@ -26,7 +26,7 @@ class TaskUpdateSlackNotification
         // Let's build a list of recipients
         $recipients = [];
 
-        if ($projectOwner->slack) {
+        if ($projectOwner && $projectOwner->slack) {
             $recipients[] = '@' . $projectOwner->slack;
         }
 

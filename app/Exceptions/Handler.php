@@ -28,7 +28,8 @@ class Handler extends ExceptionHandler
         HttpException::class,
         ModelNotFoundException::class,
         MethodNotAllowedHttpException::class,
-        ValidationException::class
+        ValidationException::class,
+        DynamicValidationException::class
     ];
 
     /**
