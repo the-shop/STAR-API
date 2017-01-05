@@ -2,22 +2,23 @@
 
 namespace App\Events;
 
-use App\Events\Event;
+use App\Profile;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class XpNotify extends Event
+class ProfileUpdate extends Event
 {
     use SerializesModels;
+
+    public $profile;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Profile $profile)
     {
-        //
+        $this->profile = $profile;
     }
 
     /**

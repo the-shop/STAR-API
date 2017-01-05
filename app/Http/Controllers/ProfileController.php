@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ProfileUpdate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -117,28 +118,16 @@ class ProfileController extends Controller
             return $this->jsonError('Not enough permissions.', 403);
         }
 
-        $oldXp = $profile->xp;
-
         $fields = $request->all();
         $this->validateInputsForResource($fields, 'profiles', null, ['email' => 'required|email']);
 
         $profile->fill($fields);
 
-        $profile->save();
-
-        // Send email with XP status change
-        if ($request->has('xp')) {
-            $xpDifference = $profile->xp - $oldXp;
-            $emailMessage = \Config::get('sharedSettings.internalConfiguration.email_xp_message');
-            $data = [
-                'xpDifference' => $xpDifference,
-                'emailMessage' => $emailMessage
-            ];
-            $view = 'emails.xp';
-            $subject = 'Xp status changed!';
-
-            MailSend::send($view, $data, $profile, $subject);
+        if ($profile->isDirty()) {
+            event(new ProfileUpdate($profile));
         }
+
+        $profile->save();
 
         return $this->jsonSuccess($profile);
     }
