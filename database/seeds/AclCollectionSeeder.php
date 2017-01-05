@@ -27,22 +27,22 @@ namespace {
                         'name' => 'standard',
                         'allows' => [
                             'GET' => [
-                                "api/v1/{resource}",
-                                "api/v1/{resource}/{id}",
-                                "api/v1/configuration",
-                                "api/v1/profiles",
-                                "api/v1/profiles/{profiles}",
-                                "api/v1/slack/users"
+                                "api/v1/app/{appName}/{resource}",
+                                "api/v1/app/{appName}/{resource}/{id}",
+                                "api/v1/app/{appName}/configuration",
+                                "api/v1/app/{appName}/profiles",
+                                "api/v1/app/{appName}/profiles/{profiles}",
+                                "api/v1/app/{appName}/slack/users"
                             ],
                             'PUT' => [
-                                'api/v1/profiles/changePassword',
-                                'api/v1/profiles/{profiles}'
+                                'api/v1/app/{appName}/profiles/changePassword',
+                                'api/v1/app/{appName}/profiles/{profiles}'
                             ],
                             'POST' => [
-                                'api/v1/slack/message'
+                                'api/v1/app/{appName}/slack/message'
                             ],
                             'PATCH' => [
-                                'api/v1/profiles/{profiles}'
+                                'api/v1/app/{appName}/profiles/{profiles}'
                             ]
                         ]
                     ],
@@ -50,8 +50,8 @@ namespace {
                         'name' => 'guest',
                         'allows' => [
                             'POST' => [
-                                'api/v1/register',
-                                'api/v1/login'
+                                'api/v1/app/{appName}/register',
+                                'api/v1/app/{appName}/login'
                             ],
                         ]
                     ]
