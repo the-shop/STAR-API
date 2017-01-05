@@ -148,7 +148,8 @@ class Controller extends BaseController
                     if (isset($editableFields[$field])) {
                         $allowedFields[$field] = $value;
                     } else {
-                        throw new DynamicValidationException(['No permissions to edit "' . $field . '"'], 403);
+                        // TODO: throw this exception when PATCH is introduced
+                        // throw new DynamicValidationException(['No permissions to edit "' . $field . '"'], 403);
                     }
                 }
                 $fields = $allowedFields;

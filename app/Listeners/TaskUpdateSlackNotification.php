@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\TaskUpdateSlackNotify;
 use App\GenericModel;
+use Illuminate\Support\Facades\Auth;
 
 class TaskUpdateSlackNotification
 {
@@ -26,11 +27,11 @@ class TaskUpdateSlackNotification
         // Let's build a list of recipients
         $recipients = [];
 
-        if ($projectOwner && $projectOwner->slack) {
+        if ($projectOwner && $projectOwner->slack && $projectOwner->_id !== Auth::user()->_id) {
             $recipients[] = '@' . $projectOwner->slack;
         }
 
-        if ($taskOwner->slack) {
+        if ($taskOwner && $taskOwner->slack && $taskOwner->_id !== Auth::user()->_id) {
             $recipients[] = '@' . $taskOwner->slack;
         }
 
