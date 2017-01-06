@@ -31,15 +31,13 @@ class TaskUpdateXP
      */
     public function handle(TaskUpdate $event)
     {
-        // I don't always make PRs, but when I do I make one with every code change I have, even work in progress
-        return $this;
         $this->tasks = $event->tasks;
 
         //task user id
         $user_id = $this->tasks->task_history[0]['user'];
 
         //project owner id
-        $project_owner_id = $this->tasks->owner;
+        $project_owner_id = $this->tasks->ownerId;
 
         //get task's XP value
         $task_xp = $this->tasks->xp;
@@ -47,23 +45,38 @@ class TaskUpdateXP
         $user_profile = Profile::find($user_id);
         $owner_profile = Profile::find($project_owner_id);
 
-        $end = 0;
-        $review = 0;
-        for ($i = 0; $i < count($this->tasks->task_history); $i++) {
-            if ($this->tasks->submitted_for_qa === true) {
-                $end += $this->tasks->task_history[$i]['timestamp'] - $this->tasks->task_history[$i - 1]['timestamp'];
-                echo $end;
-            } elseif ($this->tasks->submitted_for_qa === false) {
-                $review += $this->tasks->task_history[$i]['timestamp'] - $this->tasks->task_history[$i - 1]['timestamp'];
+
+        $timeSpentReviewing = 0;
+        $timeSpentWorking = 0;
+        $tempWork = 0;
+        $tempReview = 0;
+        for ($i = count($this->tasks->task_history) - 1; $i >= 0; $i--) {
+            switch ($this->tasks->task_history[$i]['event']) {
+                case ($this->tasks->task_history[$i]['event'] == 'Task submitted for QA'):
+                    $endWork = $tempWork - floor($this->tasks->task_history[$i]['timestamp'] / 1000);
+                    if ($endWork > 0) {
+                        $timeSpentWorking += $endWork;
+                    }
+                    $tempWork = floor($this->tasks->task_history[$i]['timestamp'] / 1000);
+                    break;
+                case ($this->tasks->task_history[$i]['event'] == 'Task returned for development'):
+                    $endReview = $tempReview - floor($this->tasks->task_history[$i]['timestamp'] / 1000);
+                    if ($endReview > 0) {
+                        $timeSpentReviewing += $endReview;
+                    }
+                    $tempReview = floor($this->tasks->task_history[$i]['timestamp'] / 1000);
+                    break;
             }
         }
 
+        //if time spent reviewing code more than 1 day, deduct project/task owner 5 XP
+        if ($timeSpentReviewing > 24 * 60 * 60) {
+            $owner_profile->xp += -5;
+            $owner_profile->save();
+        }
 
-
-
-        $coefficient = ($end / $this->tasks->estimatedHours);
-
-        echo $coefficient;
+        //apply xp change
+        $coefficient = number_format(($timeSpentWorking / ($this->tasks->estimatedHours * 60 * 60)), 5);
         switch ($coefficient) {
             case ($coefficient <= 0.75):
                 $user_profile->xp += $task_xp + 3;
