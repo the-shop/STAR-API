@@ -36,7 +36,7 @@ class FileUploadController extends Controller
             $fileUrl = Storage::cloud()->url($fileName);
 
             $upload->projectId = $projectId;
-            $upload->name = $fileName;
+            $upload->name = $file->getClientOriginalName();
             $upload->fileUrl = $fileUrl;
             $upload->save();
 
