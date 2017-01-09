@@ -113,7 +113,7 @@ class XpDeduction extends Command
                     GenericModel::setCollection('profiles');
 
                     $profile->xp--;
-                    $profile->lastTimeActivityCheck = $cronTime;
+                    $profile->lastTimeActivityCheck = $cronTime . '000'; // Microtime
                     $profile->save();
                 }
             }
