@@ -105,7 +105,7 @@ class XpDeduction extends Command
                     $records[] = [
                         'xp' => -1,
                         'details' => 'Xp deducted for inactivity.',
-                        'timestamp' => $cronTime . '000' // Microtime
+                        'timestamp' => (int) $cronTime . '000' // Microtime
                     ];
                     $userXP->records = $records;
                     $userXP->save();
