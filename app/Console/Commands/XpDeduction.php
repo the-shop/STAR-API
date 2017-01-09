@@ -7,7 +7,10 @@ use Illuminate\Console\Command;
 use App\GenericModel;
 use MongoDB\BSON\ObjectID;
 
-
+/**
+ * Class XpDeduction
+ * @package App\Console\Commands
+ */
 class XpDeduction extends Command
 {
     /**
@@ -15,7 +18,7 @@ class XpDeduction extends Command
      *
      * @var string
      */
-    protected $signature = 'XpDeduction';
+    protected $signature = 'xp:activity:auto-deduct';
 
     /**
      * The console command description.
@@ -34,8 +37,6 @@ class XpDeduction extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return mixed
      */
     public function handle()
     {
@@ -50,7 +51,7 @@ class XpDeduction extends Command
         $daysChecked = 0;
 
         do {
-            // set current time of cron start and get all logs for previous 4 days
+            // Set current time of cron start and get all logs for previous 4 days
             $date = new \DateTime();
             $cronTime = $date->format('U');
             GenericModel::setCollection('logs');
@@ -69,12 +70,12 @@ class XpDeduction extends Command
 
             foreach ($profileHashMap as $user) {
                 if (isset($user->banned) && $user->banned === true) {
-                    unset ($profileHashMap[$user->_id]);
+                    unset($profileHashMap[$user->_id]);
                     continue;
                 }
 
                 if (isset($user->active) && $user->active === false) {
-                    unset ($profileHashMap[$user->_id]);
+                    unset($profileHashMap[$user->_id]);
                     continue;
                 }
 
@@ -91,23 +92,34 @@ class XpDeduction extends Command
                         $profile->banned = true;
                     }
                     GenericModel::setCollection('xp');
-                    $userXP = GenericModel::where('_id', '=', $profile->xp_id)->first();
+
+                    if (!$profile->xp_id) {
+                        $userXP = new GenericModel(['records' => []]);
+                        $userXP->save();
+                        $profile->xp_id = $userXP->_id;
+                    } else {
+                        $userXP = GenericModel::find($profile->xp_id);
+                    }
+
                     $records = $userXP->records;
                     $records[] = [
                         'xp' => -1,
                         'details' => 'Xp deducted for inactivity.',
-                        'timestamp' => $cronTime
+                        'timestamp' => (int) ($cronTime . '000') // Microtime
                     ];
                     $userXP->records = $records;
                     $userXP->save();
+
+                    GenericModel::setCollection('profiles');
+
                     $profile->xp--;
-                    $profile->lastTimeActivityCheck = $cronTime;
+                    $profile->lastTimeActivityCheck = (int) $cronTime;
                     $profile->save();
                 }
             }
 
             $daysChecked++;
-            unset ($logHashMap);
-        } while (count($profileHashMap) > 0 || $daysChecked === 4);
+            unset($logHashMap);
+        } while (count($profileHashMap) > 0 && $daysChecked < 5);
     }
 }

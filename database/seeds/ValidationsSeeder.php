@@ -20,6 +20,7 @@ namespace {
             DB::collection('validations')->where('resource', 'tasks')->delete();
             DB::collection('validations')->where('resource', 'xp')->delete();
             DB::collection('validations')->where('resource', 'comments')->delete();
+            DB::collection('validations')->where('resource', 'uploads')->delete();
             DB::collection('validations')->delete();
 
             // Insert records into validations collection
@@ -140,12 +141,30 @@ namespace {
                             'standard' => [
                                 'editable' => [
                                     'submitted_for_qa',
+                                    'owner',
                                     'task_history',
                                 ],
                                 'GET' => true,
                                 'DELETE' => false,
                                 'POST' => false,
                                 'updateOwn' => true
+                            ]
+                        ]
+                    ],
+                    [
+                        'fields' => [
+                            'projectId' => 'alpha_num',
+                            'name' => 'required|string',
+                            'fileUrl' => 'required|string',
+                        ],
+                        'resource' => 'uploads',
+                        'acl' => [
+                            'standard' => [
+                                'editable' => [],
+                                'GET' => true,
+                                'DELETE' => false,
+                                'POST' => false,
+                                'updateOwn' => false
                             ]
                         ]
                     ]

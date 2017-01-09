@@ -27,7 +27,7 @@ class Kernel extends ConsoleKernel
     {
          $schedule->command('sprint:remind')
                   ->twiceDaily(8, 14);
-         $schedule->command('XpDeduction')
+         $schedule->command('xp:activity:auto-deduct')
                   ->dailyAt('13:00');
     }
 }
