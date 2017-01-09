@@ -105,7 +105,7 @@ class XpDeduction extends Command
                     $records[] = [
                         'xp' => -1,
                         'details' => 'Xp deducted for inactivity.',
-                        'timestamp' => $cronTime
+                        'timestamp' => $cronTime . '000' // Microtime
                     ];
                     $userXP->records = $records;
                     $userXP->save();
@@ -113,7 +113,7 @@ class XpDeduction extends Command
                     GenericModel::setCollection('profiles');
 
                     $profile->xp--;
-                    $profile->lastTimeActivityCheck = $cronTime . '000'; // Microtime
+                    $profile->lastTimeActivityCheck = $cronTime;
                     $profile->save();
                 }
             }
