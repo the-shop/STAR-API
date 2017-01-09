@@ -48,17 +48,19 @@ class TaskUpdateXP
         $work = 0;
         $review = 0;
         for ($i = count($this->model->task_history) - 1; $i >= 0; $i--) {
-            if (($i % 2 == 0) && ($i > 0)) {
+            if (((($this->model->task_history[$i]['event'] == "Task returned for development")) || $this->model->task_history[$i]['event'] == "Task passed QA!") && ($i > 0)) {
+                for ($j = $i; $j >= 0; $j++) {
+                    $review += floor($this->model->task_history[$i]['timestamp'] / 1000) - floor($this->model->task_history[$i - 1]['timestamp'] / 1000);
+                }
+            } elseif (($this->model->task_history[$i]['event'] == "Task submitted for QA") && ($i > 0)) {
                 $work += floor($this->model->task_history[$i]['timestamp'] / 1000) - floor($this->model->task_history[$i - 1]['timestamp'] / 1000);
-            } elseif ($i % 2 !== 0) {
-                $review += floor($this->model->task_history[$i]['timestamp'] / 1000) - floor($this->model->task_history[$i - 1]['timestamp'] / 1000);
             }
         }
-        echo "work : " . $work . " review : " . $review;
+        echo "work  " . $work . " review " . $review;
 
-        //if time spent reviewing code more than 1 day, deduct project/task owner 5 XP
+        //if time spent reviewing code more than 1 day, deduct project/task owner 3 XP
         if ($review > 24 * 60 * 60) {
-            $ownerProfile->xp += -3;
+            $ownerProfile->xp -= 3;
             $ownerProfile->save();
         }
 
