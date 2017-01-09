@@ -3,12 +3,15 @@
 namespace App\Exceptions;
 
 use Exception;
+use Faker\Provider\File;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Mockery\Matcher\Not;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
@@ -29,7 +32,9 @@ class Handler extends ExceptionHandler
         ModelNotFoundException::class,
         MethodNotAllowedHttpException::class,
         ValidationException::class,
-        DynamicValidationException::class
+        DynamicValidationException::class,
+        FileUploadException::class,
+        NotFoundHttpException::class
     ];
 
     /**
@@ -87,6 +92,16 @@ class Handler extends ExceptionHandler
         } else if ($e instanceof DynamicValidationException) {
             return response()->json(
                 ['errors' => $e->getMessages()],
+                400
+            );
+        } else if ($e instanceof NotFoundHttpException) {
+            return response()->json(
+                ['errors' => 'Route not found'],
+                501
+            );
+        } else if ($e instanceof FileUploadException) {
+            return response()->json(
+                ['errors' => $e->getMessage()],
                 400
             );
         }

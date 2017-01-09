@@ -22,16 +22,6 @@ class SprintReminder extends Command
     protected $description = 'Check sprint tasks due dates and ping task owner 1 day before task end_due_date';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @return mixed

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\FileUploadException;
 use App\GenericModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,12 @@ class FileUploadController extends Controller
 
         $response = [];
         foreach ($files as $file) {
+            $t = $file->getError();
+
+            if ($file->getError()) {
+                throw new FileUploadException('File could not be uploaded.');
+            }
+
             GenericModel::setCollection('uploads');
             $upload = GenericModel::create();
 

@@ -6,6 +6,7 @@ use App\Events\TaskUpdateSlackNotify;
 use App\GenericModel;
 use Illuminate\Http\Request;
 use App\Events\TaskUpdate;
+use MongoDB\BSON\ObjectID;
 
 /**
  * Class GenericResourceController
@@ -29,12 +30,15 @@ class GenericResourceController extends Controller
 
         $errors = [];
 
-        //validate query params based on request params
-
+        // Validate query params based on request params
         if ($request->has('searchField') && $request->has('searchQuery')) {
             $searchField = $request->get('searchField');
             $searchQuery = '%' . $request->get('searchQuery') . '%';
-            $query->where($searchField, 'LIKE', $searchQuery);
+            if ($request->input('searchExact', null)) {
+                $query->where($searchField, '=', $request->get('searchQuery'));
+            } else {
+                $query->where($searchField, 'LIKE', $searchQuery);
+            }
         }
 
         if ($request->has('orderBy')) {
