@@ -25,8 +25,6 @@ class FileUploadController extends Controller
 
         $response = [];
         foreach ($files as $file) {
-            $t = $file->getError();
-
             if ($file->getError()) {
                 throw new FileUploadException('File could not be uploaded.');
             }

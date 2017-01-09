@@ -7,6 +7,8 @@ Task description if aplicable
 ## Checklist
 
 - [ ] README.md updated
+- [ ] Migrations written
+- [ ] Seeders written
 - [ ] Tests covered
 
 ## Environment updates
