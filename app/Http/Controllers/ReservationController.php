@@ -3,10 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\GenericModel;
-
-use Faker\Provider\DateTime;
 use Illuminate\Http\Request;
-use App\Http\Requests;
 
 /**
  * Handles project reservation logic

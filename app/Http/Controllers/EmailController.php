@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\GenericModel;
 use Illuminate\Http\Request;
-
-use App\Http\Requests;
 use App\Helpers\MailSend;
 
+/**
+ * Class EmailController
+ * @package App\Http\Controllers
+ */
 class EmailController extends Controller
 {
-
     /**
      * Send emails to list of user Ids
      * @param Request $request
