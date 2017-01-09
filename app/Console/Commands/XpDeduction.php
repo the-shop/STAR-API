@@ -92,7 +92,15 @@ class XpDeduction extends Command
                         $profile->banned = true;
                     }
                     GenericModel::setCollection('xp');
-                    $userXP = GenericModel::where('_id', '=', $profile->xp_id)->first();
+
+                    if (!$profile->xp_id) {
+                        $userXP = new GenericModel(['records' => []]);
+                        $userXP->save();
+                        $profile->xp_id = $userXP->_id;
+                    } else {
+                        $userXP = GenericModel::find($profile->xp_id);
+                    }
+
                     $records = $userXP->records;
                     $records[] = [
                         'xp' => -1,
@@ -101,6 +109,9 @@ class XpDeduction extends Command
                     ];
                     $userXP->records = $records;
                     $userXP->save();
+
+                    GenericModel::setCollection('profiles');
+
                     $profile->xp--;
                     $profile->lastTimeActivityCheck = $cronTime;
                     $profile->save();
