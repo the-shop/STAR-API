@@ -141,6 +141,7 @@ namespace {
                             'standard' => [
                                 'editable' => [
                                     'submitted_for_qa',
+                                    'owner',
                                     'task_history',
                                 ],
                                 'GET' => true,
