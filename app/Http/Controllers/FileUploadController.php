@@ -27,7 +27,7 @@ class FileUploadController extends Controller
             GenericModel::setCollection('uploads');
             $upload = GenericModel::create();
 
-            $fileName = time() . "." . $file->getClientOriginalExtension();
+            $fileName = $userId . '-' . str_random(20) . '.' . $file->getClientOriginalExtension();
 
             $s3 = Storage::disk('s3');
             $filePath = $fileName;
@@ -36,7 +36,7 @@ class FileUploadController extends Controller
             $fileUrl = Storage::cloud()->url($fileName);
 
             $upload->projectId = $projectId;
-            $upload->name = $fileName;
+            $upload->name = $file->getClientOriginalName();
             $upload->fileUrl = $fileUrl;
             $upload->save();
 
@@ -46,6 +46,12 @@ class FileUploadController extends Controller
         return $this->jsonSuccess($response);
     }
 
+    /**
+     * Lists all uploaded files with set projectId
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getProjectUploads(Request $request)
     {
         GenericModel::setCollection('projects');
@@ -55,7 +61,7 @@ class FileUploadController extends Controller
         }
 
         GenericModel::setCollection('uploads');
-        $uploads = GenericModel::where('projectId', '=', $id)->get();
+        $uploads = GenericModel::where('projectId', '=', $request->route('id'))->get();
 
         return $this->jsonSuccess($uploads);
     }
