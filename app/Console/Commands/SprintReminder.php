@@ -5,6 +5,10 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\GenericModel;
 
+/**
+ * Class SprintReminder
+ * @package App\Console\Commands
+ */
 class SprintReminder extends Command
 {
     /**
@@ -23,8 +27,6 @@ class SprintReminder extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return mixed
      */
     public function handle()
     {
@@ -35,7 +37,7 @@ class SprintReminder extends Command
         $sprints = [];
         $tasks = [];
 
-        //get all active projects and sprints
+        // Get all active projects and sprints
         GenericModel::setCollection('sprints');
         foreach ($projects as $project) {
             if (!empty($project->acceptedBy) && $project->isComplete !== true && !empty($project->sprints)) {
@@ -46,7 +48,7 @@ class SprintReminder extends Command
             }
         }
 
-        //get all active tasks
+        // Get all active tasks
         GenericModel::setCollection('tasks');
         foreach ($sprints as $sprint) {
             if (!empty($sprint->tasks)) {
@@ -56,26 +58,28 @@ class SprintReminder extends Command
             }
         }
 
-        //check tasks due date and ping task owner 1 day before task end
+        // Check tasks due date and ping task owner 1 day before task end
         $date = new \DateTime();
         $unixCheckDate = $date->format('U') + 24 * 60 * 60;
-        $checkDate = date('d-m-Y', $unixCheckDate);
+        $checkDate = date('Y-m-d', $unixCheckDate);
 
         GenericModel::setCollection('profiles');
         foreach ($tasks as $task) {
-            $taskDueDate = date('d-m-Y', $task->due_date);
+            $taskDueDate = date('Y-m-d', $task->due_date);
             if ($taskDueDate === $checkDate) {
-                $user = GenericModel::where('_id', '=', $task->owner)->first();
-                $recipient = '@' . $user['slack'];
-                $project = $activeProjects[$task->project_id]->name;
-                $message = '*Reminder*: task *'
-                    . $task->title
-                    . '* is due *tomorrow* (on '
-                    . $taskDueDate
-                    . ', for project *'
-                    . $project
-                    . '*)';
-                \SlackChat::message($recipient, $message);
+                $user = GenericModel::find($task->owner);
+                if ($user->slack) {
+                    $recipient = '@' . $user->slack;
+                    $project = $activeProjects[$task->project_id]->name;
+                    $message = '*Reminder*: task *'
+                        . $task->title
+                        . '* is due *tomorrow* (on '
+                        . $taskDueDate
+                        . ', for project *'
+                        . $project
+                        . '*)';
+                    \SlackChat::message($recipient, $message);
+                }
             }
         }
     }
