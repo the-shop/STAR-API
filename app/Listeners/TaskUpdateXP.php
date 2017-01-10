@@ -50,17 +50,11 @@ class TaskUpdateXP
         $review = 0;
         for ($i = count($this->model->task_history) - 1; $i >= 0; $i--) {
             if (((($this->model->task_history[$i]['event'] == "Task returned for development")) || $this->model->task_history[$i]['event'] == "Task passed QA!") && ($i > 0)) {
-                for ($j = $i; $j >= 0; $j--) {
                     $review += floor($this->model->task_history[$i]['timestamp'] / 1000) - floor($this->model->task_history[$i - 1]['timestamp'] / 1000);
-                }
-                break;
             } elseif (($this->model->task_history[$i]['event'] == "Task submitted for QA") && ($i > 0)) {
-                for ($k = $i; $k <= 0; $k--) {
-                    $work += floor($this->model->task_history[$k]['timestamp'] / 1000) - floor($this->model->task_history[$k - 1]['timestamp'] / 1000);
-                }break;
+                    $work += floor($this->model->task_history[$i]['timestamp'] / 1000) - floor($this->model->task_history[$i - 1]['timestamp'] / 1000);
             }
         }
-        echo "work  " . $work . " review " . $review;
 
         //if time spent reviewing code more than 1 day, deduct project/task owner 3 XP
         if ($review > 24 * 60 * 60) {
