@@ -13,7 +13,7 @@ return [
         'profile_update_xp_message' => 'Hey, your XP changed by {N}',
         'guestRole' => 'guest',
         'defaultRole' => 'standard',
-        'skillSet' => [
+        'skills' => [
             'PHP',
             'React',
             'Cloud',
