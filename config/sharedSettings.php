@@ -12,7 +12,13 @@ return [
         ],
         'profile_update_xp_message' => 'Hey, your XP changed by {N}',
         'guestRole' => 'guest',
-        'defaultRole' => 'standard'
+        'defaultRole' => 'standard',
+        'skills' => [
+            'PHP',
+            'React',
+            'Cloud',
+            'Node'
+        ]
     ],
 
     /**
