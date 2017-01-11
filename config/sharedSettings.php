@@ -18,7 +18,8 @@ return [
             'React',
             'Cloud',
             'Node'
-        ]
+        ],
+        'web_domain' => 'http://the-shop.io:3000/'
     ],
 
     /**

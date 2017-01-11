@@ -38,11 +38,19 @@ class TaskUpdateSlackNotification
         // Make sure that we don't double send notifications if task owner is project owner
         $recipients = array_unique($recipients);
 
+        $webDomain = \Config::get('sharedSettings.internalConfiguration.web_domain');
         $message = 'Task *'
             . $event->model->title
             . '* was just updated by *'
             . \Auth::user()->name
-            . '*';
+            . '* '
+            . $webDomain
+            . 'projects/'
+            . $event->model->project_id
+            . '/sprints/'
+            . $event->model->sprint_id
+            . '/tasks/'
+            . $event->model->_id;
 
         foreach ($recipients as $recipient) {
             \SlackChat::message($recipient, $message);
