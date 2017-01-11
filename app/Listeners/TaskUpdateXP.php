@@ -40,9 +40,7 @@ class TaskUpdateXP
         //get project owner id
         GenericModel::setCollection('projects');
         $accepted = GenericModel::where('_id', $this->model->project_id)->first();
-
-        $projectOwner = Profile::find($accepted);
-
+        $projectOwner = Profile::find($accepted->acceptedBy);
 
         //get task's XP value
         $taskXp = $this->model->xp;
