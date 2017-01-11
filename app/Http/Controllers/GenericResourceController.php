@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Events\TaskUpdateSlackNotify;
 use App\GenericModel;
 use Illuminate\Http\Request;
+use App\Events\ModelUpdate;
 use App\Events\TaskUpdate;
 use MongoDB\BSON\ObjectID;
 
@@ -150,8 +151,7 @@ class GenericResourceController extends Controller
 
 
         if ($model->passed_qa === true) {
-            $tasks = $model;
-            event(new TaskUpdate($tasks));
+            event(new ModelUpdate($model));
         }
 
         if ($model->save()) {

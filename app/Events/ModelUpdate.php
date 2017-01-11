@@ -7,20 +7,20 @@ use App\GenericModel;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
-class TaskUpdate extends Event
+class ModelUpdate extends Event
 {
     use SerializesModels;
 
-    public $tasks;
+    public $model;
 
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(GenericModel $tasks)
+    public function __construct(GenericModel $model)
     {
-        $this->tasks = $tasks;
+        $this->model = $model;
     }
 
     /**

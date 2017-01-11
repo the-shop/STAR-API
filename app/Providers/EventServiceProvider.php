@@ -15,12 +15,13 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         'App\Events\TaskUpdateSlackNotify' => [
             'App\Listeners\TaskUpdateSlackNotification',
-        ], 'App\Events\ProfileUpdate' => [
+        ],
+        'App\Events\ProfileUpdate' => [
             'App\Listeners\ProfileUpdate'
         ],
-//        'App\Events\TaskUpdate' => [
-//            'App\Listeners\TaskUpdateXP',
-//        ]
+        'App\Events\ModelUpdate' => [
+            'App\Listeners\TaskUpdateXP',
+        ]
     ];
 
     /**
