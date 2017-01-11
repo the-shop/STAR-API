@@ -26,7 +26,7 @@ class GenericResourceController extends Controller
         $orderBy = '_id';
         $orderDirection = 'desc';
         $offset = 0;
-        $limit = 20;
+        $limit = 50;
 
         $errors = [];
 
