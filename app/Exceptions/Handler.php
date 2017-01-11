@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 use Faker\Provider\File;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
