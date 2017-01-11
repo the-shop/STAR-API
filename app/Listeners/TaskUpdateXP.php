@@ -39,8 +39,10 @@ class TaskUpdateXP
 
         //get project owner id
         GenericModel::setCollection('projects');
-        $projectOwner = GenericModel::where('_id', $this->model->project_id)->first();
-        $projectOwner->acceptedBy;
+        $accepted = GenericModel::where('_id', $this->model->project_id)->first();
+
+        $projectOwner = Profile::find($accepted);
+
 
         //get task's XP value
         $taskXp = $this->model->xp;
@@ -69,35 +71,35 @@ class TaskUpdateXP
             }
         }
 
-//        //if time spent reviewing code more than 1 day, deduct project/task owner 3 XP
-//        if ($review > 24 * 60 * 60) {
-//            $projectOwner->xp -= 3;
-//            $projectOwner->save();
-//        }
-//
-//        //apply xp change
-//        $coefficient = number_format(($work / ($this->model->estimatedHours * 60 * 60)), 5);
-//        switch ($coefficient) {
-//            case ($coefficient < 0.75):
-//                $userProfile->xp += $taskXp + 3;
-//                $userProfile->save();
-//                break;
-//            case ($coefficient >= 0.75 && $coefficient <= 1):
-//                $userProfile->xp += $taskXp;
-//                $userProfile->save();
-//                break;
-//            case ($coefficient > 1 && $coefficient <= 1.1):
-//                $userProfile->xp = -1;
-//                $userProfile->save();
-//                break;
-//            case ($coefficient > 1.1 && $coefficient <= 1.25):
-//                $userProfile->xp = -2;
-//                $userProfile->save();
-//                break;
-//            case ($coefficient > 1.25 && $coefficient <= 1.4):
-//                $userProfile->xp -= 3;
-//                $userProfile->save();
-//                break;
-//        }
+        //if time spent reviewing code more than 1 day, deduct project/task owner 3 XP
+        if ($review > 24 * 60 * 60) {
+            $projectOwner->xp -= 3;
+            $projectOwner->save();
+        }
+
+        //apply xp change
+        $coefficient = number_format(($work / ($this->model->estimatedHours * 60 * 60)), 5);
+        switch ($coefficient) {
+            case ($coefficient < 0.75):
+                $userProfile->xp += $taskXp + 3;
+                $userProfile->save();
+                break;
+            case ($coefficient >= 0.75 && $coefficient <= 1):
+                $userProfile->xp += $taskXp;
+                $userProfile->save();
+                break;
+            case ($coefficient > 1 && $coefficient <= 1.1):
+                $userProfile->xp = -1;
+                $userProfile->save();
+                break;
+            case ($coefficient > 1.1 && $coefficient <= 1.25):
+                $userProfile->xp = -2;
+                $userProfile->save();
+                break;
+            case ($coefficient > 1.25 && $coefficient <= 1.4):
+                $userProfile->xp -= 3;
+                $userProfile->save();
+                break;
+        }
     }
 }
