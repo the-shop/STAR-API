@@ -19,7 +19,7 @@ return [
             'Cloud',
             'Node'
         ],
-        'web_domain' => 'http://the-shop.io:3000/'
+        'webDomain' => env('WEB_DOMAIN', 'http://the-shop.io:3000/')
     ],
 
     /**

@@ -38,7 +38,7 @@ class TaskUpdateSlackNotification
         // Make sure that we don't double send notifications if task owner is project owner
         $recipients = array_unique($recipients);
 
-        $webDomain = \Config::get('sharedSettings.internalConfiguration.web_domain');
+        $webDomain = \Config::get('sharedSettings.internalConfiguration.webDomain');
         $message = 'Task *'
             . $event->model->title
             . '* was just updated by *'
