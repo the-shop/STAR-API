@@ -14,16 +14,6 @@ class TaskUpdateXP
     protected $model;
 
     /**
-     * Create the event listener.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Handle the event.
      *
      * @param  ModelUpdate $event
@@ -39,8 +29,8 @@ class TaskUpdateXP
 
         //get project owner id
         GenericModel::setCollection('projects');
-        $accepted = GenericModel::where('_id', $this->model->project_id)->first();
-        $projectOwner = Profile::find($accepted->acceptedBy);
+        $project = GenericModel::where('_id', $this->model->project_id)->first();
+        $projectOwner = Profile::find($project->acceptedBy);
 
         //get task's XP value
         $taskXp = $this->model->xp;
