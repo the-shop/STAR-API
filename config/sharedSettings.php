@@ -18,7 +18,8 @@ return [
             'React',
             'Cloud',
             'Node'
-        ]
+        ],
+        'webDomain' => env('WEB_DOMAIN', 'http://the-shop.io:3000/')
     ],
 
     /**
