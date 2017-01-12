@@ -14,7 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         Commands\SprintReminder::class,
-        Commands\XpDeduction::class
+        Commands\XpDeduction::class,
+        Commands\UnfinishedTasks::class
     ];
 
     /**
@@ -29,5 +30,7 @@ class Kernel extends ConsoleKernel
                   ->twiceDaily(8, 14);
          $schedule->command('xp:activity:auto-deduct')
                   ->dailyAt('13:00');
+         $schedule->command('unfinished:tasks:auto-move')
+                  ->dailyAt('00:01');
     }
 }
