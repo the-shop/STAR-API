@@ -34,16 +34,28 @@ class SprintReminder extends Command
         $projects = GenericModel::all();
 
         $activeProjects = [];
+        $members = [];
         $sprints = [];
         $tasks = [];
 
-        // Get all active projects and sprints
-        GenericModel::setCollection('sprints');
+        $date = new \DateTime();
+        $unixDate = $date->format('U');
+
+        // Get all active projects, members of projects and sprints
         foreach ($projects as $project) {
             if (!empty($project->acceptedBy) && $project->isComplete !== true && !empty($project->sprints)) {
                 $activeProjects[$project->id] = $project;
+                GenericModel::setCollection('sprints');
                 foreach ($project->sprints as $sprintId) {
-                    $sprints[$sprintId] = GenericModel::where('_id', '=', $sprintId)->first();
+                    $sprint = GenericModel::where('_id', '=', $sprintId)->first();
+                    if ($unixDate >= $sprint->start && $unixDate <= $sprint->end) {
+                        $sprints[$sprintId] = $sprint;
+                    }
+                }
+                GenericModel::setCollection('profiles');
+                foreach ($project->members as $memberId) {
+                    $member = GenericModel::where('_id', '=', $memberId)->first();
+                    $members[$memberId] = $member;
                 }
             }
         }
@@ -53,30 +65,36 @@ class SprintReminder extends Command
         foreach ($sprints as $sprint) {
             if (!empty($sprint->tasks)) {
                 foreach ($sprint->tasks as $taskId) {
-                    $tasks[$taskId] = GenericModel::where('_id', '=', $taskId)->first();
+                    $task = GenericModel::where('_id', '=', $taskId)->first();
+                    if (empty($task->owner)) {
+                        $tasks[$taskId] = $task;
+                    }
                 }
             }
         }
 
-        // Check tasks due date and ping task owner 1 day before task end
-        $date = new \DateTime();
-        $unixCheckDate = $date->format('U') + 24 * 60 * 60;
-        $checkDate = date('Y-m-d', $unixCheckDate);
-
-        GenericModel::setCollection('profiles');
+        // Ping on slack all users on active projects about unassigned tasks on active sprints
+        $taskCount = [];
         foreach ($tasks as $task) {
-            $taskDueDate = date('Y-m-d', $task->due_date);
-            if ($taskDueDate === $checkDate) {
-                $user = GenericModel::find($task->owner);
-                if ($user->slack) {
-                    $recipient = '@' . $user->slack;
-                    $project = $activeProjects[$task->project_id]->name;
-                    $message = '*Reminder*: task *'
-                        . $task->title
-                        . '* is due *tomorrow* (on '
-                        . $taskDueDate
+            if (!key_exists($task->project_id, $taskCount)) {
+                $taskCount[$task->project_id] = 1;
+            } else {
+                $taskCount[$task->project_id]++;
+            }
+        }
+
+        foreach ($activeProjects as $project) {
+            foreach ($members as $member) {
+                if (in_array($member->_id, $project->members) && $member->slack) {
+                    $recipient = '@' . $member->slack;
+                    $projectName = $project->name;
+                    $unassignedTasks = $taskCount[$project->_id];
+                    $message = '*Reminder*:'
+                        . 'There are * '
+                        . $unassignedTasks
+                        . '* unassigned tasks on active sprints'
                         . ', for project *'
-                        . $project
+                        . $projectName
                         . '*)';
                     \SlackChat::message($recipient, $message);
                 }
