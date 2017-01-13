@@ -35,9 +35,9 @@ class TaskUpdateXP
         //get task's XP value
         $taskXp = $this->model->xp;
 
-        $returned = "Task returned for development";
-        $passed = "Task passed QA!";
-        $submitted = "Task submitted for QA";
+        $returned = "Task failed QA";
+        $passed = "Task passed QA";
+        $submitted = "Task ready for QA";
 
         $work = 0;
         $review = 0;

@@ -29,6 +29,7 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
     // Define a group of APIs that require auth (we use JWT Auth for token authorization)
     Route::group(['middleware' => ['jwt.auth', 'jwt.refresh', 'acl']], function () {
         Route::put('profiles/changePassword', 'ProfileController@changePassword');
+        Route::get('profiles/{id}/performance', 'ProfileController@getPerformance');
         Route::resource('profiles', 'ProfileController');
         Route::resource('validations', 'ValidationController');
         Route::get('projects/{id}/uploads', 'FileUploadController@getProjectUploads');
