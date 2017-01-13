@@ -13,7 +13,8 @@ return [
         'taskHistoryStatuses' => [
             'assigned' => 'Task assigned to %s',
             'claimed' => 'Task claimed by %s',
-            'paused' => 'Task paused by %s because of: "%s"',
+            'paused' => 'Task paused because of: "%s"',
+            'resumed' => 'Task resumed',
             'qa_ready' => 'Task ready for QA',
             'qa_fail' => 'Task failed QA',
             'qa_success' => 'Task passed QA',
