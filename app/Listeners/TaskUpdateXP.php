@@ -109,27 +109,24 @@ class TaskUpdateXP
         // Apply XP change
         $coefficient = number_format(($work / ($this->model->estimatedHours * 60 * 60)), 5);
         if ($work > 0) {
-            switch ($coefficient) {
-                case ($coefficient < 0.75):
-                    $xpDiff = $taskXp + 3;
-                    $message = 'Early task delivery: ' . $taskLink;
-                    break;
-                case ($coefficient >= 0.75 && $coefficient <= 1):
-                    $xpDiff = $taskXp;
-                    $message = 'Task delivery: ' . $taskLink;
-                    break;
-                case ($coefficient > 1 && $coefficient <= 1.1):
-                    $xpDiff = -1;
-                    $message = 'Late task delivery: ' . $taskLink;
-                    break;
-                case ($coefficient > 1.1 && $coefficient <= 1.25):
-                    $xpDiff = -2;
-                    $message = 'Late task delivery: ' . $taskLink;
-                    break;
-                case ($coefficient > 1.25 && $coefficient <= 1.4):
-                    $xpDiff = -3;
-                    $message = 'Late task delivery: ' . $taskLink;
-                    break;
+            if ($coefficient < 0.75) {
+                $xpDiff = $taskXp + 3;
+                $message = 'Early task delivery: ' . $taskLink;
+            } elseif ($coefficient >= 0.75 && $coefficient <= 1) {
+                $xpDiff = $taskXp;
+                $message = 'Task delivery: ' . $taskLink;
+            } elseif ($coefficient > 1 && $coefficient <= 1.1) {
+                $xpDiff = -1;
+                $message = 'Late task delivery: ' . $taskLink;
+            } elseif ($coefficient > 1.1 && $coefficient <= 1.25) {
+                $xpDiff = -2;
+                $message = 'Late task delivery: ' . $taskLink;
+            } elseif ($coefficient > 1.25 && $coefficient <= 1.4) {
+                $xpDiff = -3;
+                $message = 'Late task delivery: ' . $taskLink;
+            } else {
+                $xpDiff = -5;
+                $message = 'Extremely late task delivery: ' . $taskLink;
             }
         }
 
