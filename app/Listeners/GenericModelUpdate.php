@@ -8,15 +8,6 @@ use Illuminate\Support\Facades\App;
 class GenericModelUpdate
 {
     /**
-     *
-     * GenericModelUpdate constructor.
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Handle the event.
      * @param \App\Events\GenericModelUpdate $event
      */

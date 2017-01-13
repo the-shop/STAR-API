@@ -8,14 +8,6 @@ use Illuminate\Support\Facades\App;
 class GenericModelCreate
 {
     /**
-     * GenericModelCreate constructor.
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Handle the event
      * @param \App\Events\GenericModelCreate $event
      */
