@@ -41,6 +41,7 @@ namespace {
                                 "api/v1/app/{appName}/{resource}/{id}",
                             ],
                             'POST' => [
+                                "api/v1/app/{appName}/{resource}",
                                 'api/v1/app/{appName}/slack/message'
                             ],
                             'PATCH' => [
