@@ -41,18 +41,24 @@ class TaskUpdateXP
 
         $work = 0;
         $review = 0;
+
+        $taskHistory = array_reverse($this->model->task_history);
+
+        foreach ($taskHistory as $history) {
+        }
+
         for ($i = count($this->model->task_history) - 1; $i >= 0; $i--) {
             if (($this->model->task_history[$i]['event'] == $returned) || ($this->model->task_history[$i]['event'] == $passed)) {
                 for ($j = $i; $j > 0; $j--) {
                     if (($this->model->task_history[$j]['event'] == $returned) || ($this->model->task_history[$j]['event'] == $passed)) {
-                        $review += floor($this->model->task_history[$j]['timestamp'] / 1000) - floor($this->model->task_history[$j - 1]['timestamp'] / 1000);
+                        $review += floor($this->model->task_history[$j]['timestamp']) - floor($this->model->task_history[$j - 1]['timestamp']);
                     }
                     break;
                 }
             } elseif (($this->model->task_history[$i]['event'] == $submitted)) {
                 for ($j = $i; $j > 0; $j++) {
                     if ($this->model->task_history[$j]['event'] == $submitted) {
-                        $work += floor($this->model->task_history[$j]['timestamp'] / 1000) - floor($this->model->task_history[$j - 1]['timestamp'] / 1000);
+                        $work += floor($this->model->task_history[$j]['timestamp']) - floor($this->model->task_history[$j - 1]['timestamp']);
                     }
                     break;
                 }
@@ -69,6 +75,11 @@ class TaskUpdateXP
             . $event->model->_id;
 
         GenericModel::setCollection('xp');
+
+        // Convert timestamps to seconds
+        $review /= 1000;
+        $work /= 1000;
+
         // If time spent reviewing code more than 1 day, deduct project/task owner 3 XP
         if ($review > 24 * 60 * 60) {
             if (!$projectOwner->xp_id) {
@@ -97,27 +108,29 @@ class TaskUpdateXP
 
         // Apply XP change
         $coefficient = number_format(($work / ($this->model->estimatedHours * 60 * 60)), 5);
-        switch ($coefficient) {
-            case ($coefficient < 0.75):
-                $xpDiff = $taskXp + 3;
-                $message = 'Early task delivery: ' . $taskLink;
-                break;
-            case ($coefficient >= 0.75 && $coefficient <= 1):
-                $xpDiff = $taskXp;
-                $message = 'Task delivery: ' . $taskLink;
-                break;
-            case ($coefficient > 1 && $coefficient <= 1.1):
-                $xpDiff = -1;
-                $message = 'Late task delivery: ' . $taskLink;
-                break;
-            case ($coefficient > 1.1 && $coefficient <= 1.25):
-                $xpDiff = -2;
-                $message = 'Late task delivery: ' . $taskLink;
-                break;
-            case ($coefficient > 1.25 && $coefficient <= 1.4):
-                $xpDiff = -3;
-                $message = 'Late task delivery: ' . $taskLink;
-                break;
+        if ($work > 0) {
+            switch ($coefficient) {
+                case ($coefficient < 0.75):
+                    $xpDiff = $taskXp + 3;
+                    $message = 'Early task delivery: ' . $taskLink;
+                    break;
+                case ($coefficient >= 0.75 && $coefficient <= 1):
+                    $xpDiff = $taskXp;
+                    $message = 'Task delivery: ' . $taskLink;
+                    break;
+                case ($coefficient > 1 && $coefficient <= 1.1):
+                    $xpDiff = -1;
+                    $message = 'Late task delivery: ' . $taskLink;
+                    break;
+                case ($coefficient > 1.1 && $coefficient <= 1.25):
+                    $xpDiff = -2;
+                    $message = 'Late task delivery: ' . $taskLink;
+                    break;
+                case ($coefficient > 1.25 && $coefficient <= 1.4):
+                    $xpDiff = -3;
+                    $message = 'Late task delivery: ' . $taskLink;
+                    break;
+            }
         }
 
         if ($xpDiff !== 0) {
