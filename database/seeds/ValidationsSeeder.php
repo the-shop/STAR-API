@@ -101,7 +101,7 @@ namespace {
                                 'editable' => [],
                                 'GET' => true,
                                 'DELETE' => false,
-                                'POST' => false,
+                                'POST' => true,
                                 'updateOwn' => true
                             ]
                         ]
