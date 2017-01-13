@@ -5,7 +5,7 @@ namespace App\Providers;
 use Illuminate\Contracts\Events\Dispatcher as DispatcherContract;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
-class EventServiceProvider extends ServiceProvider
+class TheShopEventServiceProvider extends ServiceProvider
 {
     /**
      * The event listener mappings for the application.
@@ -13,15 +13,12 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        'App\Events\TaskUpdateSlackNotify' => [
-            'App\Listeners\TaskUpdateSlackNotification',
+        'App\Events\GenericModelCreate' => [
+            'App\Listeners\GenericModelCreate'
         ],
-        'App\Events\ProfileUpdate' => [
-            'App\Listeners\ProfileUpdate'
+        'App\Events\GenericModelUpdate' => [
+            'App\Listeners\GenericModelUpdate'
         ],
-        'App\Events\ModelUpdate' => [
-            'App\Listeners\TaskUpdateXP',
-        ]
     ];
 
     /**
