@@ -59,35 +59,87 @@ class TaskUpdateXP
             }
         }
 
-        //if time spent reviewing code more than 1 day, deduct project/task owner 3 XP
+        $webDomain = \Config::get('sharedSettings.internalConfiguration.webDomain');
+        $taskLink = $webDomain
+            . 'projects/'
+            . $event->model->project_id
+            . '/sprints/'
+            . $event->model->sprint_id
+            . '/tasks/'
+            . $event->model->_id;
+
+        GenericModel::setCollection('xp');
+        // If time spent reviewing code more than 1 day, deduct project/task owner 3 XP
         if ($review > 24 * 60 * 60) {
+            if (!$projectOwner->xp_id) {
+                $userXP = new GenericModel(['records' => []]);
+                $userXP->save();
+                $projectOwner->xp_id = $userXP->_id;
+            } else {
+                $userXP = GenericModel::find($projectOwner->xp_id);
+            }
+
+            $records = $userXP->records;
+            $records[] = [
+                'xp' => -3,
+                'details' => 'Failed to review PR in time for ' . $taskLink,
+                'timestamp' => (int) ((new \DateTime())->format('U') . '000') // Microtime
+            ];
+            $userXP->records = $records;
+            $userXP->save();
+
             $projectOwner->xp -= 3;
             $projectOwner->save();
         }
 
-        //apply xp change
+        $message = null;
+        $xpDiff = 0;
+
+        // Apply XP change
         $coefficient = number_format(($work / ($this->model->estimatedHours * 60 * 60)), 5);
         switch ($coefficient) {
             case ($coefficient < 0.75):
-                $userProfile->xp += $taskXp + 3;
-                $userProfile->save();
+                $xpDiff = $taskXp + 3;
+                $message = 'Early task delivery: ' . $taskLink;
                 break;
             case ($coefficient >= 0.75 && $coefficient <= 1):
-                $userProfile->xp += $taskXp;
-                $userProfile->save();
+                $xpDiff = $taskXp;
+                $message = 'Task delivery: ' . $taskLink;
                 break;
             case ($coefficient > 1 && $coefficient <= 1.1):
-                $userProfile->xp = -1;
-                $userProfile->save();
+                $xpDiff = -1;
+                $message = 'Late task delivery: ' . $taskLink;
                 break;
             case ($coefficient > 1.1 && $coefficient <= 1.25):
-                $userProfile->xp = -2;
-                $userProfile->save();
+                $xpDiff = -2;
+                $message = 'Late task delivery: ' . $taskLink;
                 break;
             case ($coefficient > 1.25 && $coefficient <= 1.4):
-                $userProfile->xp -= 3;
-                $userProfile->save();
+                $xpDiff = -3;
+                $message = 'Late task delivery: ' . $taskLink;
                 break;
+        }
+
+        if ($xpDiff !== 0) {
+            if (!$userProfile->xp_id) {
+                $userXP = new GenericModel(['records' => []]);
+                $userXP->save();
+                $userProfile->xp_id = $userXP->_id;
+            } else {
+                $userXP = GenericModel::find($userProfile->xp_id);
+            }
+
+            $records = $userXP->records;
+            $records[] = [
+                'xp' => $xpDiff,
+                'details' => $message,
+                'timestamp' => (int) ((new \DateTime())->format('U') . '000') // Microtime
+            ];
+            $userXP->records = $records;
+            $userXP->save();
+
+            $userProfile->xp += $xpDiff;
+            $userProfile->save();
         }
     }
 }
