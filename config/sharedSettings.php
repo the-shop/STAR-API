@@ -26,7 +26,8 @@ return [
             'PHP',
             'React',
             'Cloud',
-            'Node'
+            'Node',
+            'Planning'
         ],
         'webDomain' => env('WEB_DOMAIN', 'http://the-shop.io:3000/')
     ],
