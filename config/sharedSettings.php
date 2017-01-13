@@ -10,6 +10,14 @@ return [
                 'maxReservationTime' => env('PROJECT_RESERVATION_TIME', 30)
             ]
         ],
+        'taskHistoryStatuses' => [
+            'assigned' => 'Task assigned to %s',
+            'claimed' => 'Task claimed by %s',
+            'paused' => 'Task paused by %s because of: "%s"',
+            'qa_ready' => 'Task ready for QA',
+            'qa_fail' => 'Task failed QA',
+            'qa_success' => 'Task passed QA',
+        ],
         'profile_update_xp_message' => 'Hey, your XP changed by {N}',
         'guestRole' => 'guest',
         'defaultRole' => 'standard',
