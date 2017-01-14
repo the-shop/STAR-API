@@ -8,14 +8,6 @@ use App\Helpers\MailSend;
 class ProfileUpdate
 {
     /**
-     * ProfileUpdate constructor.
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * @param \App\Events\ProfileUpdate $event
      */
     public function handle(\App\Events\ProfileUpdate $event)

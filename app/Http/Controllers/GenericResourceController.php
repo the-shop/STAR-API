@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\TaskUpdateSlackNotify;
+use App\Events\GenericModelCreate;
+use App\Events\GenericModelUpdate;
 use App\GenericModel;
 use Illuminate\Http\Request;
-use App\Events\ModelUpdate;
 use App\Events\TaskUpdate;
 use MongoDB\BSON\ObjectID;
 
@@ -115,9 +115,7 @@ class GenericResourceController extends Controller
 
         $model = GenericModel::create($fields);
 
-        if ($model->getCollection() === 'tasks' && $request->has('owner') && !empty($request->input('owner'))) {
-            event(new TaskUpdateSlackNotify($model), []);
-        }
+        event(new GenericModelCreate($model));
 
         if ($model->save()) {
             return $this->jsonSuccess($model);
@@ -145,14 +143,7 @@ class GenericResourceController extends Controller
 
         $model->fill($updateFields);
 
-        if ($model->getCollection() === 'tasks' && $model->isDirty()) {
-            event(new TaskUpdateSlackNotify($model));
-        }
-
-
-        if ($model->passed_qa === true) {
-            event(new ModelUpdate($model));
-        }
+        event(new GenericModelUpdate($model));
 
         if ($model->save()) {
             return $this->jsonSuccess($model);
