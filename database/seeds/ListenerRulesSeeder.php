@@ -13,8 +13,8 @@ namespace {
          */
         public function run()
         {
-            DB::collection('listenerRules')->delete();
-            DB::collection('listenerRules')->insert(
+            DB::collection('listener-rules')->delete();
+            DB::collection('listener-rules')->insert(
                 [
                     [
                         'resource' => 'tasks',
