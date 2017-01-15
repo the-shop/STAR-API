@@ -19,6 +19,18 @@ return [
             'qa_fail' => 'Task failed QA',
             'qa_success' => 'Task passed QA',
         ],
+        'taskComplexityOptions' => [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10
+        ],
         'profile_update_xp_message' => 'Hey, your XP changed by {N}',
         'guestRole' => 'guest',
         'defaultRole' => 'standard',
