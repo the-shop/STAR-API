@@ -6,12 +6,18 @@ use App\GenericModel;
 use App\Profile;
 use Illuminate\Support\Facades\Config;
 
+/**
+ * Class ProfilePerformance
+ * @package App\Services
+ */
 class ProfilePerformance
 {
-    public function __construct()
-    {
-    }
-
+    /**
+     * @param Profile $profile
+     * @param $unixStart
+     * @param $unixEnd
+     * @return array
+     */
     public function forTimeRange(Profile $profile, $unixStart, $unixEnd)
     {
         // Get all profile projects
@@ -28,8 +34,6 @@ class ProfilePerformance
 
         $loadedProjects = [];
 
-        $taskHistoryStatuses = Config::get('sharedSettings.internalConfiguration.taskHistoryStatuses');
-
         // Let's aggregate task data
         foreach ($profileTasks as $task) {
             // Check if tasks is in selected time range and delivered
@@ -37,13 +41,14 @@ class ProfilePerformance
             $deliveredTask = false;
             $taskInTimeRange = false;
             foreach ($task->task_history as $historyItem) {
-                if (($historyItem['event'] === $taskHistoryStatuses['assigned']
-                    || $historyItem['event'] === $taskHistoryStatuses['claimed'])
-                    && $historyItem['timestamp'] <= $unixEnd
-                    && $historyItem['timestamp'] > $unixStart
+                if (array_key_exists('status', $historyItem)
+                    && ($historyItem['status'] === 'assigned'
+                        || $historyItem['status'] === 'claimed')
+                    && (int) $historyItem['timestamp'] / 1000 <= $unixEnd
+                    && (int) $historyItem['timestamp'] / 1000 > $unixStart
                 ) {
                     $taskInTimeRange = true;
-                } elseif ($historyItem['event'] === $taskHistoryStatuses['qa_success']) {
+                } elseif (array_key_exists('status', $historyItem) && $historyItem['status'] === 'qa_success') {
                     $deliveredTask = true;
                     break;
                 }
