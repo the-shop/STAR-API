@@ -65,7 +65,7 @@ class ProfileController extends Controller
 
         $performance = new ProfilePerformance();
 
-        return $this->jsonSuccess($performance->forTimeRange($profile, $startDate, $endDate));
+        return $this->jsonSuccess($performance->aggregateForTimeRange($profile, $startDate, $endDate));
     }
 
     /**

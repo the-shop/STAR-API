@@ -18,7 +18,7 @@ class ProfilePerformance
      * @param $unixEnd
      * @return array
      */
-    public function forTimeRange(Profile $profile, $unixStart, $unixEnd)
+    public function aggregateForTimeRange(Profile $profile, $unixStart, $unixEnd)
     {
         // Get all profile projects
         GenericModel::setCollection('tasks');

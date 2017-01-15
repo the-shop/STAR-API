@@ -44,7 +44,7 @@ class EmailProfilePerformance extends Command
         $adminAggregation = [];
 
         foreach ($profiles as $profile) {
-            $data = $performance->forTimeRange($profile, $unixAgo, $unixNow);
+            $data = $performance->aggregateForTimeRange($profile, $unixAgo, $unixNow);
             $data['name'] = $profile->name;
             $data['fromDate'] = \DateTime::createFromFormat('U', $unixAgo)->format('Y-m-d');
             $data['toDate'] = \DateTime::createFromFormat('U', $unixNow)->format('Y-m-d');
