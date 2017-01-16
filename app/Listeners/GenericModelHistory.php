@@ -11,22 +11,42 @@ class GenericModelHistory
     public function handle(\App\Events\GenericModelHistory $event)
     {
         if ($event->model->isDirty()) {
+            $newAllAttributes = $event->model->getAttributes();
             $newValues = $event->model->getDirty();
             $oldValues = $event->model->getOriginal();
 
-            foreach ($oldValues as $oldField => $oldValue) {
-                if (key_exists($oldField, $newValues)) {
-                    $history = $event->model->history;
+            $history = $event->model->history;
+            foreach ($newValues as $newField => $newValue) {
+                if (key_exists($newField, $oldValues)) {
                     $history[] = [
                         'profileId' => \Auth::user()->id,
-                        'filedName' => $oldField,
-                        'oldValue' => $oldValue,
-                        'newValue' => $newValues[$oldField]
+                        'filedName' => $newField,
+                        'oldValue' => $oldValues[$newField],
+                        'newValue' => $newValue
                     ];
-                    $event->model->history = $history;
-                    $event->model->save();
+                } elseif (!key_exists($newField, $oldValues)) {
+                    $history[] = [
+                        'profileId' => \Auth::user()->id,
+                        'fieldName' => $newField,
+                        'oldValue' => null,
+                        'newValue' => $newValue
+                    ];
                 }
             }
+
+            foreach ($oldValues as $oldFieldName => $oldFieldValue) {
+                if (!key_exists($oldFieldName, $newAllAttributes)) {
+                    $history[] = [
+                        'profileId' => \Auth::user()->id,
+                        'fieldName' => $oldFieldName,
+                        'oldValue' => $oldFieldValue,
+                        'newValue' => null
+                    ];
+                }
+            }
+
+            $event->model->history = $history;
+            $event->model->save();
         }
     }
 }
