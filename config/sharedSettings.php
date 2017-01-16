@@ -42,6 +42,12 @@ return [
             'Planning'
         ],
         'webDomain' => env('WEB_DOMAIN', 'http://the-shop.io:3000/'),
+        'employeeMonthlyMinimum' => [
+            'apprentice' => 10000,
+            'junior' => 17500,
+            'standard' => 30000,
+            'senior' => 45000
+        ],
         'taskPriorities' => [
             'High',
             'Medium',
@@ -53,15 +59,15 @@ return [
      * Dynamic configuration that depends on external services
      */
     'externalConfiguration' => [
-    'slack' => [
-        [
-            'resolver' => [
-                'class' => \Vluzrmos\SlackApi\Facades\SlackTeam::class,
-                'method' => 'info'
-            ],
-            'settingName' => 'teamInfo'
-        ]
-    ],
+        'slack' => [
+            [
+                'resolver' => [
+                    'class' => \Vluzrmos\SlackApi\Facades\SlackTeam::class,
+                    'method' => 'info'
+                ],
+                'settingName' => 'teamInfo'
+            ]
+        ],
     ]
 
 ];
