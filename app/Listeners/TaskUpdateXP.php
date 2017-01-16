@@ -112,7 +112,7 @@ class TaskUpdateXP
                 $projectOwnerXpRecord->records = $records;
                 $projectOwnerXpRecord->save();
 
-                $projectOwner->xp -= $poXpDiff;
+                $projectOwner->xp += $poXpDiff;
                 $projectOwner->save();
             }
         }
