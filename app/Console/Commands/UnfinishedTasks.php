@@ -78,7 +78,7 @@ class UnfinishedTasks extends Command
             if ($sprintEndDueDate === $checkDayAgo && !empty($sprint->tasks)) {
                 foreach ($sprint->tasks as $taskId) {
                     $task = GenericModel::where('_id', '=', $taskId)->first();
-                    if (empty($task->owner)) {
+                    if ($task->passed_qa !== true) {
                         $sprintEndedTasks[$taskId] = $task;
                         $endedSprints[$sprint->project_id] = $sprint;
                     }
@@ -119,7 +119,7 @@ class UnfinishedTasks extends Command
                                 $oldSprint = $endedSprints[$sprint->project_id];
                                 $oldSprint->tasks = $oldSprintTaskUpdate;
                                 $oldSprint->save();
-                                $this->info('Task' . $task->title . 'moved to sprint ' . $sprint->title);
+                                $this->info('Task ' . $task->title . ' moved to sprint ' . $sprint->title);
                             }
                         }
                     }
