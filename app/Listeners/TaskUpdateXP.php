@@ -10,18 +10,19 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class TaskUpdateXP
 {
-
     protected $model;
 
     /**
-     * Handle the event.
-     *
-     * @param  ModelUpdate $event
-     * @return void
+     * @param ModelUpdate $event
+     * @return bool
      */
     public function handle(ModelUpdate $event)
     {
         $this->model = $event->model;
+
+        if (!$this->model->passed_qa) {
+            return false;
+        }
 
         //task user id
         $userId = $this->model->task_history[0]['user'];
@@ -41,11 +42,6 @@ class TaskUpdateXP
 
         $work = 0;
         $review = 0;
-
-        $taskHistory = array_reverse($this->model->task_history);
-
-        foreach ($taskHistory as $history) {
-        }
 
         for ($i = count($this->model->task_history) - 1; $i >= 0; $i--) {
             if (($this->model->task_history[$i]['event'] == $returned) || ($this->model->task_history[$i]['event'] == $passed)) {
@@ -151,5 +147,7 @@ class TaskUpdateXP
             $userProfile->xp += $xpDiff;
             $userProfile->save();
         }
+
+        return true;
     }
 }

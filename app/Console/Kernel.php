@@ -15,22 +15,30 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         Commands\SprintReminder::class,
         Commands\XpDeduction::class,
-        Commands\UnfinishedTasks::class
+        Commands\UnfinishedTasks::class,
+        Commands\EmailProfilePerformance::class
     ];
 
     /**
      * Define the application's command schedule.
      *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
+     * @param  \Illuminate\Console\Scheduling\Schedule $schedule
      * @return void
      */
     protected function schedule(Schedule $schedule)
     {
-         $schedule->command('sprint:remind')
-                  ->twiceDaily(8, 14);
-         $schedule->command('xp:activity:auto-deduct')
-                  ->dailyAt('13:00');
-         $schedule->command('unfinished:tasks:auto-move')
-                  ->dailyAt('00:01');
+        $schedule->command('sprint:remind')
+            ->twiceDaily(8, 14);
+
+        $schedule->command('xp:activity:auto-deduct')
+            ->dailyAt('13:00');
+
+        $schedule->command('unfinished:tasks:auto-move')
+            ->dailyAt('00:01');
+
+        $schedule->command('email:profile:performance 7')
+            ->weekly()
+            ->mondays()
+            ->at('08:00');
     }
 }
