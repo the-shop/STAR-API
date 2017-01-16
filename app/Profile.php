@@ -34,6 +34,7 @@ class Profile extends StarModel implements AuthenticatableContract, CanResetPass
         'active',
         'xp_id',
         'admin',
+        'role'
     ];
 
     /**
@@ -57,6 +58,7 @@ class Profile extends StarModel implements AuthenticatableContract, CanResetPass
         $model = new static($attributes);
 
         $model->xp = 50;
+        $model->role = 'standard';
 
         $model->save();
 
