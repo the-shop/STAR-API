@@ -24,7 +24,7 @@ class GenericModelHistory
                         'oldValue' => $oldValues[$newField],
                         'newValue' => $newValue
                     ];
-                } elseif (!key_exists($newField, $oldValues)) {
+                } else {
                     $history[] = [
                         'profileId' => \Auth::user()->id,
                         'fieldName' => $newField,
