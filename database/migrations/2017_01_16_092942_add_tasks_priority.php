@@ -17,26 +17,16 @@ namespace {
             GenericModel::setCollection('tasks');
             $tasks = GenericModel::all();
             foreach ($tasks as $task) {
-                $task->update([
-                    'priority' => 'Medium'
-                ]);
+                if (empty($task->priority)) {
+                    $task->update([
+                        'priority' => 'Medium'
+                    ]);
+                }
             }
         }
-
-        /**
-         * Reverse the migrations.
-         *
-         * @return void
-         */
+        
         public function down()
         {
-            GenericModel::setCollection('tasks');
-            $tasks = GenericModel::all();
-            foreach ($tasks as $task) {
-                $task->update([
-                    'priority' => ''
-                ]);
-            }
         }
     }
 }
