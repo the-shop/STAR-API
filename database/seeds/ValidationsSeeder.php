@@ -120,6 +120,7 @@ namespace {
                         ],
                     [
                         'fields' => [
+                            'price' => 'numeric'
                         ],
                         'resource' => 'sprints',
                         'acl' => [
