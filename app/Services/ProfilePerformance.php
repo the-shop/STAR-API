@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\GenericModel;
+use App\Helpers\InputHandler;
 use App\Profile;
-use Illuminate\Support\Facades\Config;
 
 /**
  * Class ProfilePerformance
@@ -112,5 +112,92 @@ class ProfilePerformance
             'xpDiff' => $xpDiff,
             'xpTotal' => $profile->xp,
         ];
+    }
+
+    public function forTask(GenericModel $task)
+    {
+        $task->confirmResourceOf('tasks');
+
+        $taskHistory = is_array($task->task_history) ? $task->task_history : [];
+
+        $taskHistoryOriginal = array_reverse($taskHistory);
+
+        // We'll respond with array of performance per task owner (if task got reassigned for example)
+        $response = [];
+
+        // Let's find last task owner
+        $taskOwner = null;
+        $startSecond = null;
+        foreach ($taskHistoryOriginal as $historyItem) {
+            // Check if valid record
+            if (array_key_exists('status', $historyItem) === false) {
+                continue;
+            }
+            // Check for assignment record
+            if ($historyItem['status'] === 'assigned' || $historyItem['status'] === 'claimed') {
+                $taskOwner = $historyItem['user'];
+                $startSecond = InputHandler::getUnixTimestamp($historyItem['timestamp']);
+                break;
+            }
+        }
+
+        // If task was never assigned, there's no performance, respond with empty array
+        if ($taskOwner === null) {
+            return $response;
+        }
+
+        // Set defaults
+        $userPerformance = [
+            'taskCompleted' => false,
+            'workSeconds' => 0,
+            'qaSeconds' => 0,
+            'pauseSeconds' => 0,
+        ];
+
+        $isWorking = true;
+        $isQa = false;
+        $isPaused = false;
+
+        // Now let's start tracking time from time owner took over the task
+        foreach ($taskHistory as $key => $historyItem) {
+            // Check if valid record
+            if (array_key_exists('status', $historyItem) === false) {
+                continue;
+            }
+
+            $itemSecond = InputHandler::getUnixTimestamp($historyItem['timestamp']);
+
+            // Let's skip records before last task owner for now including assignment time
+            if ($itemSecond <= $startSecond) {
+                continue;
+            }
+            
+            // Check for assignment record
+            if ($isWorking) {
+                $userPerformance['workSeconds'] += $itemSecond - $startSecond;
+            } elseif ($isPaused) {
+                $userPerformance['pauseSeconds'] += $itemSecond - $startSecond;
+            } elseif ($isQa) {
+                $userPerformance['qaSeconds'] += $itemSecond - $startSecond;
+            }
+
+            $isWorking = $historyItem['status'] === 'resumed'
+                || $historyItem['status'] === 'assigned'
+                || $historyItem['status'] === 'claimed';
+
+            $isQa = $historyItem['status'] === 'qa_success'
+                || $historyItem['status'] === 'qa_ready'
+                || $historyItem['status'] === 'qa_fail';
+
+            $isPaused = $historyItem['status'] === 'paused';
+
+            $startSecond = $itemSecond;
+        }
+
+        $userPerformance['taskCompleted'] = $task->passed_qa === true;
+
+        $response[$taskOwner] = $userPerformance;
+
+        return $response;
     }
 }

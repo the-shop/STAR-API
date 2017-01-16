@@ -46,6 +46,21 @@ class GenericModel extends StarModel
     }
 
     /**
+     * Validates collection is set properly, throws exception otherwise
+     *
+     * @param $resourceType
+     * @return $this
+     * @throws \Exception
+     */
+    public function confirmResourceOf($resourceType)
+    {
+        if (self::$collectionName !== $resourceType) {
+            throw new \Exception('Model resource not configured correctly');
+        }
+        return $this;
+    }
+
+    /**
      * @param $resourceName
      */
     public static function setCollection($resourceName)

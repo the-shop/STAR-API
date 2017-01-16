@@ -4,153 +4,166 @@ namespace App\Listeners;
 
 use App\Events\ModelUpdate;
 use App\GenericModel;
+use App\Helpers\InputHandler;
 use App\Profile;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Services\ProfilePerformance;
+use Illuminate\Support\Facades\Config;
 
+/**
+ * Class TaskUpdateXP
+ * @package App\Listeners
+ */
 class TaskUpdateXP
 {
-    protected $model;
-
     /**
      * @param ModelUpdate $event
      * @return bool
      */
     public function handle(ModelUpdate $event)
     {
-        $this->model = $event->model;
+        $task = $event->model;
 
-        if (!$this->model->passed_qa) {
-            return false;
-        }
+        $profilePerformance = new ProfilePerformance();
 
-        //task user id
-        $userId = $this->model->task_history[0]['user'];
-        $userProfile = Profile::find($userId);
+        GenericModel::setCollection('tasks');
+        $taskPerformance = $profilePerformance->forTask($task);
 
-        //get project owner id
+        // Get project owner id
         GenericModel::setCollection('projects');
-        $project = GenericModel::where('_id', $this->model->project_id)->first();
+        $project = GenericModel::find($task->project_id);
         $projectOwner = Profile::find($project->acceptedBy);
 
-        //get task's XP value
-        $taskXp = $this->model->xp;
-
-        $returned = "Task failed QA";
-        $passed = "Task passed QA";
-        $submitted = "Task ready for QA";
-
-        $work = 0;
-        $review = 0;
-
-        for ($i = count($this->model->task_history) - 1; $i >= 0; $i--) {
-            if (($this->model->task_history[$i]['event'] == $returned) || ($this->model->task_history[$i]['event'] == $passed)) {
-                for ($j = $i; $j > 0; $j--) {
-                    if (($this->model->task_history[$j]['event'] == $returned) || ($this->model->task_history[$j]['event'] == $passed)) {
-                        $review += floor($this->model->task_history[$j]['timestamp']) - floor($this->model->task_history[$j - 1]['timestamp']);
-                    }
-                    break;
-                }
-            } elseif (($this->model->task_history[$i]['event'] == $submitted)) {
-                for ($j = $i; $j > 0; $j++) {
-                    if ($this->model->task_history[$j]['event'] == $submitted) {
-                        $work += floor($this->model->task_history[$j]['timestamp']) - floor($this->model->task_history[$j - 1]['timestamp']);
-                    }
-                    break;
-                }
-            }
-        }
-
-        $webDomain = \Config::get('sharedSettings.internalConfiguration.webDomain');
-        $taskLink = $webDomain
-            . 'projects/'
-            . $event->model->project_id
-            . '/sprints/'
-            . $event->model->sprint_id
-            . '/tasks/'
-            . $event->model->_id;
-
-        GenericModel::setCollection('xp');
-
-        // Convert timestamps to seconds
-        $review /= 1000;
-        $work /= 1000;
-
-        // If time spent reviewing code more than 1 day, deduct project/task owner 3 XP
-        if ($review > 24 * 60 * 60) {
-            if (!$projectOwner->xp_id) {
-                $userXP = new GenericModel(['records' => []]);
-                $userXP->save();
-                $projectOwner->xp_id = $userXP->_id;
-            } else {
-                $userXP = GenericModel::find($projectOwner->xp_id);
+        foreach ($taskPerformance as $profileId => $taskDetails) {
+            if ($taskDetails['taskCompleted'] === false) {
+                return false;
             }
 
-            $records = $userXP->records;
-            $records[] = [
-                'xp' => -3,
-                'details' => 'Failed to review PR in time for ' . $taskLink,
-                'timestamp' => (int) ((new \DateTime())->format('U') . '000') // Microtime
-            ];
-            $userXP->records = $records;
-            $userXP->save();
+            $estimatedSeconds = InputHandler::getInteger($task->estimatedHours) * 60 * 60;
 
-            $projectOwner->xp -= 3;
-            $projectOwner->save();
-        }
+            $taskOwnerProfile = Profile::find($profileId);
 
-        $message = null;
-        $xpDiff = 0;
+            $secondsWorking = $taskDetails['workSeconds'];
 
-        // Apply XP change
-        $coefficient = number_format(($work / ($this->model->estimatedHours * 60 * 60)), 5);
-        if ($work > 0) {
-            switch ($coefficient) {
-                case ($coefficient < 0.75):
-                    $xpDiff = $taskXp + 3;
+            $coefficient = $secondsWorking / $estimatedSeconds;
+
+            $webDomain = Config::get('sharedSettings.internalConfiguration.webDomain');
+            $taskLink = $webDomain
+                . 'projects/'
+                . $event->model->project_id
+                . '/sprints/'
+                . $event->model->sprint_id
+                . '/tasks/'
+                . $event->model->_id;
+
+            if ($secondsWorking > 0) {
+                $xpDiff = 0;
+                $message = null;
+                $taskXp = (float) $taskOwnerProfile->xp < 201 ? (float) $task->xp : 0;
+                if ($coefficient < 0.75) {
+                    $xpDiff = ($taskXp + 3) * $this->getDurationCoefficient($task, $taskOwnerProfile);
                     $message = 'Early task delivery: ' . $taskLink;
-                    break;
-                case ($coefficient >= 0.75 && $coefficient <= 1):
-                    $xpDiff = $taskXp;
+                } elseif ($coefficient >= 0.75 && $coefficient <= 1) {
+                    $xpDiff = $taskXp * $this->getDurationCoefficient($task, $taskOwnerProfile);
                     $message = 'Task delivery: ' . $taskLink;
-                    break;
-                case ($coefficient > 1 && $coefficient <= 1.1):
-                    $xpDiff = -1;
+                } elseif ($coefficient > 1 && $coefficient <= 1.1) {
+                    $xpDiff =  -1;
                     $message = 'Late task delivery: ' . $taskLink;
-                    break;
-                case ($coefficient > 1.1 && $coefficient <= 1.25):
+                } elseif ($coefficient > 1.1 && $coefficient <= 1.25) {
                     $xpDiff = -2;
                     $message = 'Late task delivery: ' . $taskLink;
-                    break;
-                case ($coefficient > 1.25 && $coefficient <= 1.4):
+                } elseif ($coefficient > 1.25) {
                     $xpDiff = -3;
                     $message = 'Late task delivery: ' . $taskLink;
-                    break;
+                } else {
+                    // TODO: handle properly
+                }
+
+                if ($xpDiff !== 0) {
+                    $profileXpRecord = $this->getXpRecord($taskOwnerProfile);
+
+                    $records = $profileXpRecord->records;
+                    $records[] = [
+                        'xp' => $xpDiff,
+                        'details' => $message,
+                        'timestamp' => (int) ((new \DateTime())->format('U') . '000') // Microtime
+                    ];
+                    $profileXpRecord->records = $records;
+                    $profileXpRecord->save();
+
+                    $taskOwnerProfile->xp += $xpDiff;
+                    $profileXpRecord->save();
+                }
+
+                if ($taskDetails['qaSeconds'] > 24 * 60 * 60) {
+                    $poXpDiff = -3;
+                    $poMessage = 'Failed to review PR in time for ' . $taskLink;
+                } else {
+                    $poXpDiff = 0.25;
+                    $poMessage = 'Review PR in time for ' . $taskLink;
+                }
+
+                $projectOwnerXpRecord = $this->getXpRecord($projectOwner);
+                $records = $projectOwnerXpRecord->records;
+                $records[] = [
+                    'xp' => $poXpDiff,
+                    'details' => $poMessage,
+                    'timestamp' => (int) ((new \DateTime())->format('U') . '000') // Microtime
+                ];
+                $projectOwnerXpRecord->records = $records;
+                $projectOwnerXpRecord->save();
+
+                $projectOwner->xp -= 3;
+                $projectOwner->save();
             }
-        }
-
-        if ($xpDiff !== 0) {
-            if (!$userProfile->xp_id) {
-                $userXP = new GenericModel(['records' => []]);
-                $userXP->save();
-                $userProfile->xp_id = $userXP->_id;
-            } else {
-                $userXP = GenericModel::find($userProfile->xp_id);
-            }
-
-            $records = $userXP->records;
-            $records[] = [
-                'xp' => $xpDiff,
-                'details' => $message,
-                'timestamp' => (int) ((new \DateTime())->format('U') . '000') // Microtime
-            ];
-            $userXP->records = $records;
-            $userXP->save();
-
-            $userProfile->xp += $xpDiff;
-            $userProfile->save();
         }
 
         return true;
+    }
+
+    /**
+     * @param Profile $profile
+     * @return GenericModel
+     */
+    private function getXpRecord(Profile $profile)
+    {
+        $oldCollection = GenericModel::getCollection();
+        GenericModel::setCollection('xp');
+        if (!$profile->xp_id) {
+            $profileXp = new GenericModel(['records' => []]);
+            $profileXp->save();
+            $profile->xp_id = $profileXp->_id;
+        } else {
+            $profileXp = GenericModel::find($profile->xp_id);
+        }
+        GenericModel::setCollection($oldCollection);
+
+        return $profileXp;
+    }
+
+    /**
+     * @param GenericModel $task
+     * @param Profile $taskOwner
+     * @return float|int
+     */
+    private function getDurationCoefficient(GenericModel $task, Profile $taskOwner)
+    {
+        $profileCoefficient = 1;
+        if ((float) $taskOwner->xp > 200 && (float) $taskOwner->xp <= 400) {
+            $profileCoefficient = 0.8;
+        } elseif ((float) $taskOwner->xp > 400 && (float) $taskOwner->xp <= 600) {
+            $profileCoefficient = 0.7;
+        } elseif ((float) $taskOwner->xp > 600 && (float) $taskOwner->xp <= 800) {
+            $profileCoefficient = 0.6;
+        } elseif ((float) $taskOwner->xp > 800 && (float) $taskOwner->xp <= 1000) {
+            $profileCoefficient = 0.5;
+        } elseif ((float) $taskOwner->xp > 1000) {
+            $profileCoefficient = 0.4;
+        }
+
+        if ((int) $task->estimatedHours < 9) {
+            return ((int) $task->estimatedHours / 10) * $profileCoefficient;
+        }
+
+        return 1;
     }
 }
