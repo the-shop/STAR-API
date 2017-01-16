@@ -22,6 +22,9 @@ class TheShopEventServiceProvider extends ServiceProvider
         'App\Events\ProfileUpdate' => [
             'App\Listeners\ProfileUpdate'
         ],
+        'App\Events\GenericModelHistory' => [
+            'App\Listeners\GenericModelHistory'
+        ],
     ];
 
     /**
