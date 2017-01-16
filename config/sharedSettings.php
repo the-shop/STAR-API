@@ -41,22 +41,27 @@ return [
             'Node',
             'Planning'
         ],
-        'webDomain' => env('WEB_DOMAIN', 'http://the-shop.io:3000/')
+        'webDomain' => env('WEB_DOMAIN', 'http://the-shop.io:3000/'),
+        'taskPriorities' => [
+            'High',
+            'Medium',
+            'Low'
+        ]
     ],
 
     /**
      * Dynamic configuration that depends on external services
      */
     'externalConfiguration' => [
-        'slack' => [
-            [
-                'resolver' => [
-                    'class' => \Vluzrmos\SlackApi\Facades\SlackTeam::class,
-                    'method' => 'info'
-                ],
-                'settingName' => 'teamInfo'
-            ]
-        ],
+    'slack' => [
+        [
+            'resolver' => [
+                'class' => \Vluzrmos\SlackApi\Facades\SlackTeam::class,
+                'method' => 'info'
+            ],
+            'settingName' => 'teamInfo'
+        ]
+    ],
     ]
 
 ];
