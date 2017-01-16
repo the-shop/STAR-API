@@ -21,11 +21,15 @@ namespace {
                     $profile->update([
                         'role' => 'admin'
                     ]);
-                } elseif (empty($profile->role) && $profile->employee === true) {
+                }
+
+                if (empty($profile->role) && $profile->employee === true) {
                     $profile->update([
                         'role' => 'employee'
                     ]);
-                } elseif (empty($profile->role)) {
+                }
+
+                if (empty($profile->role)) {
                     $profile->update([
                         'role' => 'standard'
                     ]);
