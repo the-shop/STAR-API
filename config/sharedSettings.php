@@ -41,7 +41,13 @@ return [
             'Node',
             'Planning'
         ],
-        'webDomain' => env('WEB_DOMAIN', 'http://the-shop.io:3000/')
+        'webDomain' => env('WEB_DOMAIN', 'http://the-shop.io:3000/'),
+        'employeeMonthlyMinimum' => [
+            'apprentice' => 10000,
+            'junior' => 17500,
+            'standard' => 30000,
+            'senior' => 45000
+        ]
     ],
 
     /**
