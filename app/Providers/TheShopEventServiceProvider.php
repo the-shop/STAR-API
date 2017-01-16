@@ -21,7 +21,7 @@ class TheShopEventServiceProvider extends ServiceProvider
         ],
         'App\Events\ProfileUpdate' => [
             'App\Listeners\ProfileUpdate'
-        ],
+        ]
     ];
 
     /**
