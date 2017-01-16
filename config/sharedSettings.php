@@ -42,7 +42,7 @@ return [
             'Planning'
         ],
         'webDomain' => env('WEB_DOMAIN', 'http://the-shop.io:3000/'),
-        'employee_monthly_minimum_earning' => [
+        'employeeMonthlyMinimum' => [
             'apprentice' => 10000,
             'junior' => 17500,
             'standard' => 30000,
