@@ -47,6 +47,11 @@ return [
             'junior' => 17500,
             'standard' => 30000,
             'senior' => 45000
+        ],
+        'taskPriorities' => [
+            'High',
+            'Medium',
+            'Low'
         ]
     ],
 

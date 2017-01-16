@@ -143,6 +143,7 @@ namespace {
                                 'editable' => [
                                     'submitted_for_qa',
                                     'owner',
+                                    'paused',
                                     'task_history',
                                 ],
                                 'GET' => true,
