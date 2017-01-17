@@ -79,7 +79,7 @@ class GenericResourceController extends Controller
         $query->orderBy($orderBy, $orderDirection)->offset($offset)->limit($limit);
         $models = $query->get();
 
-        return $this->jsonSuccess($models);
+        return $models;
     }
 
     /**

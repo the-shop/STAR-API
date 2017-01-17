@@ -54,5 +54,6 @@ class Kernel extends HttpKernel
         'the-shop.requestLogger' => \App\Http\Middleware\RequestLogger::class,
         'acl' => \App\Http\Middleware\Acl::class,
         'multiple-app-support' => \App\Http\Middleware\MultipleAppSupport::class,
+        'adapters' => \App\Http\Middleware\OutputAdapters::class,
     ];
 }
