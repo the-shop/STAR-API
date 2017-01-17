@@ -60,7 +60,7 @@ class TaskUpdateXP
                 $message = null;
                 $taskXp = (float) $taskOwnerProfile->xp < 201 ? (float) $task->xp : 0;
                 if ($coefficient < 0.75) {
-                    $xpDiff = ($taskXp + 3) * $this->getDurationCoefficient($task, $taskOwnerProfile);
+                    $xpDiff = $taskXp + 3 * $this->getDurationCoefficient($task, $taskOwnerProfile);
                     $message = 'Early task delivery: ' . $taskLink;
                 } elseif ($coefficient >= 0.75 && $coefficient <= 1) {
                     $xpDiff = $taskXp * $this->getDurationCoefficient($task, $taskOwnerProfile);
@@ -91,7 +91,7 @@ class TaskUpdateXP
                     $profileXpRecord->save();
 
                     $taskOwnerProfile->xp += $xpDiff;
-                    $profileXpRecord->save();
+                    $taskOwnerProfile->save();
                 }
 
                 if ($taskDetails['qaSeconds'] > 24 * 60 * 60) {
