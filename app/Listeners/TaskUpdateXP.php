@@ -63,7 +63,7 @@ class TaskUpdateXP
                     $xpDiff = $taskXp + 3 * $this->getDurationCoefficient($task, $taskOwnerProfile);
                     $message = 'Early task delivery: ' . $taskLink;
                 } elseif ($coefficient >= 0.75 && $coefficient <= 1) {
-                    $xpDiff = $taskXp * $this->getDurationCoefficient($task, $taskOwnerProfile);
+                    $xpDiff = $taskXp;
                     $message = 'Task delivery: ' . $taskLink;
                 } elseif ($coefficient > 1 && $coefficient <= 1.1) {
                     $xpDiff =  -1;
@@ -151,13 +151,13 @@ class TaskUpdateXP
         if ((float) $taskOwner->xp > 200 && (float) $taskOwner->xp <= 400) {
             $profileCoefficient = 0.8;
         } elseif ((float) $taskOwner->xp > 400 && (float) $taskOwner->xp <= 600) {
-            $profileCoefficient = 0.7;
-        } elseif ((float) $taskOwner->xp > 600 && (float) $taskOwner->xp <= 800) {
             $profileCoefficient = 0.6;
-        } elseif ((float) $taskOwner->xp > 800 && (float) $taskOwner->xp <= 1000) {
-            $profileCoefficient = 0.5;
-        } elseif ((float) $taskOwner->xp > 1000) {
+        } elseif ((float) $taskOwner->xp > 600 && (float) $taskOwner->xp <= 800) {
             $profileCoefficient = 0.4;
+        } elseif ((float) $taskOwner->xp > 800 && (float) $taskOwner->xp <= 1000) {
+            $profileCoefficient = 0.2;
+        } elseif ((float) $taskOwner->xp > 1000) {
+            $profileCoefficient = 0.1;
         }
 
         if ((int) $task->estimatedHours < 9) {
