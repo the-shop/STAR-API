@@ -41,7 +41,9 @@ class TaskUpdateXP
 
             $taskOwnerProfile = Profile::find($profileId);
 
+            GenericModel::setCollection('tasks');
             $mappedValues = $profilePerformance->getTaskValuesForProfile($taskOwnerProfile, $task);
+            GenericModel::setCollection('projects');
             foreach ($mappedValues as $key => $value) {
                 $task->{$key} = $value;
             }
