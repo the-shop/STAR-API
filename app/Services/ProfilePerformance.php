@@ -5,8 +5,6 @@ namespace App\Services;
 use App\GenericModel;
 use App\Helpers\InputHandler;
 use App\Profile;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Class ProfilePerformance
@@ -14,20 +12,6 @@ use Illuminate\Support\Facades\Auth;
  */
 class ProfilePerformance
 {
-    /**
-     * @var Request
-     */
-    private $request;
-
-    /**
-     * ProfilePerformance constructor.
-     * @param Request $request
-     */
-    public function __construct(Request $request)
-    {
-        $this->request = $request;
-    }
-
     /**
      * @param Profile $profile
      * @param $unixStart
