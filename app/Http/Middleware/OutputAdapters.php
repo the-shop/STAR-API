@@ -4,7 +4,13 @@ namespace App\Http\Middleware;
 
 use App\GenericModel;
 use Closure;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
+/**
+ * Class OutputAdapters
+ * @package App\Http\Middleware
+ */
 class OutputAdapters
 {
     /**
@@ -17,50 +23,55 @@ class OutputAdapters
     public function handle($request, Closure $next)
     {
         $response = $next($request);
-        $models = $response->getOriginalContent();
 
+        // If already JSON just return it, this should be removed after Controller::jsonError is replaced with
+        // exception handlers
+        if (!$response instanceof Response) {
+            return $response;
+        }
+
+        $responseBody = $response->getOriginalContent();
+
+        $out = [];
+        if ($responseBody instanceof \Traversable) {
+            foreach ($responseBody as $item) {
+                $adapterConfig = $this->getAdapterConfig(GenericModel::getCollection());
+                $out[] = $this->processWithAdapter($adapterConfig, $item);
+            }
+        } else {
+            $adapterConfig = $this->getAdapterConfig(GenericModel::getCollection());
+            $out = $this->processWithAdapter($adapterConfig, $responseBody);
+        }
+
+        return response()->json($out, 200);
+    }
+
+    /**
+     * @param GenericModel|null $adapterConfig
+     * @param GenericModel $model
+     * @return GenericModel|mixed
+     */
+    private function processWithAdapter(GenericModel $adapterConfig = null, GenericModel $model)
+    {
+        if ($adapterConfig) {
+            $adapterModel = new $adapterConfig->resolver['class']($model);
+            return call_user_func([$adapterModel, $adapterConfig->resolver['method']]);
+        }
+
+        return $model;
+    }
+
+    /**
+     * @param $resource
+     * @return mixed
+     */
+    private function getAdapterConfig($resource)
+    {
         $preSetCollection = GenericModel::getCollection();
         GenericModel::setCollection('adapter-rules');
-        $adapterRules = GenericModel::all();
-
-        $adapterResponse = [];
-
-        foreach ($adapterRules as $adapterRule) {
-            if ($models instanceof GenericModel && $adapterRule->resource ===
-                $models['collection']
-            ) {
-                $adapterModel = new $adapterRule->resolver['class']($models);
-                $adapterResponse[] = call_user_func([$adapterModel, $adapterRule->resolver['method']]);
-            } else {
-                foreach ($models as $model) {
-                    if ($adapterRule->resource === $model['collection']) {
-                        $adapterModel = new $adapterRule->resolver['class']($model);
-                        $adapterResponse[] = call_user_func([$adapterModel, $adapterRule->resolver['method']]);
-                    }
-                }
-            }
-        }
-
-
+        $out = GenericModel::where('resource', '=', $resource)->first();
         GenericModel::setCollection($preSetCollection);
 
-        $headers = [];
-        $token = \JWTAuth::getToken();
-        if ($token) {
-            $headers = array_merge(
-                $headers,
-                [
-                    'Authorization' => 'bearer ' . $token
-                ]
-            );
-        }
-
-        if (!empty($adapterResponse) && count($adapterResponse) > 1) {
-            return response()->json($adapterResponse, 200, $headers);
-        } elseif (!empty($adapterResponse) && count($adapterResponse) === 1) {
-            return response()->json($adapterResponse[0], 200, $headers);
-        }
-
-        return response()->json($models, 200, $headers);
+        return $out;
     }
 }

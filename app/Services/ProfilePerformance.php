@@ -214,17 +214,14 @@ class ProfilePerformance
 
         $xp = (float) $profile->xp;
 
-        $taskComplexity = (int) $task->complexity;
+        $taskComplexity = max((int) $task->complexity, 1);
 
-        $estimatedHours = (int) $task->estimatedHours * 1000 / $profile->xp;
+        $estimatedHours = (float) $task->estimatedHours * 1000 / min($xp, 1000);
 
-        // Adjust payout based on profile XP
-        $taskPayout = min($xp, 1000) / 1000 * (float) $task->payout;
         // Award xp based on complexity
-        $xpAward = $profile->xp <= 200 ? $taskComplexity / 10 * $estimatedHours * $profile->xp / 10 : 0;
+        $xpAward = $xp <= 200 ? $taskComplexity * $estimatedHours * 10 / $xp : 0;
 
         $out = [];
-        $out['payout'] = $taskPayout;
         $out['xp'] = $xpAward;
         $out['estimatedHours'] = $estimatedHours;
 

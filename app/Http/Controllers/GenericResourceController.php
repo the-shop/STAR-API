@@ -170,7 +170,7 @@ class GenericResourceController extends Controller
         }
 
         if ($model->delete()) {
-            return $this->jsonSuccess(['id' => $model->id]);
+            return $model->id;
         }
         return $this->jsonError('Issue with deleting resource.');
     }

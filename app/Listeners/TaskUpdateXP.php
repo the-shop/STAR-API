@@ -26,6 +26,7 @@ class TaskUpdateXP
         $profilePerformance = new ProfilePerformance();
 
         GenericModel::setCollection('tasks');
+
         $taskPerformance = $profilePerformance->forTask($task);
 
         // Get project owner id
@@ -36,6 +37,11 @@ class TaskUpdateXP
         foreach ($taskPerformance as $profileId => $taskDetails) {
             if ($taskDetails['taskCompleted'] === false) {
                 return false;
+            }
+
+            $mappedValues = $profilePerformance->getTaskValuesForProfile($taskOwnerProfile, $task);
+            foreach ($mappedValues as $key => $value) {
+                $task->{$key} = $value;
             }
 
             $estimatedSeconds = max(InputHandler::getInteger($task->estimatedHours) * 60 * 60, 1);
@@ -58,7 +64,7 @@ class TaskUpdateXP
             if ($secondsWorking > 0 && $estimatedSeconds > 1) {
                 $xpDiff = 0;
                 $message = null;
-                $taskXp = (float) $taskOwnerProfile->xp < 201 ? (float) $task->xp : 0;
+                $taskXp = (float) $taskOwnerProfile->xp <= 200 ? (float) $task->xp : 0;
                 if ($coefficient < 0.75) {
                     $xpDiff = $taskXp + 3 * $this->getDurationCoefficient($task, $taskOwnerProfile);
                     $message = 'Early task delivery: ' . $taskLink;

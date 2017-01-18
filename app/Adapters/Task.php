@@ -3,22 +3,28 @@
 namespace App\Adapters;
 
 use App\GenericModel;
+use App\Services\ProfilePerformance;
+use Illuminate\Support\Facades\Auth;
 
 class Task implements AdaptersInterface
 {
-    public $model;
+    public $task;
 
     public function __construct(GenericModel $model)
     {
-        $this->model = $model;
+        $this->task = $model;
     }
 
     public function process()
     {
-        $model = $this->model;
+        $profilePerformance = new ProfilePerformance();
 
-        $model->testField = 'test';
+        $mappedValues = $profilePerformance->getTaskValuesForProfile(Auth::user(), $this->task);
 
-        return $model;
+        foreach ($mappedValues as $key => $value) {
+            $this->task->{$key} = $value;
+        }
+
+        return $this->task;
     }
 }
