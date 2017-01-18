@@ -38,7 +38,7 @@ class TaskUpdateXP
                 return false;
             }
 
-            $estimatedSeconds = InputHandler::getInteger($task->estimatedHours) * 60 * 60;
+            $estimatedSeconds = max(InputHandler::getInteger($task->estimatedHours) * 60 * 60, 1);
 
             $taskOwnerProfile = Profile::find($profileId);
 
