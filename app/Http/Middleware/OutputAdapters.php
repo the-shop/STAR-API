@@ -57,7 +57,7 @@ class OutputAdapters
 
         if (!empty($adapterResponse) && count($adapterResponse) > 1) {
             return response()->json($adapterResponse, 200, $headers);
-        } elseif (!empty($adapterResponse) === 1) {
+        } elseif (!empty($adapterResponse) && count($adapterResponse) === 1) {
             return response()->json($adapterResponse[0], 200, $headers);
         }
 
