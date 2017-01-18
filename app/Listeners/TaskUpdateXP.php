@@ -55,7 +55,7 @@ class TaskUpdateXP
                 . '/tasks/'
                 . $event->model->_id;
 
-            if ($secondsWorking > 0) {
+            if ($secondsWorking > 0 && $estimatedSeconds > 1) {
                 $xpDiff = 0;
                 $message = null;
                 $taskXp = (float) $taskOwnerProfile->xp < 201 ? (float) $task->xp : 0;
