@@ -60,11 +60,11 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
          * All of routes use `the-shop.genericResource` middleware so that GenericModel gets injected
          * `$collection` from `resource` route paramter
          */
-        Route::get('{resource}', 'GenericResourceController@index')->middleware('the-shop.genericResource');
-        Route::get('{resource}/{id}', 'GenericResourceController@show')->middleware('the-shop.genericResource');
-        Route::post('{resource}', 'GenericResourceController@store')->middleware('the-shop.genericResource');
-        Route::put('{resource}/{id}', 'GenericResourceController@update')->middleware('the-shop.genericResource');
-        Route::delete('{resource}/{id}', 'GenericResourceController@destroy')->middleware('the-shop.genericResource');
+        Route::get('{resource}', 'GenericResourceController@index')->middleware(['the-shop.genericResource', 'adapters']);
+        Route::get('{resource}/{id}', 'GenericResourceController@show')->middleware(['the-shop.genericResource', 'adapters']);
+        Route::post('{resource}', 'GenericResourceController@store')->middleware(['the-shop.genericResource', 'adapters']);
+        Route::put('{resource}/{id}', 'GenericResourceController@update')->middleware(['the-shop.genericResource', 'adapters']);
+        Route::delete('{resource}/{id}', 'GenericResourceController@destroy')->middleware(['the-shop.genericResource', 'adapters']);
     });
 });
 
