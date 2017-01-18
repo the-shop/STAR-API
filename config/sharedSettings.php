@@ -10,6 +10,11 @@ return [
                 'maxReservationTime' => env('PROJECT_RESERVATION_TIME', 30)
             ]
         ],
+        'tasks' => [
+            'reservation' => [
+                'maxReservationTime' => env('PROJECT_TASK_RESERVATION_TIME', 3)
+            ]
+        ],
         'taskHistoryStatuses' => [
             'assigned' => 'Task assigned to %s',
             'claimed' => 'Task claimed by %s',
