@@ -10,12 +10,27 @@ class Configuration extends Controller
     public static function getConfiguration($email = null)
     {
         $internalSettings = \Config::get('sharedSettings.internalConfiguration', []);
+        $internalDynamicSettings = \Config::get('sharedSettings.internalDynamicConfiguration', []);
         $externalSettings = \Config::get('sharedSettings.externalConfiguration', []);
         $allSettings = [];
         $allSettings['internal'] = $internalSettings;
 
         if (empty($internalSettings) && empty($externalSettings)) {
             return false;
+        }
+
+        foreach ($internalDynamicSettings as $settingName => $settings) {
+            foreach ($settings as $setting) {
+                if (!key_exists('resolver', $setting)) {
+                    continue;
+                }
+                try {
+                    $resolved = call_user_func([$setting['resolver']['class'], $setting['resolver']['method']]);
+                } catch (\Exception $e) {
+                    continue;
+                }
+                $allSettings['internal'][$setting['settingName']] = $resolved;
+            }
         }
 
         foreach ($externalSettings as $name => $configs) {
