@@ -39,14 +39,14 @@ class TaskUpdateXP
                 return false;
             }
 
+            $taskOwnerProfile = Profile::find($profileId);
+
             $mappedValues = $profilePerformance->getTaskValuesForProfile($taskOwnerProfile, $task);
             foreach ($mappedValues as $key => $value) {
                 $task->{$key} = $value;
             }
 
             $estimatedSeconds = max(InputHandler::getInteger($task->estimatedHours) * 60 * 60, 1);
-
-            $taskOwnerProfile = Profile::find($profileId);
 
             $secondsWorking = $taskDetails['workSeconds'];
 
