@@ -5,6 +5,8 @@ namespace App\Services;
 use App\GenericModel;
 use App\Helpers\InputHandler;
 use App\Profile;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class ProfilePerformance
@@ -12,6 +14,20 @@ use App\Profile;
  */
 class ProfilePerformance
 {
+    /**
+     * @var Request
+     */
+    private $request;
+
+    /**
+     * ProfilePerformance constructor.
+     * @param Request $request
+     */
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+    }
+
     /**
      * @param Profile $profile
      * @param $unixStart
@@ -199,5 +215,35 @@ class ProfilePerformance
         $response[$taskOwner] = $userPerformance;
 
         return $response;
+    }
+
+    /**
+     * Calculates payout, xp award and estimate for specific $profile <-> $task relation
+     *
+     * @param Profile $profile
+     * @param GenericModel $task
+     * @return array
+     */
+    public function getTaskValuesForProfile(Profile $profile, GenericModel $task)
+    {
+        $task->confirmResourceOf('tasks');
+
+        $xp = (float) $profile->xp;
+
+        $taskComplexity = (int) $task->complexity;
+
+        $estimatedHours = (int) $task->estimatedHours * 1000 / $profile->xp;
+
+        // Adjust payout based on profile XP
+        $taskPayout = min($xp, 1000) / 1000 * (float) $task->payout;
+        // Award xp based on complexity
+        $xpAward = $profile->xp <= 200 ? $taskComplexity / 10 * $estimatedHours * $profile->xp / 10 : 0;
+
+        $out = [];
+        $out['payout'] = $taskPayout;
+        $out['xp'] = $xpAward;
+        $out['estimate'] = $estimatedHours;
+
+        return $out;
     }
 }
