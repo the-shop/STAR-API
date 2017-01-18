@@ -226,7 +226,7 @@ class ProfilePerformance
         $out = [];
         $out['payout'] = $taskPayout;
         $out['xp'] = $xpAward;
-        $out['estimate'] = $estimatedHours;
+        $out['estimatedHours'] = $estimatedHours;
 
         return $out;
     }
