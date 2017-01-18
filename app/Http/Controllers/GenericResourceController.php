@@ -99,7 +99,7 @@ class GenericResourceController extends Controller
             return $this->jsonError(['Insufficient permissions.'], 403);
         }
 
-        return $this->jsonSuccess($model);
+        return $model;
     }
 
     /**
@@ -118,7 +118,7 @@ class GenericResourceController extends Controller
         event(new GenericModelCreate($model));
 
         if ($model->save()) {
-            return $this->jsonSuccess($model);
+            return $model;
         }
         return $this->jsonError('Issue with saving resource.');
     }
@@ -146,7 +146,7 @@ class GenericResourceController extends Controller
         event(new GenericModelUpdate($model));
 
         if ($model->save()) {
-            return $this->jsonSuccess($model);
+            return $model;
         }
 
         return $this->jsonError('Issue with updating resource.');

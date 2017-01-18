@@ -16,5 +16,9 @@ class Task implements AdaptersInterface
     public function process()
     {
         $model = $this->model;
+
+        $model->testField = 'test';
+
+        return $model;
     }
 }

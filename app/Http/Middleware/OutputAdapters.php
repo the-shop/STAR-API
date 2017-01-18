@@ -10,23 +10,55 @@ class OutputAdapters
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param  \Illuminate\Http\Request $request
+     * @param  \Closure $next
      * @return mixed
      */
     public function handle($request, Closure $next)
     {
         $response = $next($request);
+        $models = $response->getOriginalContent();
 
-        foreach ($response->getOriginalContent() as $model) {
-                $resource = GenericModel::getCollection();
-            if ($resource === 'tasks') {
-                GenericModel::setCollection('adapter-rules');
-                $adapter = GenericModel::where('resource', '=', $resource)->first();
-                $response = call_user_func($adapter->resolver['class'], $adapter->resolver['method']);
+        $preSetCollection = GenericModel::getCollection();
+        GenericModel::setCollection('adapter-rules');
+        $adapterRules = GenericModel::all();
+
+        $adapterResponse = [];
+
+        foreach ($adapterRules as $adapterRule) {
+            if ($models instanceof GenericModel && $adapterRule->resource ===
+                $models['collection']
+            ) {
+                $adapterModel = new $adapterRule->resolver['class']($models);
+                $adapterResponse[] = call_user_func([$adapterModel, $adapterRule->resolver['method']]);
+            } else {
+                foreach ($models as $model) {
+                    if ($adapterRule->resource === $model['collection']) {
+                        $adapterModel = new $adapterRule->resolver['class']($model);
+                        $adapterResponse[] = call_user_func([$adapterModel, $adapterRule->resolver['method']]);
+                    }
+                }
             }
         }
 
-        return $response;
+
+        GenericModel::setCollection($preSetCollection);
+
+        $headers = [];
+        $token = \JWTAuth::getToken();
+        if ($token) {
+            $headers = array_merge(
+                $headers,
+                [
+                    'Authorization' => 'bearer ' . $token
+                ]
+            );
+        }
+
+        if (!empty($adapterResponse)) {
+            return response()->json($adapterResponse, 200, $headers);
+        }
+
+        return response()->json($models, 200, $headers);
     }
 }
