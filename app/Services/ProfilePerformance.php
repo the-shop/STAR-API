@@ -5,6 +5,8 @@ namespace App\Services;
 use App\GenericModel;
 use App\Helpers\InputHandler;
 use App\Profile;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Config;
 
 /**
  * Class ProfilePerformance
@@ -36,16 +38,22 @@ class ProfilePerformance
 
         // Let's aggregate task data
         foreach ($profileTasks as $task) {
+            // Adjust values for profile we're looking at
+            $mappedValues = self::getTaskValuesForProfile($profile, $task);
+            foreach ($mappedValues as $key => $value) {
+                $task->{$key} = $value;
+            }
+
             // Check if tasks is in selected time range and delivered
-            $estimatedHours += (int) $task->estimatedHours;
+            $estimatedHours += (float) $task->estimatedHours;
             $deliveredTask = false;
             $taskInTimeRange = false;
             foreach ($task->task_history as $historyItem) {
                 if (array_key_exists('status', $historyItem)
                     && ($historyItem['status'] === 'assigned'
                         || $historyItem['status'] === 'claimed')
-                    && (int) $historyItem['timestamp'] / 1000 <= $unixEnd
-                    && (int) $historyItem['timestamp'] / 1000 > $unixStart
+                    && InputHandler::getUnixTimestamp($historyItem['timestamp']) <= $unixEnd
+                    && InputHandler::getUnixTimestamp($historyItem['timestamp']) > $unixStart
                 ) {
                     $taskInTimeRange = true;
                 } elseif (array_key_exists('status', $historyItem) && $historyItem['status'] === 'qa_success') {
@@ -100,7 +108,7 @@ class ProfilePerformance
         $totalPayoutCombined = $totalPayoutExternal + $totalPayoutInternal;
         $realPayoutCombined = $realPayoutExternal + $realPayoutInternal;
 
-        return [
+        $out = [
             'estimatedHours' => $estimatedHours,
             'hoursDelivered' => $hoursDelivered,
             'totalPayoutExternal' => $totalPayoutExternal,
@@ -112,6 +120,10 @@ class ProfilePerformance
             'xpDiff' => $xpDiff,
             'xpTotal' => $profile->xp,
         ];
+
+        $out = array_merge($out, $this->calculateSalary($out, $profile));
+
+        return $out;
     }
 
     public function forTask(GenericModel $task)
@@ -226,5 +238,80 @@ class ProfilePerformance
         $out['estimatedHours'] = $estimatedHours;
 
         return $out;
+    }
+
+    /**
+     * Calculates salary based on performance in time range
+     *
+     * @param array $aggregated
+     * @param Profile $profile
+     * @return array
+     */
+    private function calculateSalary(array $aggregated, Profile $profile)
+    {
+        $employeeConfig = Config::get('sharedSettings.internalConfiguration.employees.roles');
+
+        $role = $profile->employeeRole;
+
+        if (!isset($employeeConfig[$role])) {
+            return [
+                'baseGrossPayout' => 0,
+                'grossPayout' => 0,
+                'bonusPayout' => 0,
+                'employeeRole' => 'Not set',
+                'amountReached' => $aggregated['realPayoutCombined'],
+                'roleMinimumReached' => false,
+                'roleMinimum' => 0,
+            ];
+        }
+
+        $minimum = $employeeConfig[$role]['minimumEarnings'];
+        $coefficient = $employeeConfig[$role]['coefficient'];
+
+        $realPayout = $minimum;
+        if ($aggregated['realPayoutExternal'] > $minimum) {
+            $realPayout = $minimum + ($aggregated['realPayoutExternal'] - $minimum) / 2;
+        }
+
+        $grossReal = $this->calculateSalaryForAmount($realPayout, $coefficient);
+        $grossMinimum = $this->calculateSalaryForAmount($minimum, $coefficient);
+
+        $aggregated['baseGrossPayout'] = round($grossMinimum, 4);
+        $aggregated['grossPayout'] = round($grossReal, 4);
+        $aggregated['bonusPayout'] = round($grossReal - $grossMinimum, 4);
+        $aggregated['employeeRole'] = $role;
+        $aggregated['amountReached'] = $aggregated['realPayoutCombined'];
+        $aggregated['roleMinimumReached'] = $grossReal > $grossMinimum;
+        $aggregated['roleMinimum'] = $minimum;
+
+
+        return $aggregated;
+    }
+
+    /**
+     * Helper to calculate salary based of earned amount
+     *
+     * @param $forAmount
+     * @param $coefficient
+     * @return float
+     */
+    private function calculateSalaryForAmount($forAmount, $coefficient)
+    {
+        $totalCost = $forAmount - $forAmount * $coefficient * 2;
+
+        return $this->adjustToTotalSalaryCost($totalCost);
+    }
+
+    /**
+     * Helper for salary cost conversion to gross payout
+     *
+     * @param $totalGross
+     * @return float
+     */
+    private function adjustToTotalSalaryCost($totalGross)
+    {
+        // 17.2% is fixed cost over gross salary in Croatia
+        $gross = $totalGross / 1.172;
+        return $gross;
     }
 }

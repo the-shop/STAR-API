@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\ProfileUpdate;
+use App\Helpers\InputHandler;
 use App\Services\ProfilePerformance;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -51,9 +52,12 @@ class ProfileController extends Controller
 
     public function getPerformance(Request $request)
     {
-        $now = new \DateTime();
-        $startDate = (int) $request->input('startDate', $now->format('U') - 7 * 24 * 60 * 60); // Default last 7 days
-        $endDate = (int) $request->input('endDate', $now->format('U')); // Default now
+        // Default last month
+        $lastMonthUnixStart = strtotime('first day of last month');
+        $lastMonthUnixEnd = strtotime('last day of last month');
+
+        $startDate = InputHandler::getUnixTimestamp($request->input('unixStart', $lastMonthUnixStart));
+        $endDate = InputHandler::getUnixTimestamp($request->input('unixEnd', $lastMonthUnixEnd));
 
         $profile = Profile::find($request->route('id'));
         if (!$profile) {
