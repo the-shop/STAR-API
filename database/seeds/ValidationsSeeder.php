@@ -38,6 +38,7 @@ namespace {
                             'xp_id' => 'alpha_num',
                             'active' => 'boolean',
                             'valid' => 'boolean',
+                            'employeeRole' => 'string',
                             'employee' => 'boolean'
 
                         ],
