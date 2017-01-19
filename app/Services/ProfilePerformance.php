@@ -5,7 +5,6 @@ namespace App\Services;
 use App\GenericModel;
 use App\Helpers\InputHandler;
 use App\Profile;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 
 /**
@@ -258,7 +257,6 @@ class ProfilePerformance
                 'grossBonusPayout' => 0,
                 'costXpBasedPayout' => 0,
                 'employeeRole' => 'Not set',
-                'amountReached' => $aggregated['realPayoutCombined'],
                 'roleMinimumReached' => false,
                 'roleMinimum' => 0,
             ];
@@ -301,7 +299,6 @@ class ProfilePerformance
         $aggregated['grossBonusPayout'] = round($grossReal - $grossMinimum, 4);
         $aggregated['costXpBasedPayout'] = $xpBasedPayout;
         $aggregated['employeeRole'] = $role;
-        $aggregated['amountReached'] = $aggregated['realPayoutCombined'];
         $aggregated['roleMinimumReached'] = $grossReal > $grossMinimum;
         $aggregated['roleMinimum'] = $minimum;
 
