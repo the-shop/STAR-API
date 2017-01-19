@@ -126,7 +126,7 @@ class ProfilePerformance
         return $out;
     }
 
-    public function forTask(GenericModel $task)
+    public function perTask(GenericModel $task)
     {
         $task->confirmResourceOf('tasks');
 

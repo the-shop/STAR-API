@@ -27,7 +27,7 @@ class TaskUpdateXP
 
         GenericModel::setCollection('tasks');
 
-        $taskPerformance = $profilePerformance->forTask($task);
+        $taskPerformance = $profilePerformance->perTask($task);
 
         // Get project owner id
         GenericModel::setCollection('projects');
