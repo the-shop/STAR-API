@@ -75,6 +75,7 @@ class SprintReminder extends Command
 
         // Ping on slack all users on active projects about unassigned tasks on active sprints
         $taskCount = [];
+
         foreach ($tasks as $task) {
             if (!key_exists($task->project_id, $taskCount)) {
                 $taskCount[$task->project_id] = 1;
@@ -83,20 +84,25 @@ class SprintReminder extends Command
             }
         }
 
-        foreach ($activeProjects as $project) {
-            foreach ($members as $member) {
-                if (in_array($member->_id, $project->members) && $member->slack) {
-                    $recipient = '@' . $member->slack;
-                    $projectName = $project->name;
-                    $unassignedTasks = $taskCount[$project->_id];
-                    $message = '*Reminder*:'
-                        . 'There are * '
-                        . $unassignedTasks
-                        . '* unassigned tasks on active sprints'
-                        . ', for project *'
-                        . $projectName
-                        . '*)';
-                    \SlackChat::message($recipient, $message);
+        if (!empty($taskCount)) {
+            foreach ($activeProjects as $project) {
+                if (!key_exists($project->_id, $taskCount)) {
+                    continue;
+                }
+                foreach ($members as $member) {
+                    if (in_array($member->_id, $project->members) && $member->slack) {
+                        $recipient = '@' . $member->slack;
+                        $projectName = $project->name;
+                        $unassignedTasks = $taskCount[$project->_id];
+                        $message = '*Reminder*:'
+                            . 'There are * '
+                            . $unassignedTasks
+                            . '* unassigned tasks on active sprints'
+                            . ', for project *'
+                            . $projectName
+                            . '*';
+                        \SlackChat::message($recipient, $message);
+                    }
                 }
             }
         }
