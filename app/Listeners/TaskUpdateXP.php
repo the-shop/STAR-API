@@ -110,18 +110,20 @@ class TaskUpdateXP
                     $poMessage = 'Review PR in time for ' . $taskLink;
                 }
 
-                $projectOwnerXpRecord = $this->getXpRecord($projectOwner);
-                $records = $projectOwnerXpRecord->records;
-                $records[] = [
-                    'xp' => $poXpDiff,
-                    'details' => $poMessage,
-                    'timestamp' => (int) ((new \DateTime())->format('U') . '000') // Microtime
-                ];
-                $projectOwnerXpRecord->records = $records;
-                $projectOwnerXpRecord->save();
+                if ($projectOwner) {
+                    $projectOwnerXpRecord = $this->getXpRecord($projectOwner);
+                    $records = $projectOwnerXpRecord->records;
+                    $records[] = [
+                        'xp' => $poXpDiff,
+                        'details' => $poMessage,
+                        'timestamp' => (int) ((new \DateTime())->format('U') . '000') // Microtime
+                    ];
+                    $projectOwnerXpRecord->records = $records;
+                    $projectOwnerXpRecord->save();
 
-                $projectOwner->xp += $poXpDiff;
-                $projectOwner->save();
+                    $projectOwner->xp += $poXpDiff;
+                    $projectOwner->save();
+                }
             }
         }
 
