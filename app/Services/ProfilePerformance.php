@@ -255,9 +255,10 @@ class ProfilePerformance
 
         if (!isset($employeeConfig[$role])) {
             return [
-                'baseGrossPayout' => 0,
-                'grossPayout' => 0,
-                'bonusPayout' => 0,
+                'minimalGrossPayout' => 0,
+                'realGrossPayout' => 0,
+                'grossBonusPayout' => 0,
+                'costXpBasedPayout' => 0,
                 'employeeRole' => 'Not set',
                 'amountReached' => $aggregated['realPayoutCombined'],
                 'roleMinimumReached' => false,
@@ -267,23 +268,44 @@ class ProfilePerformance
 
         $minimum = $employeeConfig[$role]['minimumEarnings'];
         $coefficient = $employeeConfig[$role]['coefficient'];
+        $xpEntryPoint = $employeeConfig[$role]['xpEntryPoint'];
 
         $realPayout = $minimum;
+
+        // Adjust payout based on XP
+        $xpInRange = (float) $profile->xp - $xpEntryPoint;
+
+        if ($xpInRange < 0) {
+            $xpInRange = 0;
+        } elseif ($xpInRange > 200) {
+            $xpInRange = 200;
+        }
+
+        // 50% of everything over minimum (from external projects) goes to bonus
         if ($aggregated['realPayoutExternal'] > $minimum) {
             $realPayout = $minimum + ($aggregated['realPayoutExternal'] - $minimum) / 2;
         }
 
-        $grossReal = $this->calculateSalaryForAmount($realPayout, $coefficient);
-        $grossMinimum = $this->calculateSalaryForAmount($minimum, $coefficient);
+        $costReal = $this->calculateSalaryCostForAmount($realPayout, $coefficient);
+        $xpBasedPayout = $costReal * $coefficient * $xpInRange / 2 / 100;
+        if ($aggregated['realPayoutCombined'] > $minimum) {
+            $costReal += $xpBasedPayout;
+        }
 
-        $aggregated['baseGrossPayout'] = round($grossMinimum, 4);
-        $aggregated['grossPayout'] = round($grossReal, 4);
-        $aggregated['bonusPayout'] = round($grossReal - $grossMinimum, 4);
+        $grossReal = $this->calculateSalaryGrossForAmount($costReal);
+
+        $costGrossMinimum = $this->calculateSalaryCostForAmount($realPayout, $coefficient);
+        $grossMinimum = $this->calculateSalaryGrossForAmount($costGrossMinimum);
+
+        $aggregated['costTotal'] = round($costReal, 4);
+        $aggregated['minimalGrossPayout'] = round($grossMinimum, 4);
+        $aggregated['realGrossPayout'] = round($grossReal, 4);
+        $aggregated['grossBonusPayout'] = round($grossReal - $grossMinimum, 4);
+        $aggregated['costXpBasedPayout'] = $xpBasedPayout;
         $aggregated['employeeRole'] = $role;
         $aggregated['amountReached'] = $aggregated['realPayoutCombined'];
         $aggregated['roleMinimumReached'] = $grossReal > $grossMinimum;
         $aggregated['roleMinimum'] = $minimum;
-
 
         return $aggregated;
     }
@@ -295,11 +317,11 @@ class ProfilePerformance
      * @param $coefficient
      * @return float
      */
-    private function calculateSalaryForAmount($forAmount, $coefficient)
+    private function calculateSalaryCostForAmount($forAmount, $coefficient)
     {
         $totalCost = $forAmount - $forAmount * $coefficient * 2;
 
-        return $this->adjustToTotalSalaryCost($totalCost);
+        return $totalCost;
     }
 
     /**
@@ -308,7 +330,7 @@ class ProfilePerformance
      * @param $totalGross
      * @return float
      */
-    private function adjustToTotalSalaryCost($totalGross)
+    private function calculateSalaryGrossForAmount($totalGross)
     {
         // 17.2% is fixed cost over gross salary in Croatia
         $gross = $totalGross / 1.172;

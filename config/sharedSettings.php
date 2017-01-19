@@ -10,22 +10,27 @@ return [
                 'Apprentice' => [
                     'minimumEarnings' => 10000,
                     'coefficient' => 0.27,
+                    'xpEntryPoint' => 200,
                 ],
                 'Junior' => [
                     'minimumEarnings' => 17500,
                     'coefficient' => 0.26,
+                    'xpEntryPoint' => 400,
                 ],
                 'Standard' => [
                     'minimumEarnings' => 30000,
                     'coefficient' => 0.26,
+                    'xpEntryPoint' => 600,
                 ],
                 'Senior' => [
                     'minimumEarnings' => 45000,
                     'coefficient' => 0.25,
+                    'xpEntryPoint' => 800,
                 ],
                 'Leader' => [
                     'minimumEarnings' => 60000,
                     'coefficient' => 0.25,
+                    'xpEntryPoint' => 1000,
                 ],
             ]
         ],
