@@ -33,7 +33,8 @@ namespace {
                                 "api/v1/app/{appName}/profiles",
                                 "api/v1/app/{appName}/profiles/{profiles}",
                                 "api/v1/app/{appName}/slack/users",
-                                "api/v1/app/{appName}/projects/{id}/uploads"
+                                "api/v1/app/{appName}/projects/{id}/uploads",
+                                "api/v1/app/{appName}/profiles/{id}/performance"
                             ],
                             'PUT' => [
                                 'api/v1/app/{appName}/profiles/changePassword',
