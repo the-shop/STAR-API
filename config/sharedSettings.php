@@ -5,6 +5,30 @@ return [
      * Fixed Star API configuration
      */
     'internalConfiguration' => [
+        'employees' => [
+            'roles' => [
+                'Apprentice' => [
+                    'minimumEarnings' => 10000,
+                    'coefficient' => 0.27,
+                ],
+                'Junior' => [
+                    'minimumEarnings' => 17500,
+                    'coefficient' => 0.26,
+                ],
+                'Standard' => [
+                    'minimumEarnings' => 30000,
+                    'coefficient' => 0.26,
+                ],
+                'Senior' => [
+                    'minimumEarnings' => 45000,
+                    'coefficient' => 0.25,
+                ],
+                'Leader' => [
+                    'minimumEarnings' => 60000,
+                    'coefficient' => 0.25,
+                ],
+            ]
+        ],
         'projects' => [
             'reservation' => [
                 'maxReservationTime' => env('PROJECT_RESERVATION_TIME', 30)
