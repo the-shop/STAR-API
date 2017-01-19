@@ -68,14 +68,13 @@ class UnfinishedTasks extends Command
         $date = new \DateTime();
         $unixNow = $date->format('U');
         $checkDay = date('Y-m-d', $unixNow);
-        $unixDayAgo = $unixNow - 24 * 60 * 60;
-        $checkDayAgo = date('Y-m-d', $unixDayAgo);
 
+        //get all unfinished tasks from ended sprints and get all future sprints on project
         GenericModel::setCollection('tasks');
         foreach ($sprints as $sprint) {
             $sprintStartDueDate = date('Y-m-d', $sprint->start);
             $sprintEndDueDate = date('Y-m-d', $sprint->end);
-            if ($sprintEndDueDate === $checkDayAgo && !empty($sprint->tasks)) {
+            if ($sprintEndDueDate < $checkDay && !empty($sprint->tasks)) {
                 foreach ($sprint->tasks as $taskId) {
                     $task = GenericModel::where('_id', '=', $taskId)->first();
                     if ($task->passed_qa !== true) {
@@ -84,43 +83,52 @@ class UnfinishedTasks extends Command
                     }
                 }
             } elseif ($unixNow < $sprint->start || $checkDay === $sprintStartDueDate) {
-                $futureSprints[] = $sprint;
+                $futureSprints[$sprint->project_id] = $sprint;
                 $futureSprintsStartDates[$sprint->project_id][] = $sprint->start;
             }
+        }
+
+        //calculate on which projects are missing future sprints
+        $missingSprints = array_diff_key($endedSprints, $futureSprints);
+        $adminReport = [];
+        foreach ($missingSprints as $project_id => $endedSprint) {
+            $adminReport[$project_id] = $activeProjects[$project_id]->name;
         }
 
         if (!empty($sprintEndedTasks)) {
             //ping on slack admins if there are no future sprints created so we can move unfinished tasks from sprint to
             //following sprint on sprint end date
-            if (empty($futureSprints)) {
+
+            foreach ($adminReport as $projectName) {
                 foreach ($admins as $admin) {
                     if ($admin->slack) {
                         $recipient = '@' . $admin->slack;
                         $message = 'Hey! There are no future sprints created to move unfinished tasks from ended ' .
-                            'sprints!';
+                            'sprints on project : *' . $projectName . '*';
                         \SlackChat::message($recipient, $message);
                     }
                 }
-            } else {
-                foreach ($futureSprints as $sprint) {
-                    if ($sprint->start === min($futureSprintsStartDates[$sprint->project_id])) {
-                        foreach ($sprintEndedTasks as $task) {
-                            if ($task->project_id === $sprint->project_id) {
-                                $task->sprint_id = $sprint->_id;
-                                $task->save();
+            }
 
-                                $newSprintTasks = $sprint->tasks;
-                                $newSprintTasks[] = $task->_id;
-                                $sprint->tasks = $newSprintTasks;
-                                $sprint->save();
+            //move all unfinished tasks from ended sprint to following one
+            foreach ($futureSprints as $sprint) {
+                if ($sprint->start === min($futureSprintsStartDates[$sprint->project_id])) {
+                    foreach ($sprintEndedTasks as $task) {
+                        if ($task->project_id === $sprint->project_id) {
+                            $task->sprint_id = $sprint->_id;
+                            $task->save();
 
-                                $oldSprintTaskUpdate = array_values(array_diff($endedSprints[$sprint->project_id]->
-                                tasks, [$task->_id]));
-                                $oldSprint = $endedSprints[$sprint->project_id];
-                                $oldSprint->tasks = $oldSprintTaskUpdate;
-                                $oldSprint->save();
-                                $this->info('Task ' . $task->title . ' moved to sprint ' . $sprint->title);
-                            }
+                            $newSprintTasks = $sprint->tasks;
+                            $newSprintTasks[] = $task->_id;
+                            $sprint->tasks = $newSprintTasks;
+                            $sprint->save();
+
+                            $oldSprintTaskUpdate = array_values(array_diff($endedSprints[$sprint->project_id]->
+                            tasks, [$task->_id]));
+                            $oldSprint = $endedSprints[$sprint->project_id];
+                            $oldSprint->tasks = $oldSprintTaskUpdate;
+                            $oldSprint->save();
+                            $this->info('Task ' . $task->title . ' moved to sprint ' . $sprint->title);
                         }
                     }
                 }
