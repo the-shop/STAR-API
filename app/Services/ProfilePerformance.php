@@ -39,7 +39,7 @@ class ProfilePerformance
         // Let's aggregate task data
         foreach ($profileTasks as $task) {
             // Adjust values for profile we're looking at
-            $mappedValues = self::getTaskValuesForProfile($profile, $task);
+            $mappedValues = $this->getTaskValuesForProfile($profile, $task);
             foreach ($mappedValues as $key => $value) {
                 $task->{$key} = $value;
             }
@@ -222,8 +222,6 @@ class ProfilePerformance
      */
     public function getTaskValuesForProfile(Profile $profile, GenericModel $task)
     {
-        $task->confirmResourceOf('tasks');
-
         $xp = (float) $profile->xp;
 
         $taskComplexity = max((int) $task->complexity, 1);
