@@ -61,6 +61,21 @@ return [
     ],
 
     /**
+     * Dynamic internal configuration
+     */
+    'internalDynamicConfiguration' => [
+        'userRoles' => [
+            [
+                'resolver' => [
+                    'class' => \App\Resolvers\UserRoles::class,
+                    'method' => 'getRoles'
+                ],
+                'settingName' => 'userRoles'
+            ]
+        ],
+    ],
+
+    /**
      * Dynamic configuration that depends on external services
      */
     'externalConfiguration' => [

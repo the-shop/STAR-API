@@ -18,6 +18,7 @@ namespace
             $this->call(ValidationsSeeder::class);
             $this->call(ListenerRulesSeeder::class);
             $this->call(AdapterRulesSeeder::class);
+            $this->call(UserRolesSeeder::class);
         }
     }
 }
