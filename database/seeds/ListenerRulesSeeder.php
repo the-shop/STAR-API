@@ -31,6 +31,9 @@ namespace {
                             'App\Events\ModelUpdate' => [
                                 'App\Listeners\TaskUpdateXP',
                             ],
+                            'App\Events\TaskClaim' => [
+                                'App\Listeners\TaskClaim'
+                            ],
                             'App\Events\GenericModelHistory' => [
                                 'App\Listeners\GenericModelHistory'
                             ]
