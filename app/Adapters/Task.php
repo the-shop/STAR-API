@@ -25,6 +25,9 @@ class Task implements AdaptersInterface
             $this->task->{$key} = $value;
         }
 
+        $this->task->estimatedHours = sprintf('%.2f', $this->task->estimatedHours);
+        $this->task->xp = sprintf('%.2f', $this->task->xp);
+
         return $this->task;
     }
 }
