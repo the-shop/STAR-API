@@ -5,14 +5,14 @@ namespace App\Events;
 use App\GenericModel;
 use Illuminate\Queue\SerializesModels;
 
-class TaskClaim extends Event
+class TaskSettingStatus extends Event
 {
     use SerializesModels;
 
     public $model;
 
     /**
-     * TaskClaim constructor.
+     * TaskSettingStatus constructor.
      * @param GenericModel $model
      */
     public function __construct(GenericModel $model)

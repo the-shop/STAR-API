@@ -34,6 +34,9 @@ namespace {
                             'App\Events\TaskClaim' => [
                                 'App\Listeners\TaskClaim'
                             ],
+                            'App\Events\TaskSettingStatus' => [
+                                'App\Listeners\TaskSettingStatus'
+                            ],
                             'App\Events\GenericModelHistory' => [
                                 'App\Listeners\GenericModelHistory'
                             ]
