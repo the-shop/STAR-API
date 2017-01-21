@@ -31,6 +31,11 @@ namespace {
                 $skip = false;
                 $firstTimestamp = null;
                 foreach ($task->task_history as $historyItem) {
+                    if (!array_key_exists('status', $historyItem)) {
+                        $skip = true;
+                        continue;
+                    }
+
                     if ($historyItem['status'] === 'assigned' || $historyItem['status'] === 'claimed') {
                         $skip = true;
                     }
