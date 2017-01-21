@@ -55,13 +55,17 @@ class TaskUpdateXP
             $coefficient = $secondsWorking / $estimatedSeconds;
 
             $webDomain = Config::get('sharedSettings.internalConfiguration.webDomain');
-            $taskLink = $webDomain
+            $taskLink = '['
+                . $task->title
+                . ']('
+                . $webDomain
                 . 'projects/'
-                . $event->model->project_id
+                . $task->project_id
                 . '/sprints/'
-                . $event->model->sprint_id
+                . $task->sprint_id
                 . '/tasks/'
-                . $event->model->_id;
+                . $task->_id
+                . ')';
 
             if ($secondsWorking > 0 && $estimatedSeconds > 1) {
                 $xpDiff = 0;
