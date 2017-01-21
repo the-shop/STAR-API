@@ -105,29 +105,29 @@ class TaskUpdateXP
                     $taskOwnerProfile->xp += $xpDiff;
                     $taskOwnerProfile->save();
                 }
+            }
 
-                if ($taskDetails['qaSeconds'] > 24 * 60 * 60) {
-                    $poXpDiff = -3;
-                    $poMessage = 'Failed to review PR in time for ' . $taskLink;
-                } else {
-                    $poXpDiff = 0.25;
-                    $poMessage = 'Review PR in time for ' . $taskLink;
-                }
+            if ($taskDetails['qaSeconds'] > 24 * 60 * 60) {
+                $poXpDiff = -3;
+                $poMessage = 'Failed to review PR in time for ' . $taskLink;
+            } else {
+                $poXpDiff = 0.25;
+                $poMessage = 'Review PR in time for ' . $taskLink;
+            }
 
-                if ($projectOwner) {
-                    $projectOwnerXpRecord = $this->getXpRecord($projectOwner);
-                    $records = $projectOwnerXpRecord->records;
-                    $records[] = [
-                        'xp' => $poXpDiff,
-                        'details' => $poMessage,
-                        'timestamp' => (int) ((new \DateTime())->format('U') . '000') // Microtime
-                    ];
-                    $projectOwnerXpRecord->records = $records;
-                    $projectOwnerXpRecord->save();
+            if ($projectOwner) {
+                $projectOwnerXpRecord = $this->getXpRecord($projectOwner);
+                $records = $projectOwnerXpRecord->records;
+                $records[] = [
+                    'xp' => $poXpDiff,
+                    'details' => $poMessage,
+                    'timestamp' => (int) ((new \DateTime())->format('U') . '000') // Microtime
+                ];
+                $projectOwnerXpRecord->records = $records;
+                $projectOwnerXpRecord->save();
 
-                    $projectOwner->xp += $poXpDiff;
-                    $projectOwner->save();
-                }
+                $projectOwner->xp += $poXpDiff;
+                $projectOwner->save();
             }
         }
 
