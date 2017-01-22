@@ -33,34 +33,34 @@ class Task implements AdaptersInterface
         if (!empty($taskStatus)) {
             $taskEstimatedSeconds = $mappedValues['estimatedHours'] * 60 * 60;
             $taskDeliveredOnTime = $taskStatus[$this->task->owner]['workSeconds']
-            <= $taskEstimatedSeconds ? true : false;
+            <= $taskEstimatedSeconds;
 
             // deadline in last 25% of the time of task
-            $lastQuarterOfTask = (25 / 100) * $taskEstimatedSeconds;
+            $lastQuarterOfTask = 0.25 * $taskEstimatedSeconds;
 
             //generate task color status
             if ($this->task->passed_qa === true && $taskDeliveredOnTime === true) {
-                $this->task->colorIndicator = 'Green';
+                $this->task->colorIndicator = 'green';
                 return $this->task;
             }
 
             if ($this->task->passed_qa === true && $taskDeliveredOnTime === false) {
-                $this->task->colorIndicator = 'Red';
+                $this->task->colorIndicator = 'red';
                 return $this->task;
             }
 
             if ($this->task->submitted_for_qa === true) {
-                $this->task->colorIndicator = 'Blue';
+                $this->task->colorIndicator = 'blue';
                 return $this->task;
             }
 
             if ($this->task->paused === true) {
-                $this->task->colorIndicator = 'Yellow';
+                $this->task->colorIndicator = 'yellow';
                 return $this->task;
             }
 
             if (($taskEstimatedSeconds - $taskStatus[$this->task->owner]['workSeconds']) <= $lastQuarterOfTask) {
-                $this->task->colorIndicator = 'Orange';
+                $this->task->colorIndicator = 'orange';
             }
         }
 
