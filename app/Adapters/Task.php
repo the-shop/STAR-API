@@ -44,11 +44,6 @@ class Task implements AdaptersInterface
                 return $this->task;
             }
 
-            if ($this->task->passed_qa === true && $taskDeliveredOnTime === false) {
-                $this->task->colorIndicator = 'red';
-                return $this->task;
-            }
-
             if ($this->task->submitted_for_qa === true) {
                 $this->task->colorIndicator = 'blue';
                 return $this->task;
@@ -61,6 +56,11 @@ class Task implements AdaptersInterface
 
             if (($taskEstimatedSeconds - $taskStatus[$this->task->owner]['workSeconds']) <= $lastQuarterOfTask) {
                 $this->task->colorIndicator = 'orange';
+            }
+
+            if ($this->task->passed_qa === false && $taskDeliveredOnTime === false) {
+                $this->task->colorIndicator = 'red';
+                return $this->task;
             }
         }
 
