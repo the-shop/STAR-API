@@ -39,7 +39,8 @@ namespace {
                             'active' => 'boolean',
                             'valid' => 'boolean',
                             'employeeRole' => 'string',
-                            'employee' => 'boolean'
+                            'employee' => 'boolean',
+                            'skills' => 'array'
 
                         ],
                         'messages' => [
@@ -56,7 +57,8 @@ namespace {
                                     'trello',
                                     'github',
                                     'active',
-                                    'valid'
+                                    'valid',
+                                    'skills'
                                 ],
                                 'GET' => true,
                                 'DELETE' => false,
