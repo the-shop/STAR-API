@@ -16,20 +16,24 @@ class GenericModelHistory
             $oldValues = $event->model->getOriginal();
 
             $history = $event->model->history;
+            $date = new \DateTime();
+            $unixTime = $date->format('U');
             foreach ($newValues as $newField => $newValue) {
                 if (key_exists($newField, $oldValues)) {
                     $history[] = [
                         'profileId' => \Auth::user()->id,
                         'filedName' => $newField,
                         'oldValue' => $oldValues[$newField],
-                        'newValue' => $newValue
+                        'newValue' => $newValue,
+                        'timestamp' => (int) ($unixTime . '000') // Microtime
                     ];
                 } else {
                     $history[] = [
                         'profileId' => \Auth::user()->id,
                         'fieldName' => $newField,
                         'oldValue' => null,
-                        'newValue' => $newValue
+                        'newValue' => $newValue,
+                        'timestamp' => (int) ($unixTime . '000')
                     ];
                 }
             }
@@ -40,7 +44,8 @@ class GenericModelHistory
                         'profileId' => \Auth::user()->id,
                         'fieldName' => $oldFieldName,
                         'oldValue' => $oldFieldValue,
-                        'newValue' => null
+                        'newValue' => null,
+                        'timestamp' => (int) ($unixTime . '000')
                     ];
                 }
             }
