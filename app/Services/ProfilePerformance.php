@@ -136,27 +136,6 @@ class ProfilePerformance
         // We'll respond with array of performance per task owner (if task got reassigned for example)
         $response = [];
 
-        // Let's find last task owner
-        $taskOwner = null;
-        $startSecond = null;
-        foreach ($taskHistoryOriginal as $historyItem) {
-            // Check if valid record
-            if (array_key_exists('status', $historyItem) === false) {
-                continue;
-            }
-            // Check for assignment record
-            if ($historyItem['status'] === 'assigned' || $historyItem['status'] === 'claimed') {
-                $taskOwner = $historyItem['user'];
-                $startSecond = InputHandler::getUnixTimestamp($historyItem['timestamp']);
-                break;
-            }
-        }
-
-        // If task was never assigned, there's no performance, respond with empty array
-        if ($taskOwner === null) {
-            return $response;
-        }
-
         // Set defaults
         $userPerformance = [
             'taskCompleted' => false,
@@ -169,20 +148,37 @@ class ProfilePerformance
         $isQa = false;
         $isPaused = false;
 
+        var_dump($taskHistory);
+
+        $assignmentHistoryRecord = array_shift($taskHistory);
+
+        var_dump($taskHistory);
+
+        // If task was never assigned, there's no performance, respond with empty array
+        if ($assignmentHistoryRecord === null) {
+            return $response;
+        }
+
+        $taskOwner = $assignmentHistoryRecord['user'];
+        $startSecond = InputHandler::getUnixTimestamp($assignmentHistoryRecord['timestamp']);
+
         // Now let's start tracking time from time owner took over the task
         foreach ($taskHistory as $key => $historyItem) {
-            // Check if valid record
-            if (array_key_exists('status', $historyItem) === false) {
-                continue;
-            }
-
             $itemSecond = InputHandler::getUnixTimestamp($historyItem['timestamp']);
 
             // Let's skip records before last task owner for now including assignment time
-            if ($itemSecond <= $startSecond) {
+            if ($itemSecond < $startSecond) {
                 continue;
             }
-            
+
+            if ($itemSecond === $startSecond) {
+                $startSecond = (int) (new \DateTime())->format('U');
+            }
+
+            var_dump($itemSecond);
+            var_dump($startSecond);
+            var_dump($isWorking);
+
             // Check for assignment record
             if ($isWorking) {
                 $userPerformance['workSeconds'] += $itemSecond - $startSecond;
