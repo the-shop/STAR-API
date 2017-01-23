@@ -32,6 +32,7 @@ class TaskUpdateXP
         // Get project owner id
         GenericModel::setCollection('projects');
         $project = GenericModel::find($task->project_id);
+        $projectOwner = null;
         if ($project) {
             $projectOwner = Profile::find($project->acceptedBy);
         }
