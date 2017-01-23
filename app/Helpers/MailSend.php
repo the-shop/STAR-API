@@ -2,7 +2,6 @@
 
 namespace App\Helpers;
 
-
 class MailSend
 {
     /**
@@ -22,7 +21,9 @@ class MailSend
             $emailName = \Config::get('mail.private_mail_name');
 
             \Mail::send($view, $data, function ($message) use (
-                $profile, $emailFrom, $emailName,
+                $profile,
+                $emailFrom,
+                $emailName,
                 $subject
             ) {
                 $message->from($emailFrom, $emailName);
