@@ -155,7 +155,6 @@ class TrelloController extends Controller
             'created' => true,
             'listName' => $name
         ]);
-
     }
 
     /**
@@ -218,7 +217,6 @@ class TrelloController extends Controller
         return $this->jsonSuccess([
             'memberAdded' => true
         ]);
-
     }
 
     /**
@@ -248,7 +246,6 @@ class TrelloController extends Controller
         return $this->jsonSuccess([
             'memberRemoved' => true
         ]);
-
     }
 
     /**
@@ -275,7 +272,6 @@ class TrelloController extends Controller
             'dueDateSet' => true,
             'dueDate' => $datetime
         ]);
-
     }
 
     /**
@@ -358,6 +354,7 @@ class TrelloController extends Controller
      * @param $errors
      * @return array|bool
      */
+    // @codingStandardsIgnoreLine
     private function ticketIds($boardId = null, $id = null, &$errors)
     {
         if ($boardId === null) {
@@ -461,7 +458,6 @@ class TrelloController extends Controller
 
         if (empty($name)) {
             $errors[] = 'Invalid name field.';
-
         }
 
         if (empty($description)) {

@@ -125,6 +125,12 @@ class ProfilePerformance
         return $out;
     }
 
+    /**
+     * Outputs hash map with seconds spent in work, pause and qa together with flag is task completed
+     *
+     * @param GenericModel $task
+     * @return array
+     */
     public function perTask(GenericModel $task)
     {
         $task->confirmResourceOf('tasks');
@@ -165,32 +171,19 @@ class ProfilePerformance
             'pauseSeconds' => 0,
         ];
 
-        $isWorking = true;
-        $isQa = false;
+        $initialWorkLogAdded = false;
+        $wasWorking = false;
+        $wasQa = false;
+        $wasPaused = false;
+        $isWorking = false;
         $isPaused = false;
+        $isQa= false;
+
+        $qaPassed = false;
 
         // Now let's start tracking time from time owner took over the task
         foreach ($taskHistory as $key => $historyItem) {
-            // Check if valid record
-            if (array_key_exists('status', $historyItem) === false) {
-                continue;
-            }
-
             $itemSecond = InputHandler::getUnixTimestamp($historyItem['timestamp']);
-
-            // Let's skip records before last task owner for now including assignment time
-            if ($itemSecond <= $startSecond) {
-                continue;
-            }
-            
-            // Check for assignment record
-            if ($isWorking) {
-                $userPerformance['workSeconds'] += $itemSecond - $startSecond;
-            } elseif ($isPaused) {
-                $userPerformance['pauseSeconds'] += $itemSecond - $startSecond;
-            } elseif ($isQa) {
-                $userPerformance['qaSeconds'] += $itemSecond - $startSecond;
-            }
 
             $isWorking = $historyItem['status'] === 'resumed'
                 || $historyItem['status'] === 'assigned'
@@ -202,10 +195,58 @@ class ProfilePerformance
 
             $isPaused = $historyItem['status'] === 'paused';
 
+            // Check for assignment record
+            if ($isWorking && $wasPaused) {
+                $userPerformance['workSeconds'] += $itemSecond - $startSecond;
+            }
+
+            if (!$initialWorkLogAdded && !$isWorking) {
+                $initialWorkLogAdded = true;
+                $userPerformance['workSeconds'] += $itemSecond - $startSecond;
+            }
+
+            if ($isPaused && ($wasQa || $wasWorking)) {
+                $userPerformance['pauseSeconds'] += $itemSecond - $startSecond;
+            }
+
+            if ($isQa && ($wasPaused || $wasWorking)) {
+                $userPerformance['qaSeconds'] += $itemSecond - $startSecond;
+            }
+
+            $wasWorking = $historyItem['status'] === 'resumed'
+                || $historyItem['status'] === 'assigned'
+                || $historyItem['status'] === 'claimed';
+
+            $wasQa = $historyItem['status'] === 'qa_success'
+                || $historyItem['status'] === 'qa_ready'
+                || $historyItem['status'] === 'qa_fail';
+
+            $wasPaused = $historyItem['status'] === 'paused';
+
             $startSecond = $itemSecond;
+
+            if ($historyItem['status'] === 'qa_success') {
+                $qaPassed = true;
+            }
         }
 
-        $userPerformance['taskCompleted'] = $task->passed_qa === true;
+        // Let's just add diff based of last task state against current time if task not done yet
+        if (!$qaPassed) {
+            $itemSecond = (int) (new \DateTime())->format('U');
+            if (!$initialWorkLogAdded && !$initialWorkLogAdded) {
+                $userPerformance['workSeconds'] += $itemSecond - $startSecond;
+            }
+
+            if ($isPaused && ($wasQa || $wasWorking)) {
+                $userPerformance['pauseSeconds'] += $itemSecond - $startSecond;
+            }
+
+            if ($isQa && ($wasPaused || $wasWorking)) {
+                $userPerformance['qaSeconds'] += $itemSecond - $startSecond;
+            }
+        }
+
+        $userPerformance['taskCompleted'] = $qaPassed;
 
         $response[$taskOwner] = $userPerformance;
 

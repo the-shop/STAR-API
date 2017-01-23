@@ -23,5 +23,4 @@ class StarModel extends Eloquent
             });
         }
     }
-
 }
