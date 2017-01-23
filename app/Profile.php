@@ -37,6 +37,7 @@ class Profile extends StarModel implements AuthenticatableContract, CanResetPass
         'role',
         'employeeRole',
         'skills',
+        'minimumsMissed',
     ];
 
     /**
@@ -61,6 +62,7 @@ class Profile extends StarModel implements AuthenticatableContract, CanResetPass
 
         $model->xp = 50;
         $model->role = 'standard';
+        $model->minimumsMissed = 0;
 
         $model->save();
 
