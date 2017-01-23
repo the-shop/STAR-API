@@ -49,10 +49,10 @@ class MonthlyMinimumCheck extends Command
 
             $profilePerformance = new ProfilePerformance();
             $dateStart = new \DateTime();
-            $unixStart = $dateStart->modify('first day of last month');
+            $unixStart = $dateStart->modify('first day of last month')->format('U');
 
             $dateEnd = new \DateTime();
-            $unixEnd = $dateEnd->modify('last day of last month');
+            $unixEnd = $dateEnd->modify('last day of last month')->format('U');
 
             $performance = $profilePerformance->aggregateForTimeRange($profile, $unixStart, $unixEnd);
 
