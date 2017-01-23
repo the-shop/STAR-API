@@ -86,7 +86,8 @@ return [
             'High',
             'Medium',
             'Low'
-        ]
+        ],
+        'floatPrecision' => 2
     ],
 
     /**
