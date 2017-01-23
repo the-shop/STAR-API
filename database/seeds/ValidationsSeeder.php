@@ -74,8 +74,8 @@ namespace {
                         'fields' => [
                             'name' => 'required|alpha_num',
                             'description' => 'alpha_num',
-                            'start' => 'date',
-                            'end' => 'date',
+                            'start' => 'date_format:U',
+                            'end' => 'date_format:U',
                             'price' => 'alpha_num',
                             'trello_link' => 'alpha_dash',
                             'acceptedBy' => 'alpha_num',
