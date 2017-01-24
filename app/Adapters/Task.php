@@ -3,6 +3,7 @@
 namespace App\Adapters;
 
 use App\GenericModel;
+use App\Profile;
 use App\Services\ProfilePerformance;
 use Illuminate\Support\Facades\Auth;
 
@@ -19,13 +20,21 @@ class Task implements AdaptersInterface
     {
         $profilePerformance = new ProfilePerformance();
 
-        $mappedValues = $profilePerformance->getTaskValuesForProfile(Auth::user(), $this->task);
+        $profile = Auth::user();
+        if (!empty($this->task->owner)) {
+            $profile = Profile::find($this->task->owner);
+        }
+
+        $mappedValues = $profilePerformance->getTaskValuesForProfile($profile, $this->task);
+
+        $originalEstimate = $this->task->estimatedHours;
 
         foreach ($mappedValues as $key => $value) {
             $this->task->{$key} = $value;
         }
 
-        $this->task->estimatedHours = sprintf('%.2f', $this->task->estimatedHours);
+        $this->task->estimate = sprintf('%.2f', $this->task->estimatedHours);
+        $this->task->estimatedHours = $originalEstimate;
         $this->task->xp = sprintf('%.2f', $this->task->xp);
 
         $taskStatus = $profilePerformance->perTask($this->task);
