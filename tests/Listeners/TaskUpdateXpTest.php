@@ -18,9 +18,11 @@ class TaskUpdateXpTest extends TestCase
     {
         parent::setUp();
 
-        $this->setTaskOwner(new Profile());
+        $this->profile = Profile::create();
 
-        $this->projectOwner = new Profile();
+        $this->setTaskOwner($this->profile);
+
+        $this->projectOwner = Profile::create();
 
         $this->projectOwner->save();
         $this->profile->save();

@@ -4,7 +4,6 @@ namespace Tests\Collections;
 
 use App\GenericModel;
 use App\Profile;
-use phpDocumentor\Reflection\DocBlock\Tags\Generic;
 
 trait ProjectRelated
 {
