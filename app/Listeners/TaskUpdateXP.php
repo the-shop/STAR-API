@@ -47,11 +47,8 @@ class TaskUpdateXP
             GenericModel::setCollection('tasks');
             $mappedValues = $profilePerformance->getTaskValuesForProfile($taskOwnerProfile, $task);
             GenericModel::setCollection('projects');
-            foreach ($mappedValues as $key => $value) {
-                $task->{$key} = $value;
-            }
 
-            $estimatedSeconds = max(InputHandler::getInteger($task->estimatedHours) * 60 * 60, 1);
+            $estimatedSeconds = max(InputHandler::getInteger($mappedValues['estimatedHours']) * 60 * 60, 1);
 
             $secondsWorking = $taskDetails['workSeconds'];
 
@@ -73,7 +70,7 @@ class TaskUpdateXP
             if ($secondsWorking > 0 && $estimatedSeconds > 1) {
                 $xpDiff = 0;
                 $message = null;
-                $taskXp = (float) $taskOwnerProfile->xp <= 200 ? (float) $task->xp : 0;
+                $taskXp = (float) $taskOwnerProfile->xp <= 200 ? (float) $mappedValues['xp'] : 0;
                 if ($coefficient < 0.75) {
                     $xpDiff = $taskXp + 3 * $this->getDurationCoefficient($task, $taskOwnerProfile);
                     $message = 'Early task delivery: ' . $taskLink;
@@ -164,6 +161,9 @@ class TaskUpdateXP
      */
     private function getDurationCoefficient(GenericModel $task, Profile $taskOwner)
     {
+        $profilePerformance = new ProfilePerformance();
+        $mappedValues = $profilePerformance->getTaskValuesForProfile($taskOwner, $task);
+
         $profileCoefficient = 1;
         if ((float) $taskOwner->xp > 200 && (float) $taskOwner->xp <= 400) {
             $profileCoefficient = 0.8;
@@ -177,8 +177,8 @@ class TaskUpdateXP
             $profileCoefficient = 0.1;
         }
 
-        if ((int) $task->estimatedHours < 9) {
-            return ((int) $task->estimatedHours / 10) * $profileCoefficient;
+        if ((int) $mappedValues['estimatedHours'] < 9) {
+            return ((int) $mappedValues['estimatedHours'] / 10) * $profileCoefficient;
         }
 
         return 1;

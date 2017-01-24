@@ -6,8 +6,6 @@ use App\Events\GenericModelCreate;
 use App\Events\GenericModelUpdate;
 use App\GenericModel;
 use Illuminate\Http\Request;
-use App\Events\TaskUpdate;
-use MongoDB\BSON\ObjectID;
 
 /**
  * Class GenericResourceController
@@ -17,7 +15,7 @@ class GenericResourceController extends Controller
 {
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Database\Eloquent\Collection|\Illuminate\Http\JsonResponse|static[]
      */
     public function index(Request $request)
     {
@@ -104,7 +102,7 @@ class GenericResourceController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse|static
      */
     public function store(Request $request)
     {
