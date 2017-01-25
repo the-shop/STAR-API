@@ -37,6 +37,9 @@ namespace {
                             'App\Events\TaskSettingStatus' => [
                                 'App\Listeners\TaskSettingStatus'
                             ],
+                            'App\Events\TaskFinishedEarly' => [
+                                'App\Listeners\TaskFinishedEarly'
+                            ],
                             'App\Events\GenericModelHistory' => [
                                 'App\Listeners\GenericModelHistory'
                             ]
