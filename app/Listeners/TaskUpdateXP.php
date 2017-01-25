@@ -70,7 +70,7 @@ class TaskUpdateXP
             if ($secondsWorking > 0 && $estimatedSeconds > 1) {
                 $xpDiff = 0;
                 $message = null;
-                $taskXp = (float) $taskOwnerProfile->xp <= 200 ? (float) $mappedValues['xp'] : 0;
+                $taskXp = (float)$taskOwnerProfile->xp <= 200 ? (float)$mappedValues['xp'] : 0;
                 if ($coefficient < 0.75) {
                     $xpDiff = $taskXp + 3 * $this->getDurationCoefficient($task, $taskOwnerProfile);
                     $message = 'Early task delivery: ' . $taskLink;
@@ -78,7 +78,7 @@ class TaskUpdateXP
                     $xpDiff = $taskXp;
                     $message = 'Task delivery: ' . $taskLink;
                 } elseif ($coefficient > 1 && $coefficient <= 1.1) {
-                    $xpDiff =  -1;
+                    $xpDiff = -1;
                     $message = 'Late task delivery: ' . $taskLink;
                 } elseif ($coefficient > 1.1 && $coefficient <= 1.25) {
                     $xpDiff = -2;
@@ -97,13 +97,15 @@ class TaskUpdateXP
                     $records[] = [
                         'xp' => $xpDiff,
                         'details' => $message,
-                        'timestamp' => (int) ((new \DateTime())->format('U') . '000') // Microtime
+                        'timestamp' => (int)((new \DateTime())->format('U') . '000') // Microtime
                     ];
                     $profileXpRecord->records = $records;
                     $profileXpRecord->save();
 
                     $taskOwnerProfile->xp += $xpDiff;
                     $taskOwnerProfile->save();
+
+                    $this->sendSlackMessageXpUpdated($taskOwnerProfile, $task, $xpDiff);
                 }
             }
 
@@ -121,13 +123,15 @@ class TaskUpdateXP
                 $records[] = [
                     'xp' => $poXpDiff,
                     'details' => $poMessage,
-                    'timestamp' => (int) ((new \DateTime())->format('U') . '000') // Microtime
+                    'timestamp' => (int)((new \DateTime())->format('U') . '000') // Microtime
                 ];
                 $projectOwnerXpRecord->records = $records;
                 $projectOwnerXpRecord->save();
 
                 $projectOwner->xp += $poXpDiff;
                 $projectOwner->save();
+
+                $this->sendSlackMessageXpUpdated($projectOwner, $task, $poXpDiff);
             }
         }
 
@@ -165,22 +169,45 @@ class TaskUpdateXP
         $mappedValues = $profilePerformance->getTaskValuesForProfile($taskOwner, $task);
 
         $profileCoefficient = 1;
-        if ((float) $taskOwner->xp > 200 && (float) $taskOwner->xp <= 400) {
+        if ((float)$taskOwner->xp > 200 && (float)$taskOwner->xp <= 400) {
             $profileCoefficient = 0.8;
-        } elseif ((float) $taskOwner->xp > 400 && (float) $taskOwner->xp <= 600) {
+        } elseif ((float)$taskOwner->xp > 400 && (float)$taskOwner->xp <= 600) {
             $profileCoefficient = 0.6;
-        } elseif ((float) $taskOwner->xp > 600 && (float) $taskOwner->xp <= 800) {
+        } elseif ((float)$taskOwner->xp > 600 && (float)$taskOwner->xp <= 800) {
             $profileCoefficient = 0.4;
-        } elseif ((float) $taskOwner->xp > 800 && (float) $taskOwner->xp <= 1000) {
+        } elseif ((float)$taskOwner->xp > 800 && (float)$taskOwner->xp <= 1000) {
             $profileCoefficient = 0.2;
-        } elseif ((float) $taskOwner->xp > 1000) {
+        } elseif ((float)$taskOwner->xp > 1000) {
             $profileCoefficient = 0.1;
         }
 
-        if ((int) $mappedValues['estimatedHours'] < 9) {
-            return ((int) $mappedValues['estimatedHours'] / 10) * $profileCoefficient;
+        if ((int)$mappedValues['estimatedHours'] < 9) {
+            return ((int)$mappedValues['estimatedHours'] / 10) * $profileCoefficient;
         }
 
         return 1;
+    }
+
+    /**
+     * Send slack message about XP change
+     * @param $profile
+     * @param $task
+     * @param $xpDiff
+     */
+    private function sendSlackMessageXpUpdated($profile, $task, $xpDiff)
+    {
+        $xpUpdateMessage = Config::get('sharedSettings.internalConfiguration.profile_update_xp_message');
+        $webDomain = Config::get('sharedSettings.internalConfiguration.webDomain');
+        $recipient = '@' . $profile->slack;
+        $slackMessage = str_replace('{N}', ($xpDiff > 0 ? "+" . $xpDiff : $xpDiff), $xpUpdateMessage)
+            . ' '
+            . $webDomain
+            . 'projects/'
+            . $task->project_id
+            . '/sprints/'
+            . $task->sprint_id
+            . '/tasks/'
+            . $task->_id;
+        \SlackChat::message($recipient, $slackMessage);
     }
 }
