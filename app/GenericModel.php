@@ -75,4 +75,19 @@ class GenericModel extends StarModel
     {
         return self::$collectionName;
     }
+
+    /**
+     * Will force update of all fields on save
+     *
+     * @return $this
+     */
+    public function markAsDirty()
+    {
+        $idValue = array_key_exists('_id', $this->original) ? $this->original['_id'] : null;
+        $this->original = [];
+        if ($idValue !== null) {
+            $this->original['_id'] = $idValue;
+        }
+        return $this;
+    }
 }
