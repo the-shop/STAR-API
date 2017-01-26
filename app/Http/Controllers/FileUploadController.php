@@ -71,12 +71,18 @@ class FileUploadController extends Controller
         return $this->jsonSuccess($uploads);
     }
 
+    /**
+     * Deletes uploaded files
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteProjectUploads(Request $request)
     {
         GenericModel::setCollection('projects');
         $project = GenericModel::find($request->route('id'));
         if (!$project) {
-            return $this->jsonError(['Project with given ID not found'], 404);
+            return $this->jsonError(['Uploaded file with given ID not found'], 404);
         }
 
         GenericModel::setCollection('uploads');
