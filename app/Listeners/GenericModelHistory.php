@@ -51,7 +51,7 @@ class GenericModelHistory
             }
 
             $event->model->history = $history;
-            $event->model->save();
+            //$event->model->save();
         }
     }
 }
