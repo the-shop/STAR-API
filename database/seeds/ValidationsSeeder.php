@@ -70,7 +70,23 @@ namespace {
                                 'GET' => true,
                                 'DELETE' => false,
                                 'POST' => true
-                            ]
+                            ],
+                            'accountant' => [
+                                'editable' => [
+                                    'name',
+                                    'password',
+                                    'email',
+                                    'slack',
+                                    'trello',
+                                    'github',
+                                    'active',
+                                    'valid',
+                                    'skills'
+                                ],
+                                'GET' => true,
+                                'DELETE' => false,
+                                'POST' => false
+                            ],
                         ]
                     ],
                     [
