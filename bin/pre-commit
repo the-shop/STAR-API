@@ -44,4 +44,7 @@ then
 	fi
 fi
 
+echo "Running phpunit..."
+./vendor/bin/phpunit
+
 exit $?
