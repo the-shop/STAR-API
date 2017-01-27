@@ -334,10 +334,10 @@ class ProfilePerformance
         $costGrossMinimum = $this->calculateSalaryCostForAmount($realPayout, $coefficient);
         $grossMinimum = $this->calculateSalaryGrossForAmount($costGrossMinimum);
 
-        $aggregated['costTotal'] = round($costReal, 4);
-        $aggregated['minimalGrossPayout'] = round($grossMinimum, 4);
-        $aggregated['realGrossPayout'] = round($grossReal, 4);
-        $aggregated['grossBonusPayout'] = round($grossReal - $grossMinimum, 4);
+        $aggregated['costTotal'] = round($costReal, 2);
+        $aggregated['minimalGrossPayout'] = round($grossMinimum, 2);
+        $aggregated['realGrossPayout'] = round($grossReal, 2);
+        $aggregated['grossBonusPayout'] = round($grossReal - $grossMinimum, 2);
         $aggregated['costXpBasedPayout'] = $xpBasedPayout;
         $aggregated['employeeRole'] = $role;
         $aggregated['roleMinimumReached'] = $grossReal > $grossMinimum;
