@@ -48,7 +48,6 @@ class Kernel extends ConsoleKernel
             return Carbon::parse(LastWorkDay::getLastWorkingDay())->isToday();
         });
 
-
         $schedule->command('employee:minimum:check')
             ->monthlyOn(1, '08:00');
     }
