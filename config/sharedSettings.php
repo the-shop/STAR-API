@@ -5,6 +5,11 @@ return [
      * Fixed Star API configuration
      */
     'internalConfiguration' => [
+        'roles' => [
+            'admin' => 'Admin',
+            'standard' => 'Standard',
+            'accountant' => 'Accountant',
+        ],
         'employees' => [
             'roles' => [
                 'Apprentice' => [
