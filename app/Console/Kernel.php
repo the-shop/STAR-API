@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Helpers\WorkDays;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Carbon\Carbon;
@@ -45,7 +46,9 @@ class Kernel extends ConsoleKernel
             ->at('08:00');
 
         $schedule->command('email:profile:performance 0 --accountants')->when(function () {
-            return Carbon::parse(LastWorkDay::getLastWorkingDay())->isToday();
+            $workDays = WorkDays::getWorkDays();
+            $lastWorkDay = end($workDays);
+            return Carbon::parse($lastWorkDay)->isToday();
         });
 
         $schedule->command('employee:minimum:check')

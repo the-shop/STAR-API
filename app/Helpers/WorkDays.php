@@ -5,15 +5,15 @@ namespace App\Helpers;
 use Carbon\Carbon;
 
 /**
- * Return date of last day of month that is not weekend
- * Class LastWorkDay
+ * Return list of work days (week days)
+ * Class WorkDays
  * @package App\Helpers
  */
-class LastWorkDay
+class WorkDays
 {
-    public static function getLastWorkingDay()
+    public static function getWorkDays()
     {
-        $firstDayOfMonth  = Carbon::now()->firstOfMonth();
+        $firstDayOfMonth = Carbon::now()->firstOfMonth();
         $lastDayOfMonth = Carbon::now()->endOfMonth();
 
         $dates = [];
@@ -24,6 +24,6 @@ class LastWorkDay
             }
         }
 
-        return end($dates);
+        return $dates;
     }
 }
