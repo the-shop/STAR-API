@@ -67,21 +67,21 @@ class EmailProfilePerformance extends Command
             $adminAggregation[] = $data;
         }
 
-        $admins = Profile::where('admin', '=', true)->get();
+        $overviewRecipients = Profile::where('admin', '=', true)->get();
 
         //if option is passed get all admins and profiles with accountant role
         if ($this->option('accountants')) {
-            $admins = Profile::where('admin', '=', true)
+            $overviewRecipients = Profile::where('admin', '=', true)
                 ->orWhere('role', '=', 'accountant')
                 ->get();
         }
 
-        foreach ($admins as $admin) {
+        foreach ($overviewRecipients as $recipient) {
             $view = $this->option('accountants') ? 'emails.profile.salary-performance-report'
                 : 'emails.profile.admin-performance-report';
             $subject = Config::get('mail.admin_performance_email_subject');
 
-            MailSend::send($view, ['reports' => $adminAggregation], $admin, $subject);
+            MailSend::send($view, ['reports' => $adminAggregation], $recipient, $subject);
         }
     }
 }
