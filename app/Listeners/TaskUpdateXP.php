@@ -72,7 +72,7 @@ class TaskUpdateXP
                 $message = null;
                 $taskXp = (float)$taskOwnerProfile->xp <= 200 ? (float)$mappedValues['xp'] : 0;
                 if ($coefficient < 0.75) {
-                    $xpDiff = $taskXp + 3 * $this->getDurationCoefficient($task, $taskOwnerProfile);
+                    $xpDiff = $taskXp * $this->getDurationCoefficient($task, $taskOwnerProfile);
                     $message = 'Early task delivery: ' . $taskLink;
                 } elseif ($coefficient >= 0.75 && $coefficient <= 1) {
                     $xpDiff = $taskXp;
@@ -168,7 +168,7 @@ class TaskUpdateXP
         $profilePerformance = new ProfilePerformance();
         $mappedValues = $profilePerformance->getTaskValuesForProfile($taskOwner, $task);
 
-        $profileCoefficient = 1;
+        $profileCoefficient = 0.9;
         if ((float)$taskOwner->xp > 200 && (float)$taskOwner->xp <= 400) {
             $profileCoefficient = 0.8;
         } elseif ((float)$taskOwner->xp > 400 && (float)$taskOwner->xp <= 600) {
@@ -181,11 +181,11 @@ class TaskUpdateXP
             $profileCoefficient = 0.1;
         }
 
-        if ((int)$mappedValues['estimatedHours'] < 9) {
+        if ((int)$mappedValues['estimatedHours'] < 10) {
             return ((int)$mappedValues['estimatedHours'] / 10) * $profileCoefficient;
         }
 
-        return 1;
+        return $profileCoefficient;
     }
 
     /**
