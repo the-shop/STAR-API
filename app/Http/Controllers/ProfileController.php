@@ -72,6 +72,13 @@ class ProfileController extends Controller
         return $this->jsonSuccess($performance->aggregateForTimeRange($profile, $startDate, $endDate));
     }
 
+    public function getPerformancePerTask()
+    {
+        $performance = new ProfilePerformance();
+
+        return $performance->perTask();
+    }
+
     /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
