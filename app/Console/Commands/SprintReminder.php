@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\InputHandler;
 use Illuminate\Console\Command;
 use App\GenericModel;
 
@@ -48,7 +49,9 @@ class SprintReminder extends Command
                 GenericModel::setCollection('sprints');
                 foreach ($project->sprints as $sprintId) {
                     $sprint = GenericModel::where('_id', '=', $sprintId)->first();
-                    if ($unixDate >= $sprint->start && $unixDate <= $sprint->end) {
+                    if ($unixDate >= InputHandler::getUnixTimestamp($sprint->start)
+                        && InputHandler::getUnixTimestamp($unixDate <= $sprint->end)
+                    ) {
                         $sprints[$sprintId] = $sprint;
                     }
                 }
