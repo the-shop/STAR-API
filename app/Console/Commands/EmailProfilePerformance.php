@@ -43,8 +43,10 @@ class EmailProfilePerformance extends Command
         $unixNow = (new \DateTime())->format('U');
         $unixAgo = $unixNow - (int)$daysAgo * 24 * 60 * 60;
 
+        $forAccountants = $this->option('accountants');
+
         //if option is passed set date range from 1st day of current month until last day of current month
-        if ($this->option('accountants')) {
+        if ($forAccountants) {
             $unixNow = Carbon::now()->endOfMonth()->format('U');
             $unixAgo = Carbon::now()->firstOfMonth()->format('U');
         }
@@ -52,6 +54,10 @@ class EmailProfilePerformance extends Command
         $adminAggregation = [];
 
         foreach ($profiles as $profile) {
+            if ($forAccountants && !$profile->employee) {
+                continue;
+            }
+
             $data = $performance->aggregateForTimeRange($profile, $unixAgo, $unixNow);
             $data['name'] = $profile->name;
             $data['fromDate'] = \DateTime::createFromFormat('U', $unixAgo)->format('Y-m-d');
