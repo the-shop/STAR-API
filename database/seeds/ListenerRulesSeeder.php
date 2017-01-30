@@ -45,6 +45,15 @@ namespace {
                             ],
                             'App\Events\GenericModelHistory' => [
                                 'App\Listeners\GenericModelHistory'
+                            ],
+                        ]
+                    ],
+                    [
+                        'resource' => 'projects',
+                        'event' => 'update',
+                        'listeners' => [
+                            'App\Events\ProjectMembers' => [
+                                'App\Listeners\ProjectMembers'
                             ]
                         ]
                     ],
