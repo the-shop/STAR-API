@@ -49,11 +49,11 @@
             "php artisan optimize"
         ],
         "pre-update-cmd": [
-            "php artisan clear-compiled"
+            "php artisan clear-compiled",
+            "bash bin/setup.sh"
         ],
         "post-update-cmd": [
-            "php artisan optimize",
-            "bash bin/setup.sh"
+            "php artisan optimize"
         ]
     },
     "config": {
