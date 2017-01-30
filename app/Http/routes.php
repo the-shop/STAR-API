@@ -53,7 +53,7 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
         Route::get('configuration', 'ConfigurationController@getConfiguration');
         Route::post('email', 'EmailController@sendEmail');
         Route::post('upload', 'FileUploadController@uploadFile');
-        Route::get('profiles/{id}/performance/task', 'ProfileController@getPerformance');
+        Route::get('profiles/{id}/task', 'ProfileController@getPerformancePerTask');
 
         /**
          * Generic resources routes
