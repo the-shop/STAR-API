@@ -9,6 +9,9 @@ use Vluzrmos\SlackApi\Facades\SlackChat;
 
 class ProjectMembers
 {
+    const STATUS_ADDED = true;
+    const STATUS_REMOVED = false;
+    
     /**
      * Handle the event
      * @param \App\Events\ProjectMembers $event
@@ -26,7 +29,7 @@ class ProjectMembers
                     if (!in_array($newMemberId, $oldFields['members'])) {
                         $member = Profile::find($newMemberId);
                         if ($member->slack) {
-                            $this->slackMessageUser($member, $project, true);
+                            $this->slackMessageUser($member, $project, self::STATUS_ADDED);
                         }
                     }
                 }
@@ -35,7 +38,7 @@ class ProjectMembers
                     if (!in_array($oldMemberId, $updatedFields['members'])) {
                         $member = Profile::find($oldMemberId);
                         if ($member->slack) {
-                            $this->slackMessageUser($member, $project, false);
+                            $this->slackMessageUser($member, $project, self::STATUS_REMOVED);
                         }
                     }
                 }
@@ -54,7 +57,7 @@ class ProjectMembers
         $webDomain = Config::get('sharedSettings.internalConfiguration.webDomain');
         $recipient = '@' . $profile->slack;
         $message = 'Hey, you\'ve just been'
-            . ($status === true ? ' added to ' : ' removed from ')
+            . ($status === self::STATUS_ADDED ? ' added to ' : ' removed from ')
             . 'project '
             . $project->name
             . ' ('
