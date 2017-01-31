@@ -76,7 +76,7 @@ class ProfileController extends Controller
     public function getPerformancePerTask(Request $request)
     {
         GenericModel::setCollection('tasks');
-        $task = GenericModel::find($request->route('ID'));
+        $task = GenericModel::find($request->route('taskId'));
 
         if (!$task) {
             return $this->jsonError(
