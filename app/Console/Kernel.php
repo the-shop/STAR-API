@@ -46,7 +46,7 @@ class Kernel extends ConsoleKernel
             ->at('08:00');
 
         $schedule->command('email:profile:performance 0 --accountants')
-            ->dailyAt('16:09')
+            ->dailyAt('16:00')
             ->when(function () {
                 $workDays = WorkDays::getWorkDays();
                 $lastWorkDay = end($workDays);
