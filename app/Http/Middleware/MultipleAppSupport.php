@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Support\Facades\Config;
 
 class MultipleAppSupport
 {
@@ -16,10 +17,15 @@ class MultipleAppSupport
     public function handle($request, Closure $next)
     {
         $requestDbName = strtolower($request->route('appName'));
-        $dbName = \Config::get('database.connections.mongodb.database');
+        $coreDbName = Config::get('sharedSettings.internalConfiguration.coreDatabaseName');
+        if ($requestDbName === $coreDbName) {
+            return $next($request);
+        }
+
+        $dbName = Config::get('database.connections.mongodb.database');
 
         if ($dbName !== $requestDbName) {
-            \Config::set('database.connections.mongodb.database', $requestDbName);
+            Config::set('database.connections.mongodb.database', $requestDbName);
         }
 
         return $next($request);

@@ -92,7 +92,8 @@ return [
             'Medium',
             'Low'
         ],
-        'floatPrecision' => 2
+        'floatPrecision' => 2,
+        'coreDatabaseName' => 'core'
     ],
 
     /**

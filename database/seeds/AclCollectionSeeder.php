@@ -79,7 +79,15 @@ namespace {
                                 'api/v1/app/{appName}/profiles/{profiles}'
                             ]
                         ]
-                    ]
+                    ],
+                    [
+                        'name' => 'admin',
+                        'allows' => [
+                            'POST' => [
+                                'api/v1/app/{appName}/{resource}/register'
+                            ],
+                        ]
+                    ],
                 ]
             );
         }
