@@ -271,8 +271,11 @@ class ProfilePerformance
         // Award xp based on complexity
         $xpAward = $xp <= 200 ? $taskComplexity * $estimatedHours * 10 / $xp : 0;
 
+        $hourlyRate = Config::get('sharedSettings.internalConfiguration.hourlyRate');
+
         $out = [];
         $out['xp'] = $xpAward;
+        $out['payout'] = InputHandler::getFloat($hourlyRate) * $task->estimatedHours;
         $out['estimatedHours'] = $estimatedHours;
 
         return $out;
