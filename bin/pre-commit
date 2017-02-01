@@ -44,4 +44,7 @@ then
 	fi
 fi
 
+echo "Running phpunit..."
+vagrant ssh --command "/var/www/BoxData/GenericLAMP/starapi; ./vendor/bin/phpunit"
+
 exit $?
