@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use MongoDB\Database;
 
 class MultipleAppSupport
 {
@@ -24,7 +26,19 @@ class MultipleAppSupport
 
         $dbName = Config::get('database.connections.mongodb.database');
 
-        if ($dbName !== $requestDbName) {
+        //get list of all databases
+        $listExistingDatabases = DB::connection('mongodbAdmin')->command(['listDatabases' => true]);
+
+        $databaseNames = [];
+        foreach ($listExistingDatabases as $dbResult) {
+            $databasesBsonList = $dbResult->databases->getArrayCopy();
+            foreach ($databasesBsonList as $dbInfo) {
+                $databaseNames[] = $dbInfo->name;
+            }
+        }
+
+        //if database exists set database name
+        if ($dbName !== $requestDbName && in_array($requestDbName, $databaseNames)) {
             Config::set('database.connections.mongodb.database', $requestDbName);
         }
 
