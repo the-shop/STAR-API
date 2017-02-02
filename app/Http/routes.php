@@ -53,6 +53,7 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
         Route::get('configuration', 'ConfigurationController@getConfiguration');
         Route::post('email', 'EmailController@sendEmail');
         Route::post('upload', 'FileUploadController@uploadFile');
+        Route::delete('upload/{projectId}/project', 'FileUploadController@deleteProjectUploads');
         Route::get('tasks/{taskId}/performance', 'ProfileController@getPerformancePerTask');
 
 
