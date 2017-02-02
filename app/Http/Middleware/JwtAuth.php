@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\GenericModel;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Middleware\BaseMiddleware;
 
 class JwtAuth extends BaseMiddleware
@@ -27,8 +29,19 @@ class JwtAuth extends BaseMiddleware
         GenericModel::setCollection('profiles');
 
         $userCheck = \Auth::user();
+
         if ($userCheck === null) {
             return $this->respond('tymon.jwt.absent', 'Not logged in.', 400);
+        }
+
+        $coreDatabaseName = \Config::get('sharedSettings.internalConfiguration.coreDatabaseName');
+        //if user is admin and request route is core database, set connection and allow admins to write into database
+        if ($userCheck->admin === true && $coreDatabaseName === strtolower($request->route('appName'))) {
+            $defaultDb = Config::get('database.default');
+            Config::set('database.connections.mongodb.database', $coreDatabaseName);
+            DB::purge($defaultDb);
+            DB::connection($defaultDb);
+            return $next($request);
         }
 
         if (GenericModel::where('email', '=', $userCheck->email)->first() === null) {

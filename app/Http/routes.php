@@ -55,6 +55,7 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
         Route::post('upload', 'FileUploadController@uploadFile');
         Route::get('tasks/{taskId}/performance', 'ProfileController@getPerformancePerTask');
 
+
         /**
          * Generic resources routes
          *
@@ -66,6 +67,7 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
         Route::post('{resource}', 'GenericResourceController@store')->middleware(['the-shop.genericResource', 'adapters']);
         Route::put('{resource}/{id}', 'GenericResourceController@update')->middleware(['the-shop.genericResource', 'adapters']);
         Route::delete('{resource}/{id}', 'GenericResourceController@destroy')->middleware(['the-shop.genericResource', 'adapters']);
+        Route::post('{resource}/register', 'GenericResourceController@store')->middleware(['the-shop.genericResource', 'adapters']);
     });
 });
 

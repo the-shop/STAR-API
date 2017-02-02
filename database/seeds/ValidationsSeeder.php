@@ -21,6 +21,8 @@ namespace {
             DB::collection('validations')->where('resource', 'xp')->delete();
             DB::collection('validations')->where('resource', 'comments')->delete();
             DB::collection('validations')->where('resource', 'uploads')->delete();
+            DB::collection('validations')->where('resource', 'applications')->delete();
+
             DB::collection('validations')->delete();
 
             // Insert records into validations collection
@@ -209,6 +211,22 @@ namespace {
                             'fileUrl' => 'required|string',
                         ],
                         'resource' => 'uploads',
+                        'acl' => [
+                            'standard' => [
+                                'editable' => [],
+                                'GET' => true,
+                                'DELETE' => false,
+                                'POST' => false,
+                                'updateOwn' => false
+                            ]
+                        ]
+                    ],
+                    [
+                        'fields' => [
+                            'appName' => 'required:string',
+                            'dbSlug' => 'required:string'
+                        ],
+                        'resource' => 'applications',
                         'acl' => [
                             'standard' => [
                                 'editable' => [],
