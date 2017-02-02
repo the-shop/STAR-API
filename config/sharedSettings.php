@@ -5,6 +5,12 @@ return [
      * Fixed Star API configuration
      */
     'internalConfiguration' => [
+        'roles' => [
+            'admin' => 'Admin',
+            'standard' => 'Standard',
+            'accountant' => 'Accountant',
+        ],
+        'hourlyRate' => 500,
         'employees' => [
             'roles' => [
                 'Apprentice' => [
@@ -87,7 +93,8 @@ return [
             'Medium',
             'Low'
         ],
-        'floatPrecision' => 2
+        'floatPrecision' => 2,
+        'coreDatabaseName' => 'core'
     ],
 
     /**

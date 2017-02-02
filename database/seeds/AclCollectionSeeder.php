@@ -19,6 +19,7 @@ namespace {
             // Delete previously seeded records from acl collection
             DB::collection('acl')->where('name', 'guest')->delete();
             DB::collection('acl')->where('name', 'standard')->delete();
+            DB::collection('acl')->where('name', 'accountant')->delete();
 
             // Insert records into acl collection
             DB::collection('acl')->insert(
@@ -58,7 +59,35 @@ namespace {
                                 'api/v1/app/{appName}/login'
                             ],
                         ]
-                    ]
+                    ],
+                    [
+                        'name' => 'accountant',
+                        'allows' => [
+                            'GET' => [
+                                "api/v1/app/{appName}/profiles",
+                                "api/v1/app/{appName}/profiles/{profiles}",
+                                "api/v1/app/{appName}/configuration"
+                            ],
+                            'PUT' => [
+                                'api/v1/app/{appName}/profiles/changePassword',
+                                'api/v1/app/{appName}/profiles/{profiles}'
+                            ],
+                            'POST' => [
+                                'api/v1/app/{appName}/slack/message'
+                            ],
+                            'PATCH' => [
+                                'api/v1/app/{appName}/profiles/{profiles}'
+                            ]
+                        ]
+                    ],
+                    [
+                        'name' => 'admin',
+                        'allows' => [
+                            'POST' => [
+                                'api/v1/app/{appName}/{resource}/register'
+                            ],
+                        ]
+                    ],
                 ]
             );
         }

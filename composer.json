@@ -53,7 +53,8 @@
             "php artisan clear-compiled"
         ],
         "post-update-cmd": [
-            "php artisan optimize"
+            "php artisan optimize",
+            "bash bin/setup.sh"
         ]
     },
     "config": {

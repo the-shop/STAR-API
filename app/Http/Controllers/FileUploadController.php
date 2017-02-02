@@ -71,6 +71,7 @@ class FileUploadController extends Controller
         return $this->jsonSuccess($uploads);
     }
 
+
     /**
      * Deletes uploaded files
      *
@@ -94,4 +95,5 @@ class FileUploadController extends Controller
 
         return $this->jsonSuccess($uploads);
     }
+
 }

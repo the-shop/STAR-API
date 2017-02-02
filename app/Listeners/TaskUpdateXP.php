@@ -52,7 +52,7 @@ class TaskUpdateXP
 
             $secondsWorking = $taskDetails['workSeconds'];
 
-            $coefficient = $secondsWorking / $estimatedSeconds;
+            $taskSpeedCoefficient = $secondsWorking / $estimatedSeconds;
 
             $webDomain = Config::get('sharedSettings.internalConfiguration.webDomain');
             $taskLink = '['
@@ -70,20 +70,17 @@ class TaskUpdateXP
             if ($secondsWorking > 0 && $estimatedSeconds > 1) {
                 $xpDiff = 0;
                 $message = null;
-                $taskXp = (float)$taskOwnerProfile->xp <= 200 ? (float)$mappedValues['xp'] : 0;
-                if ($coefficient < 0.75) {
-                    $xpDiff = $taskXp + 3 * $this->getDurationCoefficient($task, $taskOwnerProfile);
+                $taskXp = (float)$taskOwnerProfile->xp <= 200 ? (float)$mappedValues['xp'] : 1.0;
+                if ($taskSpeedCoefficient < 0.75) {
+                    $xpDiff = $taskXp * $this->getDurationCoefficient($task, $taskOwnerProfile);
                     $message = 'Early task delivery: ' . $taskLink;
-                } elseif ($coefficient >= 0.75 && $coefficient <= 1) {
-                    $xpDiff = $taskXp;
-                    $message = 'Task delivery: ' . $taskLink;
-                } elseif ($coefficient > 1 && $coefficient <= 1.1) {
+                } elseif ($taskSpeedCoefficient > 1 && $taskSpeedCoefficient <= 1.1) {
                     $xpDiff = -1;
                     $message = 'Late task delivery: ' . $taskLink;
-                } elseif ($coefficient > 1.1 && $coefficient <= 1.25) {
+                } elseif ($taskSpeedCoefficient > 1.1 && $taskSpeedCoefficient <= 1.25) {
                     $xpDiff = -2;
                     $message = 'Late task delivery: ' . $taskLink;
-                } elseif ($coefficient > 1.25) {
+                } elseif ($taskSpeedCoefficient > 1.25) {
                     $xpDiff = -3;
                     $message = 'Late task delivery: ' . $taskLink;
                 } else {
@@ -168,7 +165,7 @@ class TaskUpdateXP
         $profilePerformance = new ProfilePerformance();
         $mappedValues = $profilePerformance->getTaskValuesForProfile($taskOwner, $task);
 
-        $profileCoefficient = 1;
+        $profileCoefficient = 0.9;
         if ((float)$taskOwner->xp > 200 && (float)$taskOwner->xp <= 400) {
             $profileCoefficient = 0.8;
         } elseif ((float)$taskOwner->xp > 400 && (float)$taskOwner->xp <= 600) {
@@ -181,11 +178,11 @@ class TaskUpdateXP
             $profileCoefficient = 0.1;
         }
 
-        if ((int)$mappedValues['estimatedHours'] < 9) {
+        if ((int)$mappedValues['estimatedHours'] < 10) {
             return ((int)$mappedValues['estimatedHours'] / 10) * $profileCoefficient;
         }
 
-        return 1;
+        return $profileCoefficient;
     }
 
     /**
@@ -200,14 +197,17 @@ class TaskUpdateXP
         $webDomain = Config::get('sharedSettings.internalConfiguration.webDomain');
         $recipient = '@' . $profile->slack;
         $slackMessage = str_replace('{N}', ($xpDiff > 0 ? "+" . $xpDiff : $xpDiff), $xpUpdateMessage)
-            . ' '
+            . ' *'
+            . $task->title
+            . '* ('
             . $webDomain
             . 'projects/'
             . $task->project_id
             . '/sprints/'
             . $task->sprint_id
             . '/tasks/'
-            . $task->_id;
+            . $task->_id
+            . ')';
         \SlackChat::message($recipient, $slackMessage);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\ProfileUpdate;
+use App\GenericModel;
 use App\Helpers\InputHandler;
 use App\Services\ProfilePerformance;
 use Illuminate\Support\Facades\Auth;
@@ -70,6 +71,23 @@ class ProfileController extends Controller
         $performance = new ProfilePerformance();
 
         return $this->jsonSuccess($performance->aggregateForTimeRange($profile, $startDate, $endDate));
+    }
+
+    public function getPerformancePerTask(Request $request)
+    {
+        GenericModel::setCollection('tasks');
+        $task = GenericModel::find($request->route('taskId'));
+
+        if (!$task) {
+            return $this->jsonError(
+                ['Task not found'],
+                404
+            );
+        }
+
+        $performance = new ProfilePerformance();
+
+        return $this->jsonSuccess($performance->perTask($task));
     }
 
     /**

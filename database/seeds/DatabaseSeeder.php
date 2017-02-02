@@ -4,6 +4,7 @@ namespace
 
 {
     use Illuminate\Database\Seeder;
+    use Illuminate\Support\Facades\Artisan;
 
     class DatabaseSeeder extends Seeder
     {
@@ -19,6 +20,7 @@ namespace
             $this->call(ListenerRulesSeeder::class);
             $this->call(AdapterRulesSeeder::class);
             $this->call(UserRolesSeeder::class);
+            $this->call(ApplicationRegistrationSeeder::class);
         }
     }
 }

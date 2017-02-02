@@ -2,8 +2,11 @@
 
 namespace App\Console;
 
+use App\Helpers\WorkDays;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Carbon\Carbon;
+use App\Helpers\LastWorkDay;
 
 class Kernel extends ConsoleKernel
 {
@@ -17,7 +20,8 @@ class Kernel extends ConsoleKernel
         Commands\XpDeduction::class,
         Commands\UnfinishedTasks::class,
         Commands\EmailProfilePerformance::class,
-        Commands\MonthlyMinimumCheck::class
+        Commands\MonthlyMinimumCheck::class,
+        Commands\NotifyAdminsTaskDeadline::class
     ];
 
     /**
@@ -42,7 +46,18 @@ class Kernel extends ConsoleKernel
             ->mondays()
             ->at('08:00');
 
+        $schedule->command('email:profile:performance 0 --accountants')
+            ->dailyAt('16:00')
+            ->when(function () {
+                $workDays = WorkDays::getWorkDays();
+                $lastWorkDay = end($workDays);
+                return Carbon::parse($lastWorkDay)->isToday();
+            });
+
         $schedule->command('employee:minimum:check')
             ->monthlyOn(1, '08:00');
+
+        $schedule->command('ping:admins:task:deadline')
+            ->dailyAt('09:00');
     }
 }
