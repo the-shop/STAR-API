@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\GenericModel;
 use App\Helpers\InputHandler;
+use App\Helpers\WorkDays;
 use App\Profile;
 use Illuminate\Support\Facades\Config;
 
@@ -32,6 +33,7 @@ class ProfilePerformance
         $totalPayoutExternal = 0;
         $realPayoutExternal = 0;
         $xpDiff = 0;
+        $numberOfDays = (int)abs($unixEnd - $unixStart) / (24 * 60 * 60);
 
         $loadedProjects = [];
 
@@ -44,7 +46,7 @@ class ProfilePerformance
             }
 
             // Check if tasks is in selected time range and delivered
-            $estimatedHours += (float) $task->estimatedHours;
+            $estimatedHours += (float)$task->estimatedHours;
             $deliveredTask = false;
             $taskInTimeRange = false;
             foreach ($task->task_history as $historyItem) {
@@ -82,7 +84,8 @@ class ProfilePerformance
             }
 
             if ($deliveredTask === true) {
-                $hoursDelivered += (int) $task->estimatedHours;
+                $hoursDelivered += (int)$task->estimatedHours;
+
 
                 if ($isInternalProject) {
                     $realPayoutInternal += $task->payout;
@@ -121,6 +124,7 @@ class ProfilePerformance
         ];
 
         $out = array_merge($out, $this->calculateSalary($out, $profile));
+        $out = array_merge($out, $this->calculateEarningEstimation($out, $numberOfDays));
 
         return $out;
     }
@@ -177,7 +181,7 @@ class ProfilePerformance
         $wasPaused = false;
         $isWorking = false;
         $isPaused = false;
-        $isQa= false;
+        $isQa = false;
 
         $qaPassed = false;
 
@@ -232,7 +236,7 @@ class ProfilePerformance
 
         // Let's just add diff based of last task state against current time if task not done yet
         if (!$qaPassed) {
-            $itemSecond = (int) (new \DateTime())->format('U');
+            $itemSecond = (int)(new \DateTime())->format('U');
             if (!$initialWorkLogAdded && !$initialWorkLogAdded) {
                 $userPerformance['workSeconds'] += $itemSecond - $startSecond;
             }
@@ -262,11 +266,11 @@ class ProfilePerformance
      */
     public function getTaskValuesForProfile(Profile $profile, GenericModel $task)
     {
-        $xp = (float) $profile->xp;
+        $xp = (float)$profile->xp;
 
-        $taskComplexity = max((int) $task->complexity, 1);
+        $taskComplexity = max((int)$task->complexity, 1);
 
-        $estimatedHours = (float) $task->estimatedHours * 1000 / min($xp, 1000);
+        $estimatedHours = (float)$task->estimatedHours * 1000 / min($xp, 1000);
 
         // Award xp based on complexity
         $xpAward = $xp <= 200 ? $taskComplexity * $estimatedHours * 10 / $xp : 0;
@@ -313,7 +317,7 @@ class ProfilePerformance
         $realPayout = $minimum;
 
         // Adjust payout based on XP
-        $xpInRange = (float) $profile->xp - $xpEntryPoint;
+        $xpInRange = (float)$profile->xp - $xpEntryPoint;
 
         if ($xpInRange < 0) {
             $xpInRange = 0;
@@ -393,5 +397,35 @@ class ProfilePerformance
         }
 
         return $float;
+    }
+
+    /**
+     * Calculate earning estimation
+     * @param array $aggregated
+     * @param $numberOfDays
+     * @return array
+     */
+    private function calculateEarningEstimation(array $aggregated, $numberOfDays)
+    {
+        $monthWorkDays = WorkDays::getWorkDays();
+
+        $expectedPercentage = $aggregated['totalPayoutCombined'] === 0 ? sprintf("%d%%", 0) :
+            sprintf("%d%%", ($aggregated['totalPayoutCombined'] / $aggregated['roleMinimum']) * 100);
+
+        $earnedPercentage = $aggregated['realPayoutCombined'] === 0 ? sprintf("%d%%", 0) :
+            sprintf("%d%%", ($aggregated['realPayoutCombined'] / $aggregated['roleMinimum']) * 100);
+
+        $monthlyProjection = $aggregated['realPayoutCombined'] === 0 ? 0 :
+            ($aggregated['realPayoutCombined'] / $numberOfDays) * count($monthWorkDays);
+
+        $monthlyProjectionPercentage = $monthlyProjection === 0 ? sprintf("%d%%", 0) :
+            sprintf("%d%%", ($monthlyProjection / $aggregated['roleMinimum']) * 100);
+
+        $aggregated['earnedPercentage'] = $earnedPercentage;
+        $aggregated['expectedPercentage'] = $expectedPercentage;
+        $aggregated['monthPrediction'] = $this->roundFloat($monthlyProjection, 2, 10);
+        $aggregated['monthPredictionPercentage'] = $monthlyProjectionPercentage;
+
+        return $aggregated;
     }
 }
