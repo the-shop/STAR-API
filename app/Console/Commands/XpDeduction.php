@@ -85,7 +85,7 @@ class XpDeduction extends Command
                     continue;
                 }
 
-                if (!key_exists($user->_id, $logHashMap) && $daysChecked === 4) {
+                if (!key_exists($user->_id, $logHashMap) && $daysChecked === 4 && $user->role === 'standard') {
                     $profile = $profileHashMap[$user->_id];
                     if ($profile->xp - 1 == 0) {
                         $profile->banned = true;
