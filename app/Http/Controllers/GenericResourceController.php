@@ -43,7 +43,11 @@ class GenericResourceController extends Controller
                 if (in_array($key, $skipParams)) {
                     continue;
                 }
-                $query->where($key, '=', $value);
+                if (is_array($value)) {
+                    $query->whereIn($key, $value);
+                } else {
+                    $query->where($key, '=', $value);
+                }
             }
         }
 
