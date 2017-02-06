@@ -30,13 +30,20 @@ class GenericResourceController extends Controller
         $errors = [];
 
         // Validate query params based on request params
-        if ($request->has('searchField') && $request->has('searchQuery')) {
-            $searchField = $request->get('searchField');
-            $searchQuery = '%' . $request->get('searchQuery') . '%';
-            if ($request->input('searchExact', null)) {
-                $query->where($searchField, '=', $request->get('searchQuery'));
-            } else {
-                $query->where($searchField, 'LIKE', $searchQuery);
+        if (!empty($request->all())) {
+            $allParams = $request->all();
+            $skipParams = [
+                'orderBy',
+                'orderDirection',
+                'offset',
+                'limit'
+            ];
+
+            foreach ($allParams as $key => $value) {
+                if (in_array($key, $skipParams)) {
+                    continue;
+                }
+                $query->where($key, '=', $value);
             }
         }
 
