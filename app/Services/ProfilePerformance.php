@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\GenericModel;
 use App\Helpers\InputHandler;
+use App\Helpers\WorkDays;
 use App\Profile;
 use Illuminate\Support\Facades\Config;
 
@@ -32,6 +33,7 @@ class ProfilePerformance
         $totalPayoutExternal = 0;
         $realPayoutExternal = 0;
         $xpDiff = 0;
+        $numberOfDays = (int)abs($unixEnd - $unixStart) / (24 * 60 * 60);
 
         $loadedProjects = [];
 
@@ -121,6 +123,7 @@ class ProfilePerformance
         ];
 
         $out = array_merge($out, $this->calculateSalary($out, $profile));
+        $out = array_merge($out, $this->calculateEarningEstimation($out, $numberOfDays));
 
         return $out;
     }
@@ -306,5 +309,35 @@ class ProfilePerformance
         }
 
         return $float;
+    }
+
+    /**
+     * Calculate earning estimation
+     * @param array $aggregated
+     * @param $numberOfDays
+     * @return array
+     */
+    private function calculateEarningEstimation(array $aggregated, $numberOfDays)
+    {
+        $monthWorkDays = WorkDays::getWorkDays();
+
+        $expectedPercentage = $aggregated['totalPayoutCombined'] === 0 ? sprintf("%d%%", 0) :
+            sprintf("%d%%", ($aggregated['totalPayoutCombined'] / $aggregated['roleMinimum']) * 100);
+
+        $earnedPercentage = $aggregated['realPayoutCombined'] === 0 ? sprintf("%d%%", 0) :
+            sprintf("%d%%", ($aggregated['realPayoutCombined'] / $aggregated['roleMinimum']) * 100);
+
+        $monthlyProjection = $aggregated['realPayoutCombined'] === 0 ? 0 :
+            ($aggregated['realPayoutCombined'] / $numberOfDays) * count($monthWorkDays);
+
+        $monthlyProjectionPercentage = $monthlyProjection === 0 ? sprintf("%d%%", 0) :
+            sprintf("%d%%", ($monthlyProjection / $aggregated['roleMinimum']) * 100);
+
+        $aggregated['earnedPercentage'] = $earnedPercentage;
+        $aggregated['expectedPercentage'] = $expectedPercentage;
+        $aggregated['monthPrediction'] = $this->roundFloat($monthlyProjection, 2, 10);
+        $aggregated['monthPredictionPercentage'] = $monthlyProjectionPercentage;
+
+        return $aggregated;
     }
 }
