@@ -39,6 +39,9 @@ namespace {
                             ],
                             'App\Events\TaskFinishedEarly' => [
                                 'App\Listeners\TaskFinishedEarly'
+                            ]
+                            ,'App\Events\TaskStatusTimeCalculation' => [
+                                'App\Listeners\TaskStatusTimeCalculation'
                             ],
                             'App\Events\TaskStatusHistory' => [
                                 'App\Listeners\TaskStatusHistory'

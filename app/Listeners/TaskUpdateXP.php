@@ -29,14 +29,6 @@ class TaskUpdateXP
 
         $taskPerformance = $profilePerformance->perTask($task);
 
-        // Get project owner id
-        GenericModel::setCollection('projects');
-        $project = GenericModel::find($task->project_id);
-        $projectOwner = null;
-        if ($project) {
-            $projectOwner = Profile::find($project->acceptedBy);
-        }
-
         foreach ($taskPerformance as $profileId => $taskDetails) {
             if ($taskDetails['taskCompleted'] === false) {
                 return false;
@@ -112,6 +104,14 @@ class TaskUpdateXP
             } else {
                 $poXpDiff = 0.25;
                 $poMessage = 'Review PR in time for ' . $taskLink;
+            }
+
+            // Get project owner id
+            GenericModel::setCollection('projects');
+            $project = GenericModel::find($task->project_id);
+            $projectOwner = null;
+            if ($project) {
+                $projectOwner = Profile::find($project->acceptedBy);
             }
 
             if ($projectOwner) {
