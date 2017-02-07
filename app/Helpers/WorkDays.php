@@ -11,7 +11,7 @@ use Carbon\Carbon;
 class WorkDays
 {
     /**
-     * Return list of work days (week days)
+     * Return list of work days (week days) for current month
      * Class WorkDays
      * @package App\Helpers
      */
