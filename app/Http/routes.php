@@ -33,9 +33,12 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
         Route::resource('profiles', 'ProfileController');
         Route::resource('validations', 'ValidationController');
         Route::get('projects/{id}/uploads', 'FileUploadController@getProjectUploads');
-        Route::put('projects/{id}/makeReservation', 'ReservationController@make');
-        Route::put('projects/{id}/acceptReservation', 'ReservationController@accept');
-        Route::put('projects/{id}/declineReservation', 'ReservationController@decline');
+        Route::put('projects/{id}/makeReservation', 'ReservationController@makeProjectReservation');
+        Route::put('projects/{id}/acceptReservation', 'ReservationController@acceptProject');
+        Route::put('projects/{id}/declineReservation', 'ReservationController@declineProject');
+        Route::put('tasks/{id}/makeReservation', 'ReservationController@makeTaskReservation');
+        Route::put('tasks/{id}/acceptReservation', 'ReservationController@acceptTask');
+        Route::put('tasks/{id}/declineReservation', 'ReservationController@declineTask');
         Route::get('database/listCollections', 'DatabaseController@listCollections');
         Route::post('slack/message', 'SlackController@sendMessage');
         Route::get('slack/users', 'SlackController@getUsers');
