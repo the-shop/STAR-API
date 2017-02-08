@@ -49,13 +49,14 @@ class UnfinishedTasks extends Command
         $activeProjects = [];
         $sprints = [];
 
-        // Get all active projects and sprints
+        // Get all active projects and project sprints
         GenericModel::setCollection('sprints');
         foreach ($projects as $project) {
-            if (!empty($project->acceptedBy) && $project->isComplete !== true && !empty($project->sprints)) {
+            if (!empty($project->acceptedBy) && $project->isComplete !== true) {
                 $activeProjects[$project->id] = $project;
-                foreach ($project->sprints as $sprintId) {
-                    $sprints[$sprintId] = GenericModel::where('_id', '=', $sprintId)->first();
+                $projectSprints = GenericModel::where('project_id', '=', $project->id)->get();
+                foreach ($projectSprints as $projectSprint) {
+                    $sprints[$projectSprint->id] = $projectSprint;
                 }
             }
         }
@@ -65,8 +66,7 @@ class UnfinishedTasks extends Command
         $futureSprints = [];
         $futureSprintsStartDates = [];
 
-        $date = new \DateTime();
-        $unixNow = $date->format('U');
+        $unixNow = (new \DateTime())->format('U');
         $checkDay = date('Y-m-d', $unixNow);
 
         //get all unfinished tasks from ended sprints and get all future sprints on project
@@ -74,16 +74,21 @@ class UnfinishedTasks extends Command
         foreach ($sprints as $sprint) {
             $sprintStartDueDate = date('Y-m-d', $sprint->start);
             $sprintEndDueDate = date('Y-m-d', $sprint->end);
-            if ($sprintEndDueDate < $checkDay && !empty($sprint->tasks)) {
-                foreach ($sprint->tasks as $taskId) {
-                    $task = GenericModel::where('_id', '=', $taskId)->first();
+            if ($sprintEndDueDate < $checkDay) {
+                $endedSprints[$sprint->project_id][] = $sprint;
+
+                //get all tasks and check if there are unfinished tasks
+                $sprintTasks = GenericModel::where('sprint_id', '=', $sprint->id)->get();
+                foreach ($sprintTasks as $task) {
                     if ($task->passed_qa !== true) {
-                        $sprintEndedTasks[$taskId] = $task;
-                        $endedSprints[$sprint->project_id] = $sprint;
+                        $sprintEndedTasks[$task->id] = $task;
                     }
                 }
-            } elseif ($unixNow < $sprint->start || $checkDay === $sprintStartDueDate) {
-                $futureSprints[$sprint->project_id] = $sprint;
+                //check start and end due dates for future sprints
+            } elseif ($unixNow < $sprint->start || $checkDay === $sprintStartDueDate ||
+                ($unixNow > $sprint->start && $checkDay <= $sprintEndDueDate)
+            ) {
+                $futureSprints[$sprint->project_id][] = $sprint;
                 $futureSprintsStartDates[$sprint->project_id][] = $sprint->start;
             }
         }
@@ -91,14 +96,14 @@ class UnfinishedTasks extends Command
         //calculate on which projects are missing future sprints
         $missingSprints = array_diff_key($endedSprints, $futureSprints);
         $adminReport = [];
-        foreach ($missingSprints as $project_id => $endedSprint) {
+
+        foreach ($missingSprints as $project_id => $endedSprintsArray) {
             $adminReport[$project_id] = $activeProjects[$project_id]->name;
         }
 
         if (!empty($sprintEndedTasks)) {
-            //ping on slack admins if there are no future sprints created so we can move unfinished tasks from sprint to
-            //following sprint on sprint end date
-
+            /*ping on slack admins if there are no future sprints created so we can move unfinished tasks from sprint to
+            following sprint on sprint end date*/
             foreach ($adminReport as $projectName) {
                 foreach ($admins as $admin) {
                     if ($admin->slack) {
@@ -111,24 +116,15 @@ class UnfinishedTasks extends Command
             }
 
             //move all unfinished tasks from ended sprint to following one
-            foreach ($futureSprints as $sprint) {
-                if ($sprint->start === min($futureSprintsStartDates[$sprint->project_id])) {
-                    foreach ($sprintEndedTasks as $task) {
-                        if ($task->project_id === $sprint->project_id) {
-                            $task->sprint_id = $sprint->_id;
-                            $task->save();
-
-                            $newSprintTasks = $sprint->tasks;
-                            $newSprintTasks[] = $task->_id;
-                            $sprint->tasks = $newSprintTasks;
-                            $sprint->save();
-
-                            $oldSprintTaskUpdate = array_values(array_diff($endedSprints[$sprint->project_id]->
-                            tasks, [$task->_id]));
-                            $oldSprint = $endedSprints[$sprint->project_id];
-                            $oldSprint->tasks = $oldSprintTaskUpdate;
-                            $oldSprint->save();
-                            $this->info('Task ' . $task->title . ' moved to sprint ' . $sprint->title);
+            foreach ($futureSprints as $projectId => $futureSprintsArray) {
+                foreach ($futureSprintsArray as $futureSprint) {
+                    if ($futureSprint->start === min($futureSprintsStartDates[$futureSprint->project_id])) {
+                        foreach ($sprintEndedTasks as $task) {
+                            if ($task->project_id === $futureSprint->project_id) {
+                                $task->sprint_id = $futureSprint->_id;
+                                $task->save();
+                                $this->info('Task ' . $task->title . ' moved to sprint ' . $futureSprint->title);
+                            }
                         }
                     }
                 }
