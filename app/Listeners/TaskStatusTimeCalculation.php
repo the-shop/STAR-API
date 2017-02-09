@@ -15,8 +15,18 @@ class TaskStatusTimeCalculation
         $task = $event->model;
         $unixTime = (new \DateTime())->format('U');
 
+        //if collection is other than tasks, return false
+        if ($task['collection'] !== 'tasks') {
+            return false;
+        }
+
+        //if there is no task owner return false
+        if (empty($task->owner)) {
+            return false;
+        }
+
         //on task creation check if there is owner assigned and set work field
-        if (!empty($task->owner) && $task->isDirty() === false) {
+        if ($task->isDirty() === false) {
             $task->work = [
                 $task->owner => [
                     'worked' => 0,
@@ -27,16 +37,13 @@ class TaskStatusTimeCalculation
                     'timeAssigned' => $unixTime
                 ]
             ];
+
+            return $task;
         }
 
         //handle task status time logic if model is updated
-        if ($task['collection'] === 'tasks' && $task->isDirty()) {
+        if ($task->isDirty()) {
             $updatedFields = $task->getDirty();
-
-            //if there is no task owner return false
-            if (empty($task->owner)) {
-                return false;
-            }
 
             //add work field on new task without assigned/claimed user - when task is assigned/claimed
             if (key_exists('owner', $updatedFields) && empty($task->work)) {
@@ -74,7 +81,7 @@ class TaskStatusTimeCalculation
                     }
                     //if user is reassigned set time flags to assigned
                     if ($ownerId === $updatedFields['owner']) {
-                        unset ($work[$ownerId]['timeRemoved']);
+                        unset($work[$ownerId]['timeRemoved']);
                         $work[$ownerId]['workTrackTimestamp'] = $unixTime;
                         $work[$ownerId]['timeAssigned'] = $unixTime;
                     }
