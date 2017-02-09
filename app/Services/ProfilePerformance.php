@@ -141,7 +141,12 @@ class ProfilePerformance
         $taskWorkHistory = is_array($task->work) ? $task->work : [];
 
         //let's get last element from task work history array which is last task owner if task was claimed/assigned
-        $lastTaskOwnerPerformance = array_slice($taskWorkHistory, -1, 1, true);
+        $lastTaskOwnerPerformance = null;
+        foreach ($taskWorkHistory as $ownerId => $workStatus) {
+            if (!key_exists('timeRemoved', $workStatus)) {
+                $lastTaskOwnerPerformance[$ownerId] = $workStatus;
+            }
+        }
 
         // We'll respond with array of performance per task owner (if task got reassigned for example)
         $response = [];
@@ -155,13 +160,29 @@ class ProfilePerformance
             'taskCompleted' => $task->passed_qa === true ? true : false
         ];
         $taskOwner = null;
+        $workTimeTrack = null;
 
         foreach ($lastTaskOwnerPerformance as $taskOwnerId => $stats) {
             $userPerformance['workSeconds'] = $stats['worked'];
             $userPerformance['pauseSeconds'] = $stats['paused'];
             $userPerformance['qaSeconds'] = $stats['qa'];
             $userPerformance['blockedSeconds'] = $stats['blocked'];
+            $workTimeTrack = $stats['workTrackTimestamp'];
             $taskOwner = $taskOwnerId;
+        }
+
+        // Let's just add diff based of last task state against current time if task not done yet
+        if ($userPerformance['taskCompleted'] !== true) {
+            $unixNow = (int)(new \DateTime())->format('U');
+            if ($task->paused !== true && $task->blocked !== true && $task->submitted_for_qa !== true) {
+                $userPerformance['workSeconds'] += $unixNow - $workTimeTrack;
+            }
+            if ($task->paused) {
+                $userPerformance['pauseSeconds'] += $unixNow - $workTimeTrack;
+            }
+            if ($task->submitted_for_qa) {
+                $userPerformance['qaSeconds'] += $unixNow - $workTimeTrack;
+            }
         }
 
         $response[$taskOwner] = $userPerformance;
