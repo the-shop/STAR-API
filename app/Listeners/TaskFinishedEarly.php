@@ -27,7 +27,7 @@ class TaskFinishedEarly
                 GenericModel::setCollection('tasks');
                 $taskPerformance = $profilePerformance->perTask($task);
                 foreach ($taskPerformance as $profileId => $taskDetails) {
-                    if (!key_exists('taskLastOwner', $taskDetails)) {
+                    if ($taskDetails['taskLastOwner'] === false) {
                         continue;
                     }
                     $taskOwnerProfile = Profile::find($profileId);
