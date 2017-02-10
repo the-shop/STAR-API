@@ -101,7 +101,6 @@ class TaskStatusTimeCalculationTest extends TestCase
                 ]
             ]
         );
-
     }
 
     /*
@@ -157,8 +156,10 @@ class TaskStatusTimeCalculationTest extends TestCase
         $this->assertEquals(0, $task->work[$task->owner]['paused']);
         $this->assertEquals(0, $task->work[$task->owner]['qa']);
         $this->assertEquals(0, $task->work[$task->owner]['blocked']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'],
-            $task->work[$task->owner]['timeAssigned']);
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'],
+            $task->work[$task->owner]['timeAssigned']
+        );
     }
 
     /**
@@ -182,8 +183,10 @@ class TaskStatusTimeCalculationTest extends TestCase
         $this->assertEquals(0, $task->work[$task->owner]['paused']);
         $this->assertEquals(0, $task->work[$task->owner]['qa']);
         $this->assertEquals(0, $task->work[$task->owner]['blocked']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'],
-            $task->work[$task->owner]['timeAssigned']);
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'],
+            $task->work[$task->owner]['timeAssigned']
+        );
     }
 
     /**
@@ -191,7 +194,6 @@ class TaskStatusTimeCalculationTest extends TestCase
      */
     public function testTaskStatusTimeCalculationForTaskReassigned()
     {
-
         $task = $this->getAssignedTask();
         $task->save();
         $oldOwner = $task->owner;
@@ -213,13 +215,17 @@ class TaskStatusTimeCalculationTest extends TestCase
         $this->assertArrayHasKey('workTrackTimestamp', $task->work[$oldOwner]);
         $this->assertArrayHasKey('timeAssigned', $task->work[$oldOwner]);
         $this->assertArrayHasKey('timeRemoved', $task->work[$oldOwner]);
-        $this->assertEquals($task->work[$oldOwner]['workTrackTimestamp'] - $oldWorkTrackTimestamp,
-            $task->work[$oldOwner]['worked']);
+        $this->assertEquals(
+            $task->work[$oldOwner]['workTrackTimestamp'] - $oldWorkTrackTimestamp,
+            $task->work[$oldOwner]['worked']
+        );
         $this->assertEquals(0, $task->work[$oldOwner]['paused']);
         $this->assertEquals(0, $task->work[$oldOwner]['qa']);
         $this->assertEquals(0, $task->work[$oldOwner]['blocked']);
-        $this->assertEquals($task->work[$oldOwner]['workTrackTimestamp'],
-            $task->work[$oldOwner]['timeRemoved']);
+        $this->assertEquals(
+            $task->work[$oldOwner]['workTrackTimestamp'],
+            $task->work[$oldOwner]['timeRemoved']
+        );
 
         $this->assertArrayHasKey('worked', $task->work[$task->owner]);
         $this->assertArrayHasKey('paused', $task->work[$task->owner]);
@@ -231,9 +237,10 @@ class TaskStatusTimeCalculationTest extends TestCase
         $this->assertEquals(0, $task->work[$task->owner]['paused']);
         $this->assertEquals(0, $task->work[$task->owner]['qa']);
         $this->assertEquals(0, $task->work[$task->owner]['blocked']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'],
-            $task->work[$task->owner]['timeAssigned']);
-
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'],
+            $task->work[$task->owner]['timeAssigned']
+        );
     }
 
     /**
@@ -254,8 +261,10 @@ class TaskStatusTimeCalculationTest extends TestCase
 
         $this->assertGreaterThan($workedTimeBeforeListener, $task->work[$task->owner]['worked']);
         $this->assertGreaterThan($timeStampBeforeListener, $task->work[$task->owner]['workTrackTimestamp']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
-            $task->work[$task->owner]['worked']);
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
+            $task->work[$task->owner]['worked']
+        );
     }
 
     /**
@@ -277,8 +286,10 @@ class TaskStatusTimeCalculationTest extends TestCase
 
         $this->assertGreaterThan($pausedTimeBeforeListener, $task->work[$task->owner]['paused']);
         $this->assertGreaterThan($timeStampBeforeListener, $task->work[$task->owner]['workTrackTimestamp']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
-            $task->work[$task->owner]['paused']);
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
+            $task->work[$task->owner]['paused']
+        );
     }
 
     /**
@@ -299,8 +310,10 @@ class TaskStatusTimeCalculationTest extends TestCase
 
         $this->assertGreaterThan($workedTimeBeforeListener, $task->work[$task->owner]['worked']);
         $this->assertGreaterThan($timeStampBeforeListener, $task->work[$task->owner]['workTrackTimestamp']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
-            $task->work[$task->owner]['worked']);
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
+            $task->work[$task->owner]['worked']
+        );
     }
 
     /**
@@ -322,8 +335,10 @@ class TaskStatusTimeCalculationTest extends TestCase
 
         $this->assertGreaterThan($blockedTimeBeforeListener, $task->work[$task->owner]['blocked']);
         $this->assertGreaterThan($timeStampBeforeListener, $task->work[$task->owner]['workTrackTimestamp']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
-            $task->work[$task->owner]['blocked']);
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
+            $task->work[$task->owner]['blocked']
+        );
     }
 
     /**
@@ -344,8 +359,10 @@ class TaskStatusTimeCalculationTest extends TestCase
 
         $this->assertGreaterThan($workedTimeBeforeListener, $task->work[$task->owner]['worked']);
         $this->assertGreaterThan($timeStampBeforeListener, $task->work[$task->owner]['workTrackTimestamp']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
-            $task->work[$task->owner]['worked']);
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
+            $task->work[$task->owner]['worked']
+        );
     }
 
     /**
@@ -367,8 +384,10 @@ class TaskStatusTimeCalculationTest extends TestCase
 
         $this->assertGreaterThan($qaTimeBeforeListener, $task->work[$task->owner]['qa']);
         $this->assertGreaterThan($timeStampBeforeListener, $task->work[$task->owner]['workTrackTimestamp']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
-            $task->work[$task->owner]['qa']);
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
+            $task->work[$task->owner]['qa']
+        );
     }
 
     /**
@@ -390,9 +409,10 @@ class TaskStatusTimeCalculationTest extends TestCase
 
         $this->assertGreaterThan($qaTimeBeforeListener, $task->work[$task->owner]['qa']);
         $this->assertGreaterThan($timeStampBeforeListener, $task->work[$task->owner]['workTrackTimestamp']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
-            $task->work[$task->owner]['qa']);
-
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
+            $task->work[$task->owner]['qa']
+        );
     }
 
     /**
@@ -414,8 +434,10 @@ class TaskStatusTimeCalculationTest extends TestCase
 
         $this->assertGreaterThan($workedTimeBeforeListener, $task->work[$task->owner]['worked']);
         $this->assertGreaterThan($timeStampBeforeListener, $task->work[$task->owner]['workTrackTimestamp']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
-            $task->work[$task->owner]['worked']);
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
+            $task->work[$task->owner]['worked']
+        );
 
         $modifyTimeStamp = $task->work;
         $modifyTimeStamp[$task->owner]['workTrackTimestamp'] = (new \DateTime())->format('U') - 20 * 60;
@@ -433,8 +455,10 @@ class TaskStatusTimeCalculationTest extends TestCase
 
         $this->assertGreaterThan($pausedTimeBeforeListener, $task->work[$task->owner]['paused']);
         $this->assertGreaterThan($timeStampBeforeResumed, $task->work[$task->owner]['workTrackTimestamp']);
-        $this->assertEquals(($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeResumed),
-            $task->work[$task->owner]['paused']);
+        $this->assertEquals(
+            ($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeResumed),
+            $task->work[$task->owner]['paused']
+        );
 
         $modifyTimeStamp = $task->work;
         $modifyTimeStamp[$task->owner]['workTrackTimestamp'] = (new \DateTime())->format('U') - 15 * 60;
@@ -464,13 +488,17 @@ class TaskStatusTimeCalculationTest extends TestCase
         $this->assertArrayHasKey('workTrackTimestamp', $task->work[$oldOwner]);
         $this->assertArrayHasKey('timeAssigned', $task->work[$oldOwner]);
         $this->assertArrayHasKey('timeRemoved', $task->work[$oldOwner]);
-        $this->assertEquals($task->work[$oldOwner]['workTrackTimestamp'] - $oldWorkTrackTimestamp + $oldWorked,
-            $task->work[$oldOwner]['worked']);
+        $this->assertEquals(
+            $task->work[$oldOwner]['workTrackTimestamp'] - $oldWorkTrackTimestamp + $oldWorked,
+            $task->work[$oldOwner]['worked']
+        );
         $this->assertEquals($oldWorkPaused, $task->work[$oldOwner]['paused']);
         $this->assertEquals($oldWorkQa, $task->work[$oldOwner]['qa']);
         $this->assertEquals($oldWorkBlocked, $task->work[$oldOwner]['blocked']);
-        $this->assertEquals($task->work[$oldOwner]['workTrackTimestamp'],
-            $task->work[$oldOwner]['timeRemoved']);
+        $this->assertEquals(
+            $task->work[$oldOwner]['workTrackTimestamp'],
+            $task->work[$oldOwner]['timeRemoved']
+        );
 
         $this->assertArrayHasKey('worked', $task->work[$task->owner]);
         $this->assertArrayHasKey('paused', $task->work[$task->owner]);
@@ -482,8 +510,10 @@ class TaskStatusTimeCalculationTest extends TestCase
         $this->assertEquals(0, $task->work[$task->owner]['paused']);
         $this->assertEquals(0, $task->work[$task->owner]['qa']);
         $this->assertEquals(0, $task->work[$task->owner]['blocked']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'],
-            $task->work[$task->owner]['timeAssigned']);
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'],
+            $task->work[$task->owner]['timeAssigned']
+        );
 
         $modifyTimeStamp = $task->work;
         $modifyTimeStamp[$task->owner]['workTrackTimestamp'] = (new \DateTime())->format('U') - 13 * 60;
@@ -502,8 +532,10 @@ class TaskStatusTimeCalculationTest extends TestCase
 
         $this->assertGreaterThan($workedTimeBeforeListener, $task->work[$task->owner]['worked']);
         $this->assertGreaterThan($timeStampBeforeListener, $task->work[$task->owner]['workTrackTimestamp']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
-            $task->work[$task->owner]['worked']);
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
+            $task->work[$task->owner]['worked']
+        );
 
         $modifyTimeStamp = $task->work;
         $modifyTimeStamp[$task->owner]['workTrackTimestamp'] = (new \DateTime())->format('U') - 11 * 60;
@@ -521,8 +553,10 @@ class TaskStatusTimeCalculationTest extends TestCase
 
         $this->assertGreaterThan($qaTimeBeforeListener, $task->work[$task->owner]['qa']);
         $this->assertGreaterThan($timeStampBeforeListener, $task->work[$task->owner]['workTrackTimestamp']);
-        $this->assertEquals($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
-            $task->work[$task->owner]['qa']);
+        $this->assertEquals(
+            $task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeListener,
+            $task->work[$task->owner]['qa']
+        );
 
         $modifyTimeStamp = $task->work;
         $modifyTimeStamp[$task->owner]['workTrackTimestamp'] = (new \DateTime())->format('U') - 9 * 60;
@@ -543,8 +577,10 @@ class TaskStatusTimeCalculationTest extends TestCase
 
         $this->assertGreaterThan($pausedTimeBeforeListener, $task->work[$task->owner]['paused']);
         $this->assertGreaterThan($timeStampBeforeResumed, $task->work[$task->owner]['workTrackTimestamp']);
-        $this->assertEquals(($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeResumed),
-            $task->work[$task->owner]['paused']);
+        $this->assertEquals(
+            ($task->work[$task->owner]['workTrackTimestamp'] - $timeStampBeforeResumed),
+            $task->work[$task->owner]['paused']
+        );
 
         $modifyTimeStamp = $task->work;
         $modifyTimeStamp[$task->owner]['workTrackTimestamp'] = (new \DateTime())->format('U') - 7 * 60;

@@ -2,12 +2,14 @@
 
 namespace App\Listeners;
 
+use App\GenericModel;
+
 class TaskStatusTimeCalculation
 {
     /**
      * Handle the event.
      * @param \App\Events\TaskStatusTimeCalculation $event
-     * @return bool
+     * @return bool|GenericModel
      */
     public function handle(\App\Events\TaskStatusTimeCalculation $event)
     {
@@ -19,10 +21,26 @@ class TaskStatusTimeCalculation
             return false;
         }
 
+        $updatedFields = $task->getDirty();
+
+        $taskOwner = $task->owner;
+
+        if (empty($newTaskOwner) && array_key_exists('owner', $updatedFields)) {
+            $taskOwner = $updatedFields['owner'];
+        }
+
+        if (empty($taskOwner)) {
+            return false;
+        }
+
+        if (!isset($task->work)) {
+            $task->work = [];
+        }
+
         //on task creation check if there is owner assigned and set work field
-        if ($task->exists === false && !empty($task->owner)) {
+        if ($task->exists === false) {
             $task->work = [
-                $task->owner => [
+                $taskOwner => [
                     'worked' => 0,
                     'paused' => 0,
                     'qa' => 0,
@@ -31,32 +49,21 @@ class TaskStatusTimeCalculation
                     'timeAssigned' => $unixTime
                 ]
             ];
-
-            return $task;
-        }
-
-        // TODO remove this if statement after proper migration implemented
-        if (!isset($task->work[$task->owner])) {
-            return false;
+        } elseif (!isset($task->work[$taskOwner])) {
+            $work = $task->work;
+            $work[$taskOwner] = [
+                'worked' => 0,
+                'paused' => 0,
+                'qa' => 0,
+                'blocked' => 0,
+                'workTrackTimestamp' => $unixTime,
+                'timeAssigned' => $unixTime
+            ];
+            $task->work = $work;
         }
 
         //handle task status time logic if model is updated and has got task owner
-        if ($task->isDirty() && !empty($task->owner)) {
-            $updatedFields = $task->getDirty();
-
-            //add work field on new task without assigned/claimed user - when task is assigned/claimed
-            if (key_exists('owner', $updatedFields) && empty($task->work)) {
-                $task->work = [
-                    $task->owner => [
-                        'worked' => 0,
-                        'paused' => 0,
-                        'qa' => 0,
-                        'blocked' => 0,
-                        'workTrackTimestamp' => $unixTime,
-                        'timeAssigned' => $unixTime
-                    ]
-                ];
-            }
+        if ($task->isDirty()) {
             //if task is reassigned, set properly work field values for all task owners
             //set work field for user that's first time on task(reassigned)
             if (key_exists('owner', $updatedFields)) {
@@ -84,17 +91,6 @@ class TaskStatusTimeCalculation
                         $work[$ownerId]['workTrackTimestamp'] = $unixTime;
                         $work[$ownerId]['timeAssigned'] = $unixTime;
                     }
-                }
-                //add new one if user first time on task
-                if (!key_exists($updatedFields['owner'], $work)) {
-                    $work[$updatedFields['owner']] = [
-                        'worked' => 0,
-                        'paused' => 0,
-                        'qa' => 0,
-                        'blocked' => 0,
-                        'workTrackTimestamp' => $unixTime,
-                        'timeAssigned' => $unixTime
-                    ];
                 }
                 $task->work = $work;
             }
@@ -138,5 +134,7 @@ class TaskStatusTimeCalculation
                 $task->work = $work;
             }
         }
+
+        return $task;
     }
 }

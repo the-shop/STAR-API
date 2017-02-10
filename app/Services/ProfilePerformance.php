@@ -140,6 +140,13 @@ class ProfilePerformance
 
         $taskWorkHistory = is_array($task->work) ? $task->work : [];
 
+        $defaultStats = [
+            'worked' => 0,
+            'paused' => 0,
+            'qa' => 0,
+            'blocked' => 0,
+        ];
+
         // We'll respond with array of performance per task owner (if task got reassigned for example)
         $response = [];
 
@@ -175,6 +182,8 @@ class ProfilePerformance
             //set last task owner flag so we can calculate payment and XP when task is finished
             if (!key_exists('timeRemoved', $stats)) {
                 $userPerformance['taskLastOwner'] = true;
+            } else {
+                $userPerformance['taskLastOwner'] = false;
             }
 
             $response[$taskOwnerId] = $userPerformance;

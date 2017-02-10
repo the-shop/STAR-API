@@ -44,7 +44,19 @@ class ProfilePerformanceTest extends TestCase
 
         $out = $pp->perTask($task);
 
-        $this->assertEquals([], $out);
+        $this->assertEquals(
+            [
+                $this->profile->id => [
+                    'workSeconds' => 0,
+                    'pauseSeconds' => 0,
+                    'qaSeconds' => 0,
+                    'blockedSeconds' => 0,
+                    'taskLastOwner' => true,
+                    'taskCompleted' => false,
+                ]
+            ],
+            $out
+        );
     }
 
     /**
@@ -76,36 +88,5 @@ class ProfilePerformanceTest extends TestCase
         $this->assertEquals($minutesWorking * 60, $profilePerformanceArray['workSeconds']);
         $this->assertEquals(0, $profilePerformanceArray['qaSeconds']);
         $this->assertEquals(0, $profilePerformanceArray['pauseSeconds']);
-    }
-
-    /**
-     * Test complex task history (multple breaks, qa submitted, failed and finally task done)
-     */
-    public function testCheckPerformanceForComplexFlowTaskDone()
-    {
-        // Assigned 5 minutes ago
-        $minutesWorking = 5;
-        $assignedAgo = (int) (new \DateTime())->add(new \DateInterval('PT' . $minutesWorking . 'M'))->format('U');
-        $task = $this->getQaPassedTask();
-
-        $pp = new ProfilePerformance();
-
-        $out = $pp->perTask($task);
-
-        $this->assertCount(1, $out);
-
-        $this->assertArrayHasKey($this->profile->id, $out);
-
-        $profilePerformanceArray = $out[$this->profile->id];
-
-        $this->assertArrayHasKey('taskCompleted', $profilePerformanceArray);
-        $this->assertArrayHasKey('workSeconds', $profilePerformanceArray);
-        $this->assertArrayHasKey('qaSeconds', $profilePerformanceArray);
-        $this->assertArrayHasKey('pauseSeconds', $profilePerformanceArray);
-
-        $this->assertEquals(true, $profilePerformanceArray['taskCompleted']);
-        $this->assertEquals(20, $profilePerformanceArray['workSeconds']);
-        $this->assertEquals(15, $profilePerformanceArray['qaSeconds']);
-        $this->assertEquals(15, $profilePerformanceArray['pauseSeconds']);
     }
 }

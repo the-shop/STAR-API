@@ -20,6 +20,15 @@ trait ProjectRelated
         return new GenericModel(
             [
                 'owner' => $this->profile->id,
+                'work' => [
+                    $this->profile->id => [
+                        'worked' => 0,
+                        'paused' => 0,
+                        'qa' => 0,
+                        'blocked' => 0,
+                        'workTrackTimestamp' => (int) (new \DateTime())->format('U')
+                    ],
+                ],
                 'task_history' => [],
             ]
         );
@@ -53,8 +62,19 @@ trait ProjectRelated
             $timestamp = $time->format('U');
         }
 
+        $unixNow = (int) (new \DateTime())->format('U');
+
         $task = $this->getTaskWithEmptyHistory();
 
+        $task->work = [
+            $this->profile->id => [
+                'worked' => $unixNow - $timestamp,
+                'paused' => 0,
+                'qa' => 0,
+                'blocked' => 0,
+                'workTrackTimestamp' => (int) (new \DateTime())->format('U')
+            ]
+        ];
         $task->task_history = [
             [
                 'event' => 'Task assigned to sample user',
