@@ -193,6 +193,7 @@ class TaskStatusTimeCalculationTest extends TestCase
     {
 
         $task = $this->getAssignedTask();
+        $task->save();
         $oldOwner = $task->owner;
         $oldWorkTrackTimestamp = $task->work[$oldOwner]['workTrackTimestamp'];
         $newOwner = Profile::create();
