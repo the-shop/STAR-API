@@ -44,15 +44,15 @@ class SprintReminder extends Command
 
         // Get all active projects, members of projects and sprints
         foreach ($projects as $project) {
-            if (!empty($project->acceptedBy) && $project->isComplete !== true && !empty($project->sprints)) {
+            if (!empty($project->acceptedBy) && $project->isComplete !== true) {
                 $activeProjects[$project->id] = $project;
                 GenericModel::setCollection('sprints');
-                foreach ($project->sprints as $sprintId) {
-                    $sprint = GenericModel::where('_id', '=', $sprintId)->first();
+                $projectSprints = GenericModel::where('project_id', '=', $project->id)->get();
+                foreach ($projectSprints as $sprint) {
                     if ($unixDate >= InputHandler::getUnixTimestamp($sprint->start)
-                        && InputHandler::getUnixTimestamp($unixDate <= $sprint->end)
+                        && $unixDate <= InputHandler::getUnixTimestamp($sprint->end)
                     ) {
-                        $sprints[$sprintId] = $sprint;
+                        $sprints[$sprint->id] = $sprint;
                     }
                 }
                 GenericModel::setCollection('profiles');
@@ -66,12 +66,10 @@ class SprintReminder extends Command
         // Get all active tasks
         GenericModel::setCollection('tasks');
         foreach ($sprints as $sprint) {
-            if (!empty($sprint->tasks)) {
-                foreach ($sprint->tasks as $taskId) {
-                    $task = GenericModel::where('_id', '=', $taskId)->first();
-                    if (empty($task->owner)) {
-                        $tasks[$taskId] = $task;
-                    }
+            $sprintTasks = GenericModel::where('sprint_id', '=', $sprint->id);
+            foreach ($sprintTasks as $task) {
+                if (empty($task->owner)) {
+                    $tasks[$task->id] = $task;
                 }
             }
         }
