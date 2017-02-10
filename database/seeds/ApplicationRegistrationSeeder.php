@@ -20,7 +20,17 @@ namespace {
             $defaultDb = Config::get('database.default');
             DB::purge($defaultDb);
             DB::connection($defaultDb);
-            Schema::create('applications');
+            //check if collection exist
+            $collectionList = DB::listCollections();
+            $result = [];
+
+            foreach ($collectionList as $list) {
+                $result[] = $list->getName();
+            }
+
+            if (!in_array('applications', $result)) {
+                Schema::create('applications');
+            }
         }
     }
 }
