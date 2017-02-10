@@ -27,6 +27,9 @@ class TaskFinishedEarly
                 GenericModel::setCollection('tasks');
                 $taskPerformance = $profilePerformance->perTask($task);
                 foreach ($taskPerformance as $profileId => $taskDetails) {
+                    if (!key_exists('taskLastOwner', $taskDetails)) {
+                        continue;
+                    }
                     $taskOwnerProfile = Profile::find($profileId);
                     $mappedValues = $profilePerformance->getTaskValuesForProfile($taskOwnerProfile, $task);
 

@@ -19,7 +19,11 @@ namespace {
                     [
                         'resource' => 'tasks',
                         'event' => 'create',
-                        'listeners' => []
+                        'listeners' => [
+                            'App\Events\TaskStatusTimeCalculation' => [
+                                'App\Listeners\TaskStatusTimeCalculation'
+                            ]
+                        ]
                     ],
                     [
                         'resource' => 'tasks',
@@ -39,6 +43,9 @@ namespace {
                             ],
                             'App\Events\TaskFinishedEarly' => [
                                 'App\Listeners\TaskFinishedEarly'
+                            ],
+                            'App\Events\TaskStatusTimeCalculation' => [
+                                'App\Listeners\TaskStatusTimeCalculation'
                             ],
                             'App\Events\TaskStatusHistory' => [
                                 'App\Listeners\TaskStatusHistory'

@@ -29,17 +29,14 @@ class TaskUpdateXP
 
         $taskPerformance = $profilePerformance->perTask($task);
 
-        // Get project owner id
-        GenericModel::setCollection('projects');
-        $project = GenericModel::find($task->project_id);
-        $projectOwner = null;
-        if ($project) {
-            $projectOwner = Profile::find($project->acceptedBy);
-        }
-
         foreach ($taskPerformance as $profileId => $taskDetails) {
+
             if ($taskDetails['taskCompleted'] === false) {
                 return false;
+            }
+
+            if (!key_exists('taskLastOwner', $taskDetails)) {
+                continue;
             }
 
             $taskOwnerProfile = Profile::find($profileId);
@@ -104,31 +101,39 @@ class TaskUpdateXP
 
                     $this->sendSlackMessageXpUpdated($taskOwnerProfile, $task, $xpDiff);
                 }
-            }
 
-            if ($taskDetails['qaSeconds'] > 24 * 60 * 60) {
-                $poXpDiff = -3;
-                $poMessage = 'Failed to review PR in time for ' . $taskLink;
-            } else {
-                $poXpDiff = 0.25;
-                $poMessage = 'Review PR in time for ' . $taskLink;
-            }
+                if ($taskDetails['qaSeconds'] > 24 * 60 * 60) {
+                    $poXpDiff = -3;
+                    $poMessage = 'Failed to review PR in time for ' . $taskLink;
+                } else {
+                    $poXpDiff = 0.25;
+                    $poMessage = 'Review PR in time for ' . $taskLink;
+                }
 
-            if ($projectOwner) {
-                $projectOwnerXpRecord = $this->getXpRecord($projectOwner);
-                $records = $projectOwnerXpRecord->records;
-                $records[] = [
-                    'xp' => $poXpDiff,
-                    'details' => $poMessage,
-                    'timestamp' => (int)((new \DateTime())->format('U') . '000') // Microtime
-                ];
-                $projectOwnerXpRecord->records = $records;
-                $projectOwnerXpRecord->save();
+                // Get project owner id
+                GenericModel::setCollection('projects');
+                $project = GenericModel::find($task->project_id);
+                $projectOwner = null;
+                if ($project) {
+                    $projectOwner = Profile::find($project->acceptedBy);
+                }
 
-                $projectOwner->xp += $poXpDiff;
-                $projectOwner->save();
+                if ($projectOwner) {
+                    $projectOwnerXpRecord = $this->getXpRecord($projectOwner);
+                    $records = $projectOwnerXpRecord->records;
+                    $records[] = [
+                        'xp' => $poXpDiff,
+                        'details' => $poMessage,
+                        'timestamp' => (int)((new \DateTime())->format('U') . '000') // Microtime
+                    ];
+                    $projectOwnerXpRecord->records = $records;
+                    $projectOwnerXpRecord->save();
 
-                $this->sendSlackMessageXpUpdated($projectOwner, $task, $poXpDiff);
+                    $projectOwner->xp += $poXpDiff;
+                    $projectOwner->save();
+
+                    $this->sendSlackMessageXpUpdated($projectOwner, $task, $poXpDiff);
+                }
             }
         }
 

@@ -11,7 +11,7 @@ class ProjectMembers
 {
     const STATUS_ADDED = true;
     const STATUS_REMOVED = false;
-    
+
     /**
      * Handle the event
      * @param \App\Events\ProjectMembers $event
@@ -23,7 +23,9 @@ class ProjectMembers
         if ($project->isDirty()) {
             $oldFields = $project->getOriginal();
             $updatedFields = $project->getDirty();
-            if ($project['collection'] === 'projects' && key_exists('members', $updatedFields)) {
+            if ($project['collection'] === 'projects' && key_exists('members', $updatedFields)
+                && !empty($updatedFields['members'])
+            ) {
                 //if user is added to project send slack notification
                 foreach ($updatedFields['members'] as $newMemberId) {
                     if (!in_array($newMemberId, $oldFields['members'])) {

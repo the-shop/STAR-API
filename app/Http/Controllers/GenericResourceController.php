@@ -122,7 +122,7 @@ class GenericResourceController extends Controller
             return $this->jsonError(['Insufficient permissions.'], 403);
         }
 
-        $model = GenericModel::create($fields);
+        $model = new GenericModel($fields);
 
         event(new GenericModelCreate($model));
 
