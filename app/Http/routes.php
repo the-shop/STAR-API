@@ -36,9 +36,9 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
         Route::put('projects/{id}/makeReservation', 'ReservationController@makeProjectReservation');
         Route::put('projects/{id}/acceptReservation', 'ReservationController@acceptProject');
         Route::put('projects/{id}/declineReservation', 'ReservationController@declineProject');
-        Route::put('tasks/{id}/makeReservation', 'ReservationController@makeTaskReservation');
-        Route::put('tasks/{id}/acceptReservation', 'ReservationController@acceptTask');
-        Route::put('tasks/{id}/declineReservation', 'ReservationController@declineTask');
+        Route::put('tasks/{id}/makeReservation', 'ReservationController@makeTaskReservation')->middleware(['adapters']);
+        Route::put('tasks/{id}/acceptReservation', 'ReservationController@acceptTask')->middleware(['adapters']);
+        Route::put('tasks/{id}/declineReservation', 'ReservationController@declineTask')->middleware(['adapters']);
         Route::get('database/listCollections', 'DatabaseController@listCollections');
         Route::post('slack/message', 'SlackController@sendMessage');
         Route::get('slack/users', 'SlackController@getUsers');

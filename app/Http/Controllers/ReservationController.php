@@ -116,7 +116,7 @@ class ReservationController extends Controller
         $task->reservationsBy = $reservationsBy;
         $task->save();
 
-        return $this->jsonSuccess($task);
+        return $task;
     }
 
     /**
@@ -139,7 +139,7 @@ class ReservationController extends Controller
         $task->owner = Auth::user()->id;
         $task->save();
 
-        return $this->jsonSuccess($task);
+        return $task;
     }
 
     /**
@@ -164,7 +164,7 @@ class ReservationController extends Controller
         $task->declinedBy = $declined;
         $task->save();
 
-        return $this->jsonSuccess($task);
+        return $task;
     }
 
 
