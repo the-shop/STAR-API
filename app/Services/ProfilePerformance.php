@@ -140,13 +140,6 @@ class ProfilePerformance
 
         $taskWorkHistory = is_array($task->work) ? $task->work : [];
 
-        $defaultStats = [
-            'worked' => 0,
-            'paused' => 0,
-            'qa' => 0,
-            'blocked' => 0,
-        ];
-
         // We'll respond with array of performance per task owner (if task got reassigned for example)
         $response = [];
 
