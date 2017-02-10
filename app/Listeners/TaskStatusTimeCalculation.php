@@ -26,7 +26,7 @@ class TaskStatusTimeCalculation
         }
 
         //on task creation check if there is owner assigned and set work field
-        if ($task->isDirty() === false) {
+        if ($task->exists === false) {
             $task->work = [
                 $task->owner => [
                     'worked' => 0,
