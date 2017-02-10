@@ -41,6 +41,10 @@ namespace {
                                 'api/v1/app/{appName}/profiles/changePassword',
                                 'api/v1/app/{appName}/profiles/{profiles}',
                                 "api/v1/app/{appName}/{resource}/{id}",
+                                "api/v1/app/{appName}/tasks/{id}/makeReservation",
+                                "api/v1/app/{appName}/tasks/{id}/acceptReservation",
+                                "api/v1/app/{appName}/tasks/{id}/declineReservation",
+
                             ],
                             'POST' => [
                                 "api/v1/app/{appName}/{resource}",
