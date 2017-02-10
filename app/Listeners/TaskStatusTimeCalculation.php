@@ -2,7 +2,6 @@
 
 namespace App\Listeners;
 
-
 class TaskStatusTimeCalculation
 {
     /**
@@ -22,6 +21,11 @@ class TaskStatusTimeCalculation
 
         //if there is no task owner return false
         if (empty($task->owner)) {
+            return false;
+        }
+
+        // TODO: fix data and remove this tmp fix
+        if (!empty($task->owner) && !isset($task->work[$task->owner])) {
             return false;
         }
 
@@ -96,7 +100,6 @@ class TaskStatusTimeCalculation
                         'workTrackTimestamp' => $unixTime,
                         'timeAssigned' => $unixTime
                     ];
-
                 }
                 $task->work = $work;
             }
