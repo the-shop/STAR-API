@@ -19,18 +19,8 @@ class TaskStatusTimeCalculation
             return false;
         }
 
-        //if there is no task owner return false
-        if (empty($task->owner)) {
-            return false;
-        }
-
-        // TODO: fix data and remove this tmp fix
-        if (!empty($task->owner) && !isset($task->work[$task->owner])) {
-            return false;
-        }
-
         //on task creation check if there is owner assigned and set work field
-        if ($task->exists === false) {
+        if ($task->exists === false && !empty($task->owner)) {
             $task->work = [
                 $task->owner => [
                     'worked' => 0,
@@ -45,8 +35,13 @@ class TaskStatusTimeCalculation
             return $task;
         }
 
-        //handle task status time logic if model is updated
-        if ($task->isDirty()) {
+        // TODO remove this if statement after proper migration implemented
+        if (!isset($task->work[$task->owner])) {
+            return false;
+        }
+
+        //handle task status time logic if model is updated and has got task owner
+        if ($task->isDirty() && !empty($task->owner)) {
             $updatedFields = $task->getDirty();
 
             //add work field on new task without assigned/claimed user - when task is assigned/claimed
