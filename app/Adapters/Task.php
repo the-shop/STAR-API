@@ -65,10 +65,10 @@ class Task implements AdaptersInterface
             if ($this->task->submitted_for_qa === true) {
                 $colorIndicator = 'blue';
             }
+        }
 
-            if ($this->task->passed_qa === true) {
-                $colorIndicator = 'green';
-            }
+        if ($this->task->passed_qa === true) {
+            $colorIndicator = 'green';
         }
 
         $this->task->colorIndicator = $colorIndicator;
