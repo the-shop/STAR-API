@@ -39,8 +39,7 @@ class SprintReminder extends Command
         $sprints = [];
         $tasks = [];
 
-        $date = new \DateTime();
-        $unixDate = $date->format('U');
+        $dateCheck = (new \DateTime())->format('Y-m-d');
 
         // Get all active projects, members of projects and sprints
         foreach ($projects as $project) {
@@ -49,9 +48,9 @@ class SprintReminder extends Command
                 GenericModel::setCollection('sprints');
                 $projectSprints = GenericModel::where('project_id', '=', $project->id)->get();
                 foreach ($projectSprints as $sprint) {
-                    if ($unixDate >= InputHandler::getUnixTimestamp($sprint->start)
-                        && $unixDate <= InputHandler::getUnixTimestamp($sprint->end)
-                    ) {
+                    $sprintStartDueDate = date('Y-m-d', $sprint->start);
+                    $sprintEndDueDate = date('Y-m-d', $sprint->end);
+                    if ($dateCheck >= $sprintStartDueDate && $dateCheck <= $sprintEndDueDate) {
                         $sprints[$sprint->id] = $sprint;
                     }
                 }
@@ -66,7 +65,7 @@ class SprintReminder extends Command
         // Get all active tasks
         GenericModel::setCollection('tasks');
         foreach ($sprints as $sprint) {
-            $sprintTasks = GenericModel::where('sprint_id', '=', $sprint->id);
+            $sprintTasks = GenericModel::where('sprint_id', '=', $sprint->id)->get();
             foreach ($sprintTasks as $task) {
                 if (empty($task->owner)) {
                     $tasks[$task->id] = $task;
