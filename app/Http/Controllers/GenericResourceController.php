@@ -39,18 +39,24 @@ class GenericResourceController extends Controller
                 'limit'
             ];
 
+            $operator = '=';
+            if ($request->has('looseSearch')) {
+                $operator = 'like';
+            }
+
             foreach ($allParams as $key => $value) {
                 if (in_array($key, $skipParams)) {
                     continue;
                 }
+
                 if (is_array($value)) {
                     $query->whereIn($key, $value);
-                } elseif ($request->has('looseSearch')) {
-                    $query->where($key, 'like', '%' . $value . '%');
                 } else {
-                    if ($key !== 'looseSearch') {
-                        $query->where($key, '=', $value);
+                    if ($request->has('looseSearch')) {
+                        $value = '%' . $value . '%';
                     }
+
+                    $query->where($key, $operator, $value);
                 }
             }
         }
