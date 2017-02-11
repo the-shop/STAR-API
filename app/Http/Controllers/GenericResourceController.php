@@ -36,7 +36,8 @@ class GenericResourceController extends Controller
                 'orderBy',
                 'orderDirection',
                 'offset',
-                'limit'
+                'limit',
+                'looseSearch'
             ];
 
             foreach ($allParams as $key => $value) {
@@ -45,6 +46,8 @@ class GenericResourceController extends Controller
                 }
                 if (is_array($value)) {
                     $query->whereIn($key, $value);
+                } elseif ($request->has('looseSearch')) {
+                    $query->where($key, 'like', '%' . $value . '%');
                 } else {
                     $query->where($key, '=', $value);
                 }
@@ -85,10 +88,10 @@ class GenericResourceController extends Controller
             return $this->jsonError($errors, 400);
         }
 
-        $query->orderBy($orderBy, $orderDirection)->offset($offset)->limit($limit);
-        $models = $query->get();
-
-        return $models;
+        return $query->orderBy($orderBy, $orderDirection)
+            ->offset($offset)
+            ->limit($limit)
+            ->get();
     }
 
     /**
