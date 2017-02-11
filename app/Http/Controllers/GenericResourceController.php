@@ -36,8 +36,7 @@ class GenericResourceController extends Controller
                 'orderBy',
                 'orderDirection',
                 'offset',
-                'limit',
-                'looseSearch'
+                'limit'
             ];
 
             foreach ($allParams as $key => $value) {
@@ -49,7 +48,9 @@ class GenericResourceController extends Controller
                 } elseif ($request->has('looseSearch')) {
                     $query->where($key, 'like', '%' . $value . '%');
                 } else {
-                    $query->where($key, '=', $value);
+                    if ($key !== 'looseSearch') {
+                        $query->where($key, '=', $value);
+                    }
                 }
             }
         }
