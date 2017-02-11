@@ -55,9 +55,11 @@ class SprintReminder extends Command
                     }
                 }
                 GenericModel::setCollection('profiles');
-                foreach ($project->members as $memberId) {
-                    $member = GenericModel::where('_id', '=', $memberId)->first();
-                    $members[$memberId] = $member;
+                if (!empty($project->members)) {
+                    foreach ($project->members as $memberId) {
+                        $member = GenericModel::where('_id', '=', $memberId)->first();
+                        $members[$memberId] = $member;
+                    }
                 }
             }
         }
@@ -83,12 +85,19 @@ class SprintReminder extends Command
                 $taskCount[$task->project_id]++;
             }
         }
+        print_r($taskCount);
+        print_r(count($sprints));
 
         if (!empty($taskCount)) {
             foreach ($activeProjects as $project) {
                 if (!key_exists($project->_id, $taskCount)) {
                     continue;
                 }
+
+                if (empty($project->members)) {
+                    continue;
+                }
+
                 foreach ($members as $member) {
                     if (in_array($member->_id, $project->members) && $member->slack) {
                         $recipient = '@' . $member->slack;
