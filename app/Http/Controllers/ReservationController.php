@@ -6,6 +6,7 @@ use App\GenericModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use App\Events\GenericModelUpdate;
 
 /**
  * Handles project reservation logic
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Config;
 class ReservationController extends Controller
 {
     CONST MAKE_RESERVATION = true;
+    CONST ACCEPT_OR_DECLINE = false;
 
     /**
      * Make reservation for selected project
@@ -58,7 +60,7 @@ class ReservationController extends Controller
         $errors = [];
         $time = (new \DateTime())->getTimestamp();
 
-        if ($this->validateReservation($project, $errors, $time) === false) {
+        if ($this->validateReservation($project, $errors, $time, self::ACCEPT_OR_DECLINE) === false) {
             return $this->jsonError($errors, 400);
         }
 
@@ -82,7 +84,7 @@ class ReservationController extends Controller
         $errors = [];
         $time = (new \DateTime())->getTimestamp();
 
-        if ($this->validateReservation($project, $errors, $time) === false) {
+        if ($this->validateReservation($project, $errors, $time, self::ACCEPT_OR_DECLINE) === false) {
             return $this->jsonError($errors, 400);
         }
 
@@ -114,9 +116,14 @@ class ReservationController extends Controller
         $reservationsBy = $task->reservationsBy;
         $reservationsBy[] = ['user_id' => Auth::user()->id, 'timestamp' => $time];
         $task->reservationsBy = $reservationsBy;
-        $task->save();
 
-        return $task;
+        event(new GenericModelUpdate($task));
+
+        if ($task->save()) {
+            return $task;
+        }
+
+        return $this->jsonError('Issue with updating resource.');
     }
 
     /**
@@ -132,14 +139,19 @@ class ReservationController extends Controller
         $errors = [];
         $time = (new \DateTime())->getTimestamp();
 
-        if ($this->validateReservation($task, $errors, $time) === false) {
+        if ($this->validateReservation($task, $errors, $time, self::ACCEPT_OR_DECLINE) === false) {
             return $this->jsonError($errors, 400);
         }
 
         $task->owner = Auth::user()->id;
-        $task->save();
 
-        return $task;
+        event(new GenericModelUpdate($task));
+
+        if ($task->save()) {
+            return $task;
+        }
+
+        return $this->jsonError('Issue with updating resource.');
     }
 
     /**
@@ -155,16 +167,21 @@ class ReservationController extends Controller
         $errors = [];
         $time = (new \DateTime())->getTimestamp();
 
-        if ($this->validateReservation($task, $errors, $time) === false) {
+        if ($this->validateReservation($task, $errors, $time, self::ACCEPT_OR_DECLINE) === false) {
             return $this->jsonError($errors, 400);
         }
 
         $declined = $task->declinedBy;
         $declined[] = ['user_id' => \Auth::user()->id, 'timestamp' => $time];
         $task->declinedBy = $declined;
-        $task->save();
 
-        return $task;
+        event(new GenericModelUpdate($task));
+
+        if ($task->save()) {
+            return $task;
+        }
+
+        return $this->jsonError('Issue with updating resource.');
     }
 
 
@@ -175,7 +192,7 @@ class ReservationController extends Controller
      * @param $errors
      * @return bool
      */
-    private function validateReservation(GenericModel $model = null, &$errors, $time, $makeReservation = false)
+    private function validateReservation(GenericModel $model = null, &$errors, $time, $action)
     {
         //error messages
         $errorMessages = [
@@ -206,6 +223,7 @@ class ReservationController extends Controller
                     $errors[] = $model['collection'] === 'projects' ?
                         str_replace('%m', 'Project', $errorMessages['declined'])
                         : str_replace('%m', 'Task', $errorMessages['declined']);
+                    return false;
                 }
             }
         }
@@ -219,8 +237,9 @@ class ReservationController extends Controller
 
         if (isset($model->reservationsBy)) {
             foreach ($model->reservationsBy as $reserved) {
-                //for makeReservation check time if model is already reserved
-                if ($makeReservation === self::MAKE_RESERVATION
+
+                //for makeReservation check time if model is already reserved by anyone
+                if ($action === self::MAKE_RESERVATION
                     && ($time - $reserved['timestamp'] <= ($reservationTime * 60))
                     && empty($model['collection'] === 'projects' ? $model->acceptedBy : $model->owner)
                 ) {
@@ -228,8 +247,24 @@ class ReservationController extends Controller
                         str_replace('%m', 'Project', $errorMessages['reserved'])
                         : str_replace('%m', 'Task', $errorMessages['reserved']);
                 }
-                //for accept or decline reserved model check time and user ID for permission
-                if ($makeReservation !== self::MAKE_RESERVATION
+
+                //check if user already reserved and time passed, if so add flag declinedBy and return error
+                if ($action === (self::MAKE_RESERVATION || self::ACCEPT_OR_DECLINE)
+                    && ($time - $reserved['timestamp'] >= ($reservationTime * 60))
+                    && empty($model['collection'] === 'projects' ? $model->acceptedBy : $model->owner)
+                ) {
+                    $declined = $model->declinedBy;
+                    $declined[] = ['user_id' => Auth::user()->id, 'timestamp' => $time];
+                    $model->declinedBy = $declined;
+                    $model->save();
+
+                    $errors[] = $model['collection'] === 'projects' ?
+                        str_replace('%m', 'Project', $errorMessages['declined'])
+                        : str_replace('%m', 'Task', $errorMessages['declined']);
+                }
+
+                //for accept or decline actions on already reserved project/task check time and user ID for permission
+                if ($action === self::ACCEPT_OR_DECLINE
                     && ($time - $reserved['timestamp'] <= ($reservationTime * 60))
                     && ($reserved['user_id'] !== Auth::user()->id)
                 ) {
@@ -237,7 +272,6 @@ class ReservationController extends Controller
                 }
             }
         }
-
         if (count($errors) > 0) {
             return false;
         }
