@@ -47,7 +47,7 @@ return [
         ],
         'tasks' => [
             'reservation' => [
-                'maxReservationTime' => env('PROJECT_TASK_RESERVATION_TIME', 1)
+                'maxReservationTime' => env('PROJECT_TASK_RESERVATION_TIME', 3)
             ]
         ],
         'taskHistoryStatuses' => [
