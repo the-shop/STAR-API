@@ -40,7 +40,8 @@ class SlackSendMessages extends Command
 
         $sent = [];
 
-        $unixNow = (int) (new \DateTime())->format('U');
+        $now = new \DateTime();
+        $unixNow = (int) $now->format('U');
         $currentMinuteUnix = $unixNow - $unixNow % 60; // First second of current minute
         $nextMinuteUnix = $currentMinuteUnix + 60; // First second of next minute
 
@@ -52,8 +53,8 @@ class SlackSendMessages extends Command
                 // Make sure we don't re-send things
                 ->where('sent', '=', false)
                 // Check when it was added and make sure that required delay is within current minute
-                ->where('timeAdded', '>', $currentMinuteUnix - $minutesDelay * 60)
-                ->where('timeAdded', '<', $nextMinuteUnix - $minutesDelay * 60);
+                ->where('runAt', '>', $currentMinuteUnix - $minutesDelay * 60 * 2)
+                ->where('runAt', '<', $nextMinuteUnix - $minutesDelay * 60 * 2);
 
             $messages = $query->get();
 
@@ -66,6 +67,8 @@ class SlackSendMessages extends Command
         }
 
         GenericModel::setCollection($oldCollection);
+
+        var_dump($sent);
 
         return $sent;
     }

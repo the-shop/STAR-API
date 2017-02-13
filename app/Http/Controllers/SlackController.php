@@ -59,7 +59,7 @@ class SlackController extends Controller
 
         //send message to list of users
         foreach ($recipients as $recipient) {
-            Slack::sendMessage($recipient, $message, Slack::HIGH_PRIORITY);
+            Slack::sendMessage($recipient, $message, Slack::MEDIUM_PRIORITY);
         }
 
         return $this->jsonSuccess(
