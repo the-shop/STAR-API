@@ -64,11 +64,13 @@ class EmailProfilePerformance extends Command
             $data['toDate'] = \DateTime::createFromFormat('U', $unixNow)->format('Y-m-d');
 
             //if option is not passed send mail to each profile
-            if ($this->option('accountants') === false) {
+            if ($forAccountants === false) {
                 $view = 'emails.profile.performance';
                 $subject = Config::get('mail.private_mail_subject');
 
-                MailSend::send($view, $data, $profile, $subject);
+                if ($profile->email) {
+                    MailSend::send($view, $data, $profile, $subject);
+                }
             }
             $adminAggregation[] = $data;
         }
@@ -76,7 +78,7 @@ class EmailProfilePerformance extends Command
         $overviewRecipients = Profile::where('admin', '=', true)->get();
 
         //if option is passed get all admins and profiles with accountant role
-        if ($this->option('accountants')) {
+        if ($forAccountants) {
             $overviewRecipients = Profile::where('admin', '=', true)
                 ->orWhere('role', '=', 'accountant')
                 ->get();
