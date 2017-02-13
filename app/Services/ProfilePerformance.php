@@ -340,6 +340,16 @@ class ProfilePerformance
     {
         $monthWorkDays = WorkDays::getWorkDays();
 
+        //default values if user is not employee so roleMinimum is 0
+        if ($aggregated['roleMinimum'] === 0) {
+            $aggregated['earnedPercentage'] = sprintf("%d%%", 0);
+            $aggregated['expectedPercentage'] = sprintf("%d%%", 0);
+            $aggregated['monthPrediction'] = 0;
+            $aggregated['monthPredictionPercentage'] = sprintf("%d%%", 0);
+
+            return $aggregated;
+        }
+
         $expectedPercentage = $aggregated['totalPayoutCombined'] === 0 ? sprintf("%d%%", 0) :
             sprintf("%d%%", ($aggregated['totalPayoutCombined'] / $aggregated['roleMinimum']) * 100);
 

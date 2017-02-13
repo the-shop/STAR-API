@@ -3,9 +3,9 @@
 namespace App\Listeners;
 
 use App\GenericModel;
+use App\Helpers\Slack;
 use App\Profile;
 use Illuminate\Support\Facades\Config;
-use Vluzrmos\SlackApi\Facades\SlackChat;
 
 class ProjectMembers
 {
@@ -68,6 +68,6 @@ class ProjectMembers
             . $project->_id
             . ')';
 
-        SlackChat::message($recipient, $message);
+        Slack::sendMessage($recipient, $message, Slack::HIGH_PRIORITY);
     }
 }

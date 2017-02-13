@@ -4,6 +4,7 @@ namespace App\Listeners;
 
 use App\Events\TaskUpdateSlackNotify;
 use App\GenericModel;
+use App\Helpers\Slack;
 use Illuminate\Support\Facades\Auth;
 
 class TaskUpdateSlackNotification
@@ -53,7 +54,7 @@ class TaskUpdateSlackNotification
             . $event->model->_id;
 
         foreach ($recipients as $recipient) {
-            \SlackChat::message($recipient, $message);
+            Slack::sendMessage($recipient, $message, Slack::LOW_PRIORITY);
         }
 
         GenericModel::setCollection($preSetCollection);

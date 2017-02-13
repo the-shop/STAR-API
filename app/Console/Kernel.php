@@ -21,7 +21,8 @@ class Kernel extends ConsoleKernel
         Commands\UnfinishedTasks::class,
         Commands\EmailProfilePerformance::class,
         Commands\MonthlyMinimumCheck::class,
-        Commands\NotifyAdminsTaskDeadline::class
+        Commands\NotifyAdminsTaskDeadline::class,
+        Commands\SlackSendMessages::class,
     ];
 
     /**
@@ -59,5 +60,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('ping:admins:task:deadline')
             ->dailyAt('09:00');
+
+        // Check for messages to send every minute
+        $schedule->command('slack:send-messages');
     }
 }

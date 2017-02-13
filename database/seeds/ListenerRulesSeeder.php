@@ -44,11 +44,11 @@ namespace {
                             'App\Events\TaskStatusHistory' => [
                                 'App\Listeners\TaskStatusHistory'
                             ],
-                            'App\Events\TaskFinishedEarly' => [
-                                'App\Listeners\TaskFinishedEarly'
-                            ],
                             'App\Events\ModelUpdate' => [
                                 'App\Listeners\TaskUpdateXP',
+                            ],
+                            'App\Events\TaskFinishedEarly' => [
+                                'App\Listeners\TaskFinishedEarly'
                             ],
                             'App\Events\GenericModelHistory' => [
                                 'App\Listeners\GenericModelHistory'

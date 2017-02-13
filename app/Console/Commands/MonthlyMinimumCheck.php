@@ -2,11 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\Slack;
 use App\Profile;
 use App\Services\ProfilePerformance;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
-use Vluzrmos\SlackApi\Facades\SlackChat;
 
 /**
  * Class MonthlyMinimumCheck
@@ -87,14 +87,14 @@ class MonthlyMinimumCheck extends Command
                 // Notify employee
                 if ($profile->slack) {
                     $recipient = '@' . $profile->slack;
-                    SlackChat::message($recipient, $userMessage);
+                    Slack::sendMessage($recipient, $userMessage, Slack::MEDIUM_PRIORITY);
                 }
 
                 // Notify admins
                 foreach ($admins as $admin) {
                     if ($admin->slack) {
                         $recipient = '@' . $admin->slack;
-                        SlackChat::message($recipient, $adminMessage);
+                        Slack::sendMessage($recipient, $adminMessage, Slack::MEDIUM_PRIORITY);
                     }
                 }
             }
