@@ -19,7 +19,8 @@ class GenericResourceController extends Controller
      */
     public function index(Request $request)
     {
-        $this->getArchivedCollection($request);
+        //if request route is archive, set archived collection for query
+        $this->checkArchivedCollection($request);
 
         $query = GenericModel::query();
 
@@ -226,7 +227,11 @@ class GenericResourceController extends Controller
         return $this->jsonError('Issue with archiving resource.');
     }
 
-    private function getArchivedCollection(Request $request)
+    /**
+     * @param Request $request
+     * @return bool|Request
+     */
+    private function checkArchivedCollection(Request $request)
     {
         $URI = $request->path();
 
