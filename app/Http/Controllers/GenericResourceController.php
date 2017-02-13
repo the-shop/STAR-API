@@ -194,9 +194,9 @@ class GenericResourceController extends Controller
 
         if ($deletedModel->save()) {
             $model->delete();
-            return $model;
+            return $deletedModel;
         }
-        
+
         return $this->jsonError('Issue with deleting resource.');
     }
 }
