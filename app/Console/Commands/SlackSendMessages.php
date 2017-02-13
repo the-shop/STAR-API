@@ -53,8 +53,8 @@ class SlackSendMessages extends Command
                 // Make sure we don't re-send things
                 ->where('sent', '=', false)
                 // Check when it was added and make sure that required delay is within current minute
-                ->where('runAt', '>', $currentMinuteUnix - $minutesDelay * 60 * 2)
-                ->where('runAt', '<', $nextMinuteUnix - $minutesDelay * 60 * 2);
+                ->where('runAt', '>', $currentMinuteUnix)
+                ->where('runAt', '<', $nextMinuteUnix);
 
             $messages = $query->get();
 
