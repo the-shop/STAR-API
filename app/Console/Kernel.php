@@ -21,7 +21,8 @@ class Kernel extends ConsoleKernel
         Commands\UnfinishedTasks::class,
         Commands\EmailProfilePerformance::class,
         Commands\MonthlyMinimumCheck::class,
-        Commands\NotifyAdminsTaskDeadline::class
+        Commands\NotifyAdminsTaskDeadline::class,
+        Commands\SlackSendMessages::class,
     ];
 
     /**

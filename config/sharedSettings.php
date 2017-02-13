@@ -10,6 +10,12 @@ return [
             'standard' => 'Standard',
             'accountant' => 'Accountant',
         ],
+        'slack' => [
+            'priorityToMinutesDelay' => [
+                \App\Helpers\Slack::MEDIUM_PRIORITY => 2,
+                \App\Helpers\Slack::LOW_PRIORITY => 120,
+            ]
+        ],
         'hourlyRate' => 500,
         'employees' => [
             'roles' => [

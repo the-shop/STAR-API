@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\Slack;
 use Illuminate\Http\Request;
 
 /**
@@ -58,7 +59,7 @@ class SlackController extends Controller
 
         //send message to list of users
         foreach ($recipients as $recipient) {
-            \SlackChat::message($recipient, $message);
+            Slack::sendMessage($recipient, $message, Slack::MEDIUM_PRIORITY);
         }
 
         return $this->jsonSuccess(
