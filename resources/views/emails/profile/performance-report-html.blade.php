@@ -36,7 +36,7 @@
         Real payout combined: <strong>{{$realPayoutCombined}}</strong>
     </p>
     <p>
-        Yor expected payout for last 7 days is <strong>{{$expectedPercentage}}</strong> and your real payout is :
+        Your expected payout for last 7 days is <strong>{{$expectedPercentage}}</strong> and your real payout is :
         <strong>{{ $earnedPercentage }}</strong> of your role minimum : <strong>{{$roleMinimum}}</strong>.
         Based on your performance, projection of real payout for current month is: <strong>{{$monthPrediction}}</strong>
         and that's <strong>{{$monthPredictionPercentage}}</strong> of your role minimum.
