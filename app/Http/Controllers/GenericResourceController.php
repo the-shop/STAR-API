@@ -233,9 +233,9 @@ class GenericResourceController extends Controller
      */
     private function checkArchivedCollection(Request $request)
     {
-        $URI = $request->path();
+        $uri = $request->path();
 
-        if (strpos($URI,'/archive')) {
+        if (strpos($uri,'/archive')) {
             GenericModel::setCollection($request->route('resource') . '_archived');
 
             return $request;
