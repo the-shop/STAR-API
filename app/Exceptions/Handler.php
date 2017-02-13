@@ -3,12 +3,9 @@
 namespace App\Exceptions;
 
 use Exception;
-use Faker\Provider\File;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Mockery\Matcher\Not;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -35,6 +32,7 @@ class Handler extends ExceptionHandler
         ValidationException::class,
         DynamicValidationException::class,
         FileUploadException::class,
+        TokenExpiredException::class,
         NotFoundHttpException::class
     ];
 
