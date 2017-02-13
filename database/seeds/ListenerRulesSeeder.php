@@ -32,23 +32,23 @@ namespace {
                             'App\Events\TaskUpdateSlackNotify' => [
                                 'App\Listeners\TaskUpdateSlackNotification',
                             ],
-                            'App\Events\ModelUpdate' => [
-                                'App\Listeners\TaskUpdateXP',
-                            ],
                             'App\Events\TaskClaim' => [
                                 'App\Listeners\TaskClaim'
                             ],
                             'App\Events\TaskSettingStatus' => [
                                 'App\Listeners\TaskSettingStatus'
                             ],
-                            'App\Events\TaskFinishedEarly' => [
-                                'App\Listeners\TaskFinishedEarly'
-                            ],
                             'App\Events\TaskStatusTimeCalculation' => [
                                 'App\Listeners\TaskStatusTimeCalculation'
                             ],
                             'App\Events\TaskStatusHistory' => [
                                 'App\Listeners\TaskStatusHistory'
+                            ],
+                            'App\Events\ModelUpdate' => [
+                                'App\Listeners\TaskUpdateXP',
+                            ],
+                            'App\Events\TaskFinishedEarly' => [
+                                'App\Listeners\TaskFinishedEarly'
                             ],
                             'App\Events\GenericModelHistory' => [
                                 'App\Listeners\GenericModelHistory'
