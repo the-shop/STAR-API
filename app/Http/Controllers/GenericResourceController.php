@@ -19,6 +19,8 @@ class GenericResourceController extends Controller
      */
     public function index(Request $request)
     {
+        $this->getArchivedCollection($request);
+
         $query = GenericModel::query();
 
         //default query params values
@@ -192,5 +194,48 @@ class GenericResourceController extends Controller
             return $model;
         }
         return $this->jsonError('Issue with deleting resource.');
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Http\JsonResponse
+     */
+    public function archive(Request $request)
+    {
+        $modelCollection = GenericModel::getCollection();
+        $model = GenericModel::find($request->route('id'));
+
+        if (!$model instanceof GenericModel) {
+            return $this->jsonError(['Model not found.'], 404);
+        }
+
+        $fields = $request->all();
+        if ($this->validateInputsForResource($fields, $request->route('resource'), $model) === false) {
+            return $this->jsonError(['Insufficient permissions.'], 403);
+        }
+
+        $archivedModel = $model->replicate();
+
+        $archivedModel['collection'] = $modelCollection . '_archived';
+
+        if ($archivedModel->save()) {
+            $model->delete();
+            return $archivedModel;
+        }
+
+        return $this->jsonError('Issue with archiving resource.');
+    }
+
+    private function getArchivedCollection(Request $request)
+    {
+        $URI = $request->path();
+
+        if (strpos($URI,'/archive')) {
+            GenericModel::setCollection($request->route('resource') . '_archived');
+
+            return $request;
+        }
+
+        return false;
     }
 }
