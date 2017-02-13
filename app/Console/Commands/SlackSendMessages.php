@@ -67,8 +67,6 @@ class SlackSendMessages extends Command
 
         GenericModel::setCollection($oldCollection);
 
-        var_dump($sent);
-
         return $sent;
     }
 }
