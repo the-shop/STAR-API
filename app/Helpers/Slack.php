@@ -3,7 +3,6 @@
 namespace App\Helpers;
 
 use App\GenericModel;
-use Vluzrmos\SlackApi\Facades\SlackChat;
 
 /**
  * Class Slack
@@ -19,26 +18,9 @@ class Slack
      * @param $recipient
      * @param $message
      * @param int $priority
-     */
-    public static function sendMessage($recipient, $message, $priority = self::MEDIUM_PRIORITY)
-    {
-        switch ($priority) {
-            case self::HIGH_PRIORITY:
-                SlackChat::message($recipient, $message);
-                break;
-            case self::LOW_PRIORITY:
-            default:
-                self::addToQueue($recipient, $message, $priority);
-        }
-    }
-
-    /**
-     * @param $recipient
-     * @param $message
-     * @param int $priority
      * @return GenericModel
      */
-    private static function addToQueue($recipient, $message, $priority = self::MEDIUM_PRIORITY)
+    public static function sendMessage($recipient, $message, $priority = self::MEDIUM_PRIORITY)
     {
         $oldCollection = GenericModel::getCollection();
         GenericModel::setCollection('slackMessages');

@@ -12,7 +12,8 @@ return [
         ],
         'slack' => [
             'priorityToMinutesDelay' => [
-                \App\Helpers\Slack::MEDIUM_PRIORITY => 2,
+                \App\Helpers\Slack::HIGH_PRIORITY => 1,
+                \App\Helpers\Slack::MEDIUM_PRIORITY => 30,
                 \App\Helpers\Slack::LOW_PRIORITY => 120,
             ]
         ],

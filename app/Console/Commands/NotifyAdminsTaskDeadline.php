@@ -4,9 +4,9 @@ namespace App\Console\Commands;
 
 use App\GenericModel;
 use App\Helpers\InputHandler;
+use App\Helpers\Slack;
 use App\Profile;
 use Illuminate\Console\Command;
-use Vluzrmos\SlackApi\Facades\SlackChat;
 
 class NotifyAdminsTaskDeadline extends Command
 {
@@ -23,16 +23,6 @@ class NotifyAdminsTaskDeadline extends Command
      * @var string
      */
     protected $description = 'Ping admins / PO on slack about approaching task deadline 2 days before deadline';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     /**
      * Execute the console command.
@@ -70,7 +60,7 @@ class NotifyAdminsTaskDeadline extends Command
                             . '(*'
                             . $taskDueDate
                             . '*)';
-                        SlackChat::message($recipient, $message);
+                        Slack::sendMessage($recipient, $message, Slack::LOW_PRIORITY);
                     }
                 }
             }

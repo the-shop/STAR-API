@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\Slack;
 use Illuminate\Console\Command;
 use App\GenericModel;
 
@@ -20,16 +21,6 @@ class UnfinishedTasks extends Command
      * @var string
      */
     protected $description = 'Cron that moves unfinished tasks from sprint to following sprint on sprint end date.';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     /**
      * Execute the console command.
@@ -110,7 +101,7 @@ class UnfinishedTasks extends Command
                         $recipient = '@' . $admin->slack;
                         $message = 'Hey! There are no future sprints created to move unfinished tasks from ended ' .
                             'sprints on project : *' . $projectName . '*';
-                        \SlackChat::message($recipient, $message);
+                        Slack::sendMessage($recipient, $message, Slack::LOW_PRIORITY);
                     }
                 }
             }

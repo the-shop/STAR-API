@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\ModelUpdate;
 use App\GenericModel;
 use App\Helpers\InputHandler;
+use App\Helpers\Slack;
 use App\Profile;
 use App\Services\ProfilePerformance;
 use Illuminate\Support\Facades\Config;
@@ -212,6 +213,6 @@ class TaskUpdateXP
             . '/tasks/'
             . $task->_id
             . ')';
-        \SlackChat::message($recipient, $slackMessage);
+        Slack::sendMessage($recipient, $slackMessage, Slack::HIGH_PRIORITY);
     }
 }

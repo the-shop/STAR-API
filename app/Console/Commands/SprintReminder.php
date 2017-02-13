@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Helpers\InputHandler;
+use App\Helpers\Slack;
 use Illuminate\Console\Command;
 use App\GenericModel;
 
@@ -85,8 +86,6 @@ class SprintReminder extends Command
                 $taskCount[$task->project_id]++;
             }
         }
-        print_r($taskCount);
-        print_r(count($sprints));
 
         if (!empty($taskCount)) {
             foreach ($activeProjects as $project) {
@@ -110,7 +109,7 @@ class SprintReminder extends Command
                             . ', for project *'
                             . $projectName
                             . '*';
-                        \SlackChat::message($recipient, $message);
+                        Slack::sendMessage($recipient, $message, Slack::MEDIUM_PRIORITY);
                     }
                 }
             }

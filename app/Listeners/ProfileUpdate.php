@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Helpers\Slack;
 use App\Profile;
 use App\Helpers\MailSend;
 
@@ -34,7 +35,7 @@ class ProfileUpdate
                 //Send slack message with XP status changed
                 $recipient = '@' . $event->profile->slack;
                 $message = str_replace('{N}', ($xpDifference > 0 ? "+" . $xpDifference : $xpDifference), $emailMessage);
-                \SlackChat::message($recipient, $message);
+                Slack::sendMessage($recipient, $message, Slack::HIGH_PRIORITY);
             }
         }
     }

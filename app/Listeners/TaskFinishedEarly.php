@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\GenericModel;
+use App\Helpers\Slack;
 use App\Services\ProfilePerformance;
 use App\Profile;
 use App\Helpers\InputHandler;
@@ -54,7 +55,7 @@ class TaskFinishedEarly
                                 . $task->sprint_id
                                 . '/tasks/'
                                 . $task->_id;
-                            \SlackChat::message($recipient, $message);
+                            Slack::sendMessage($recipient, $message, Slack::MEDIUM_PRIORITY);
                         }
                     }
                 }
