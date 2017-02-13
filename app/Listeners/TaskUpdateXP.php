@@ -44,7 +44,7 @@ class TaskUpdateXP
             $mappedValues = $profilePerformance->getTaskValuesForProfile($taskOwnerProfile, $task);
             GenericModel::setCollection('projects');
 
-            $estimatedSeconds = max(InputHandler::getInteger($mappedValues['estimatedHours']) * 60 * 60, 1);
+            $estimatedSeconds = max(InputHandler::getFloat($mappedValues['estimatedHours']) * 60 * 60, 1);
 
             $secondsWorking = $taskDetails['workSeconds'];
 
