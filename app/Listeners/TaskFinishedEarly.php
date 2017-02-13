@@ -35,7 +35,7 @@ class TaskFinishedEarly
                     $mappedValues = $profilePerformance->getTaskValuesForProfile($taskOwnerProfile, $task);
 
                     //calculate estimated time, working time, and 60% of estimated
-                    $estimatedSeconds = max(InputHandler::getInteger($mappedValues['estimatedHours']) * 60 * 60, 1);
+                    $estimatedSeconds = max(InputHandler::getFloat($mappedValues['estimatedHours']) * 60 * 60, 1);
                     $secondsWorking = $taskDetails['workSeconds'];
                     $sixtyPercentOfEstimate = 0.6 * $estimatedSeconds;
 

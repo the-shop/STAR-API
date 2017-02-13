@@ -17,10 +17,10 @@ class InputHandler
      */
     public static function getUnixTimestamp($input)
     {
-        if (strlen((string) $input) === 10) {
-            return (int) $input;
-        } elseif (strlen((string) $input) === 13) {
-            return (int) substr((string) $input, 0, -3);
+        if (strlen((string)$input) === 10) {
+            return (int)$input;
+        } elseif (strlen((string)$input) === 13) {
+            return (int)substr((string)$input, 0, -3);
         }
 
         throw new \Exception('Unrecognized unix timestamp format');
@@ -37,8 +37,8 @@ class InputHandler
             return $float;
         }
 
-        if ((float) $float == $float) {
-            return (float) $float;
+        if ((float)$float == $float) {
+            return (float)$float;
         }
 
         throw new \Exception('Input not a float.');
@@ -52,7 +52,7 @@ class InputHandler
     public static function getInteger($input)
     {
         if (is_numeric($input) === true) {
-            return (int) $input;
+            return (int)$input;
         }
 
         throw new \Exception('Input not an integer.');
