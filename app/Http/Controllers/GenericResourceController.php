@@ -59,6 +59,14 @@ class GenericResourceController extends Controller
                         $value = '%' . $value . '%';
                     }
 
+                    if ($value === 'false') {
+                        $value = false;
+                    } elseif ($value === 'true') {
+                        $value = true;
+                    } elseif ($value === 'null') {
+                        $value = null;
+                    }
+
                     $query->where($key, $operator, $value);
                 }
             }
@@ -241,7 +249,7 @@ class GenericResourceController extends Controller
     {
         $uri = $request->path();
 
-        if (strpos($uri,'/archive')) {
+        if (strpos($uri, '/archive')) {
             GenericModel::setCollection($request->route('resource') . '_archived');
 
             return $request;
