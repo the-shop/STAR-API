@@ -49,10 +49,7 @@ class TaskUpdateXP
 
             $secondsWorking = $taskDetails['workSeconds'];
 
-            //print_r($estimatedSeconds);
             $taskSpeedCoefficient = $secondsWorking / $estimatedSeconds;
-
-            //print_r($taskSpeedCoefficient);
 
             $webDomain = Config::get('sharedSettings.internalConfiguration.webDomain');
             $taskLink = '['
