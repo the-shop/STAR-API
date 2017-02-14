@@ -23,7 +23,7 @@ class TaskUpdateXpTest extends TestCase
     {
         parent::tearDown();
 
-        $this->profile->delete();
+       $this->profile->delete();
     }
 
     //test update XP on unfinished task
@@ -38,7 +38,7 @@ class TaskUpdateXpTest extends TestCase
         $listener = new TaskUpdateXP($task);
         $out = $listener->handle($event);
 
-        $this->assertEquals(false,$out);
+        $this->assertEquals(false, $out);
     }
 
     //early task delivery with speedCoefficient < 0.75
@@ -70,7 +70,8 @@ class TaskUpdateXpTest extends TestCase
         $listener = new TaskUpdateXP($task);
         $out = $listener->handle($event);
 
-        //$this->assertEquals(200.2052, $this->profile->xp);
+        $checkXpProfile = Profile::find($this->profile->id);
+        $this->assertEquals(200.2025, $checkXpProfile->xp);
         $this->assertEquals(true,$out);
     }
 
@@ -103,7 +104,8 @@ class TaskUpdateXpTest extends TestCase
         $listener = new TaskUpdateXP($task);
         $out = $listener->handle($event);
 
-        //$this->assertEquals(199, $this->profile->xp);
+        $checkXpProfile = Profile::find($this->profile->id);
+        $this->assertEquals(199, $checkXpProfile->xp);
         $this->assertEquals(true,$out);
     }
 
@@ -136,7 +138,8 @@ class TaskUpdateXpTest extends TestCase
         $listener = new TaskUpdateXP($task);
         $out = $listener->handle($event);
 
-        //$this->assertEquals(198, $this->profile->xp);
+        $checkXpProfile = Profile::find($this->profile->id);
+        $this->assertEquals(198, $checkXpProfile->xp);
         $this->assertEquals(true,$out);
     }
 
@@ -169,7 +172,8 @@ class TaskUpdateXpTest extends TestCase
         $listener = new TaskUpdateXP($task);
         $out = $listener->handle($event);
 
-        //$this->assertEquals(197, $this->profile->xp);
+        $checkXpProfile = Profile::find($this->profile->id);
+        $this->assertEquals(197, $checkXpProfile->xp);
         $this->assertEquals(true,$out);
     }
 
@@ -208,7 +212,8 @@ class TaskUpdateXpTest extends TestCase
         $out = $listener->handle($event);
 
         //task done in time so task owner(admin also) get's double XP
-        //$this->assertEquals(200.4525, $this->profile->xp);
+        $checkXpProfile = Profile::find($this->profile->id);
+        $this->assertEquals(200.4525, $checkXpProfile->xp);
         $this->assertEquals(true,$out);
 
     }
@@ -248,7 +253,8 @@ class TaskUpdateXpTest extends TestCase
         $out = $listener->handle($event);
 
         //task owner get's XP for early delivery and xp is deducted because code note reviewed in time
-        //$this->assertEquals(197.2025, $this->profile->xp);
+        $checkXpProfile = Profile::find($this->profile->id);
+        $this->assertEquals(197.2025, $checkXpProfile->xp);
         $this->assertEquals(true,$out);
 
     }
