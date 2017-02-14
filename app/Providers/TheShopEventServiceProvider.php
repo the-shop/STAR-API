@@ -19,9 +19,12 @@ class TheShopEventServiceProvider extends ServiceProvider
         'App\Events\GenericModelUpdate' => [
             'App\Listeners\GenericModelUpdate'
         ],
+        'App\Events\GenericModelDelete' => [
+            'App\Listeners\GenericModelDelete'
+        ],
         'App\Events\ProfileUpdate' => [
             'App\Listeners\ProfileUpdate'
-        ]
+        ],
     ];
 
     /**
