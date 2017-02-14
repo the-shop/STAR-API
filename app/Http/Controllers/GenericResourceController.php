@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\GenericModelCreate;
+use App\Events\GenericModelDelete;
 use App\Events\GenericModelUpdate;
 use App\GenericModel;
 use Illuminate\Http\Request;
@@ -196,6 +197,7 @@ class GenericResourceController extends Controller
         $deletedModel['collection'] = $modelCollection . '_deleted';
 
         if ($deletedModel->save()) {
+            event(new GenericModelDelete($model));
             $model->delete();
             return $deletedModel;
         }

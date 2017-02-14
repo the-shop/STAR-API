@@ -64,6 +64,15 @@ namespace {
                             ]
                         ]
                     ],
+                    [
+                        'resource' => 'projects',
+                        'event' => 'delete',
+                        'listeners' => [
+                            'App\Events\ProjectDelete' => [
+                                'App\Listeners\ProjectDelete'
+                            ]
+                        ]
+                    ]
                 ]
             );
         }
