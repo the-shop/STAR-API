@@ -38,7 +38,7 @@ class ProfilePerformanceTest extends TestCase
      */
     public function testCheckPerformanceForEmptyHistory()
     {
-        $task = $this->getTaskWithEmptyHistory();
+        $task = $this->getAssignedTask();
 
         $pp = new ProfilePerformance();
 
