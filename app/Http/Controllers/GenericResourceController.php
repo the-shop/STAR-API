@@ -39,7 +39,8 @@ class GenericResourceController extends Controller
                 'orderBy',
                 'orderDirection',
                 'offset',
-                'limit'
+                'limit',
+                'looseSearch'
             ];
 
             $operator = '=';
