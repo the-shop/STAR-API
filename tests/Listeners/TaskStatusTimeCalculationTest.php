@@ -30,81 +30,6 @@ class TaskStatusTimeCalculationTest extends TestCase
 
     /*
     |--------------------------------------------------------------------------
-    | Get methods
-    |--------------------------------------------------------------------------
-    |
-    | Here are methods to get new task, new project and new task that is assigned
-    */
-
-    /**
-     * Get new task without owner
-     * @return GenericModel
-     */
-    public function getNewTask()
-    {
-        GenericModel::setCollection('tasks');
-        return new GenericModel(
-            [
-                'owner' => '',
-                'paused' => false,
-                'submitted_for_qa' => false,
-                'blocked' => false,
-                'passed_qa' => false
-            ]
-        );
-    }
-
-    /**
-     * Get new project
-     * @return GenericModel
-     */
-    public function getNewProject()
-    {
-        GenericModel::setCollection('projects');
-        return new GenericModel(
-            [
-                'owner' => '',
-                'paused' => false,
-                'submitted_for_qa' => false,
-                'blocked' => false,
-                'passed_qa' => false
-            ]
-        );
-    }
-
-    /**
-     * Get assigned task
-     * @return GenericModel
-     */
-    public function getAssignedTask()
-    {
-        //Assigned 5 minutes ago
-        $minutesWorking = 30;
-        $assignedAgo = (int)(new \DateTime())->sub(new \DateInterval('PT' . $minutesWorking . 'M'))->format('U');
-        GenericModel::setCollection('tasks');
-        return new GenericModel(
-            [
-                'owner' => $this->profile->id,
-                'paused' => false,
-                'submitted_for_qa' => false,
-                'blocked' => false,
-                'passed_qa' => false,
-                'work' => [
-                    $this->profile->id => [
-                        'worked' => 0,
-                        'paused' => 0,
-                        'qa' => 0,
-                        'blocked' => 0,
-                        'workTrackTimestamp' => $assignedAgo,
-                        'timeAssigned' => $assignedAgo
-                    ]
-                ]
-            ]
-        );
-    }
-
-    /*
-    |--------------------------------------------------------------------------
     | Test methods
     |--------------------------------------------------------------------------
     |
@@ -194,7 +119,9 @@ class TaskStatusTimeCalculationTest extends TestCase
      */
     public function testTaskStatusTimeCalculationForTaskReassigned()
     {
-        $task = $this->getAssignedTask();
+        //assigned 30 mins ago
+        $assignedAgo = (new \DateTime())->format('U') - 30 * 60;
+        $task = $this->getAssignedTask($assignedAgo);
         $task->save();
         $oldOwner = $task->owner;
         $oldWorkTrackTimestamp = $task->work[$oldOwner]['workTrackTimestamp'];
@@ -248,7 +175,9 @@ class TaskStatusTimeCalculationTest extends TestCase
      */
     public function testTaskStatusTimeCalculationForTaskPaused()
     {
-        $task = $this->getAssignedTask();
+        //assigned 30 mins ago
+        $assignedAgo = (new \DateTime())->format('U') - 30 * 60;
+        $task = $this->getAssignedTask($assignedAgo);
         $task->save();
         $workedTimeBeforeListener = $task->work[$task->owner]['worked'];
         $timeStampBeforeListener = $task->work[$task->owner]['workTrackTimestamp'];
@@ -272,7 +201,9 @@ class TaskStatusTimeCalculationTest extends TestCase
      */
     public function testTaskStatusTimeCalculationForTaskResumed()
     {
-        $task = $this->getAssignedTask();
+        //assigned 30 mins ago
+        $assignedAgo = (new \DateTime())->format('U') - 30 * 60;
+        $task = $this->getAssignedTask($assignedAgo);
         $task->paused = true;
         $task->save();
         $pausedTimeBeforeListener = $task->work[$task->owner]['paused'];
@@ -297,7 +228,9 @@ class TaskStatusTimeCalculationTest extends TestCase
      */
     public function testTaskStatusTimeCalculationForBlocked()
     {
-        $task = $this->getAssignedTask();
+        //assigned 30 mins ago
+        $assignedAgo = (new \DateTime())->format('U') - 30 * 60;
+        $task = $this->getAssignedTask($assignedAgo);
         $task->save();
         $workedTimeBeforeListener = $task->work[$task->owner]['worked'];
         $timeStampBeforeListener = $task->work[$task->owner]['workTrackTimestamp'];
@@ -321,7 +254,9 @@ class TaskStatusTimeCalculationTest extends TestCase
      */
     public function testTaskStatusTimeCalculationForUnBlocked()
     {
-        $task = $this->getAssignedTask();
+        //assigned 30 mins ago
+        $assignedAgo = (new \DateTime())->format('U') - 30 * 60;
+        $task = $this->getAssignedTask($assignedAgo);
         $task->blocked = true;
         $task->save();
         $blockedTimeBeforeListener = $task->work[$task->owner]['blocked'];
@@ -346,7 +281,9 @@ class TaskStatusTimeCalculationTest extends TestCase
      */
     public function testTaskStatusTimeCalculationForSubmittedForQa()
     {
-        $task = $this->getAssignedTask();
+        //assigned 30 mins ago
+        $assignedAgo = (new \DateTime())->format('U') - 30 * 60;
+        $task = $this->getAssignedTask($assignedAgo);
         $task->save();
         $workedTimeBeforeListener = $task->work[$task->owner]['worked'];
         $timeStampBeforeListener = $task->work[$task->owner]['workTrackTimestamp'];
@@ -370,7 +307,9 @@ class TaskStatusTimeCalculationTest extends TestCase
      */
     public function testTaskStatusTimeCalculationForFailedQa()
     {
-        $task = $this->getAssignedTask();
+        //assigned 30 mins ago
+        $assignedAgo = (new \DateTime())->format('U') - 30 * 60;
+        $task = $this->getAssignedTask($assignedAgo);
         $task->submitted_for_qa = true;
         $task->save();
         $qaTimeBeforeListener = $task->work[$task->owner]['qa'];
@@ -395,7 +334,9 @@ class TaskStatusTimeCalculationTest extends TestCase
      */
     public function testTaskStatusTimeCalculationForPassedQa()
     {
-        $task = $this->getAssignedTask();
+        //assigned 30 mins ago
+        $assignedAgo = (new \DateTime())->format('U') - 30 * 60;
+        $task = $this->getAssignedTask($assignedAgo);
         $task->submitted_for_qa = true;
         $task->save();
         $qaTimeBeforeListener = $task->work[$task->owner]['qa'];
@@ -420,8 +361,9 @@ class TaskStatusTimeCalculationTest extends TestCase
      */
     public function testTaskStatusTimeComplexFlowTaskDone()
     {
-        //user that assigned task after 5 mins pause task
-        $task = $this->getAssignedTask();
+        //assigned 30 mins ago, and then paused
+        $assignedAgo = (new \DateTime())->format('U') - 30 * 60;
+        $task = $this->getAssignedTask($assignedAgo);
         $task->save();
         $workedTimeBeforeListener = $task->work[$task->owner]['worked'];
         $timeStampBeforeListener = $task->work[$task->owner]['workTrackTimestamp'];
