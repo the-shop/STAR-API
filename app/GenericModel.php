@@ -137,4 +137,23 @@ class GenericModel extends StarModel
             return $unArchivedModel;
         }
     }
+
+    /**
+     * GenericModel to delete model and pass it to _deleted collection
+     * @return \Illuminate\Database\Eloquent\Model
+     */
+    public function delete()
+    {
+        $preSetCollection = self::getCollection();
+        $deletedModel = $this->replicate();
+        self::setCollection($this->collection . '_deleted');
+        $deletedModel->collection = self::$collectionName;
+        $deletedModel->_id = $this->original['_id'];
+
+        if ($deletedModel->save()) {
+            parent::delete();
+            self::setCollection($preSetCollection);
+            return $deletedModel;
+        }
+    }
 }

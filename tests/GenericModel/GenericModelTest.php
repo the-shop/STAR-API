@@ -76,4 +76,25 @@ class GenericModelTest extends TestCase
         $this->setExpectedException('Exception', 'Model collection now allowed to unArchive', 403);
         $project->unarchive();
     }
+
+    /**
+     * Test GenericModel delete
+     */
+    public function testGenericModelDelete()
+    {
+        $project = $this->getNewProject();
+        $project->save();
+
+        $projectId = $project->id;
+        $project->delete();
+
+        GenericModel::setCollection('projects');
+        $oldProject = GenericModel::find($projectId);
+
+        GenericModel::setCollection('projects_deleted');
+        $foundDeletedProject = GenericModel::find($projectId);
+
+        $this->assertEquals($projectId, $foundDeletedProject->id);
+        $this->assertEquals(null, $oldProject);
+    }
 }
