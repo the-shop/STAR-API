@@ -23,6 +23,8 @@ class Kernel extends ConsoleKernel
         Commands\MonthlyMinimumCheck::class,
         Commands\NotifyAdminsTaskDeadline::class,
         Commands\SlackSendMessages::class,
+        Commands\UpdateTaskPriority::class,
+        Commands\NotifyAdminsTaskPriority::class,
     ];
 
     /**
@@ -63,5 +65,13 @@ class Kernel extends ConsoleKernel
 
         // Check for messages to send every minute
         $schedule->command('slack:send-messages');
+
+        //Check task deadline and update priority
+        $schedule->command('update:task:priority')
+            ->dailyAt('07:00');
+
+        //Check task deadlines based on priority and ping admins
+        $schedule->command('ping:admins:task:priority')
+            ->dailyAt('07:00');
     }
 }
