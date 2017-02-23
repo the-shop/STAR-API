@@ -1,5 +1,8 @@
 #!/bin/sh
 
+echo "Renew config cache"
+php artisan config:cache
+
 echo "Re-building cache"
 php artisan cache:clear
 
