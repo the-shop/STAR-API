@@ -48,6 +48,8 @@ class TaskClaim
                     }
                     if ($item->owner === $taskOwnerId
                         && $item->passed_qa === false
+                        && $item->blocked === false
+                        && $item->qa_in_progress === false
                         && $item->submitted_for_qa === false
                     ) {
                         throw new UserInputException('Permission denied. There are unfinished previous tasks.');
