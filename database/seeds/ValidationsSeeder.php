@@ -186,7 +186,8 @@ namespace {
                             'complexity' => 'integer',
                             'priority' => 'string',
                             'ownerId' => 'alpha_num',
-                            'commentsId' => 'alpha_num'
+                            'commentsId' => 'alpha_num',
+                            'blocked' => 'boolean'
                         ],
                         'resource' => 'tasks',
                         'acl' => [
@@ -196,6 +197,7 @@ namespace {
                                     'owner',
                                     'paused',
                                     'task_history',
+                                    'blocked'
                                 ],
                                 'GET' => true,
                                 'DELETE' => false,
