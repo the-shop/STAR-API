@@ -52,26 +52,43 @@ class ProfilePerformance
             $taskInTimeRange = false;
             $unixStartDate = Carbon::createFromFormat('U', InputHandler::getUnixTimestamp($unixStart))->format('Y-m-d');
             $unixEndDate = Carbon::createFromFormat('U', InputHandler::getUnixTimestamp($unixEnd))->format('Y-m-d');
-            foreach ($task->work as $userId => $workStats) {
-                if ($userId === $profile->id) {
-                    $assignedDate =
-                        Carbon::createFromFormat('U', InputHandler::getUnixTimestamp($workStats['timeAssigned']))
-                            ->format('Y-m-d');
-                    $lastActivityDate =
-                        Carbon::createFromFormat('U', InputHandler::getUnixTimestamp($workStats['workTrackTimestamp']))
-                            ->format('Y-m-d');
-                    // Get task if it's not finished and timeAssigned is within time range
-                    if ($task->passed_qa === false && $assignedDate <= $unixEndDate
-                        && $assignedDate >= $unixStartDate
-                    ) {
-                        $taskInTimeRange = true;
-                        break;
+
+            if (array_key_exists($profile->id, $task->work)) {
+                foreach ($task->work as $userId => $workStats) {
+                    if ($userId === $profile->id) {
+                        $assignedDate =
+                            Carbon::createFromFormat('U', InputHandler::getUnixTimestamp($workStats['timeAssigned']))
+                                ->format('Y-m-d');
+                        $lastActivityDate =
+                            Carbon::createFromFormat('U', InputHandler::getUnixTimestamp($workStats['workTrackTimestamp']))
+                                ->format('Y-m-d');
+                        // Get task if it's not finished and timeAssigned is within time range
+                        if ($task->passed_qa === false && $assignedDate <= $unixEndDate
+                            && $assignedDate >= $unixStartDate
+                        ) {
+                            $taskInTimeRange = true;
+                            break;
+                        }
+                        // Get task if finished and if delivery time (passed_qa) is within time range
+                        if ($task->passed_qa === true && $lastActivityDate <= $unixEndDate
+                            && $lastActivityDate >= $unixStartDate
+                        ) {
+                            $taskInTimeRange = true;
+                            $deliveredTask = true;
+                            break;
+                        }
                     }
-                    // Get task if finished and if delivery time (passed_qa) is within time range
-                    if ($task->passed_qa === true && $lastActivityDate <= $unixEndDate
-                        && $lastActivityDate >= $unixStartDate
+                }
+            } else {
+                foreach ($task->task_history as $historyItem) {
+                    if (array_key_exists('status', $historyItem)
+                        && ($historyItem['status'] === 'assigned'
+                            || $historyItem['status'] === 'claimed')
+                        && InputHandler::getUnixTimestamp($historyItem['timestamp']) <= $unixEnd
+                        && InputHandler::getUnixTimestamp($historyItem['timestamp']) > $unixStart
                     ) {
                         $taskInTimeRange = true;
+                    } elseif (array_key_exists('status', $historyItem) && $historyItem['status'] === 'qa_success') {
                         $deliveredTask = true;
                         break;
                     }
