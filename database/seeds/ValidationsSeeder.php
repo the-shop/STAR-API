@@ -187,6 +187,7 @@ namespace {
                             'priority' => 'string',
                             'ownerId' => 'alpha_num',
                             'commentsId' => 'alpha_num',
+                            'watchers' => 'array',
                             'blocked' => 'boolean'
                         ],
                         'resource' => 'tasks',
