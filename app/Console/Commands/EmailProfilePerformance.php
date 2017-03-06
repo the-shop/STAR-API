@@ -37,7 +37,7 @@ class EmailProfilePerformance extends Command
     {
         $performance = new ProfilePerformance();
 
-        $profiles = Profile::all();
+        $profiles = Profile::where('employee', '=', true)->get();
 
         $daysAgo = $this->argument('daysAgo');
         $unixNow = (new \DateTime())->format('U');
