@@ -127,7 +127,9 @@ class NotifyAdminsTaskPriority extends Command
                     foreach ($tasksDueDateNextTwoDays as $taskProjectId => $taskList) {
                         if ($taskProjectId === $projectToNotify->id) {
                             foreach ($taskList as $singleTask) {
-                                $message = 'Task *'
+                                $message = '*'
+                                    . $projectToNotify->name
+                                    . '* - Task *'
                                     . $singleTask->title
                                     . '* due date in next *2 days* '
                                     . $webDomain
