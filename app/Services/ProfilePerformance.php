@@ -479,7 +479,7 @@ class ProfilePerformance
 
         //default values if user is not employee so roleMinimum is 0
         if ($aggregated['roleMinimum'] === 0) {
-            $aggregated['earnedPercentage'] = sprintf("%d%%", 0);
+            $aggregated['earnedPercentage'] = sprintf("%d", 0);
             $aggregated['monthPrediction'] = 0;
 
             return $aggregated;
