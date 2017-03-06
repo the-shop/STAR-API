@@ -475,34 +475,24 @@ class ProfilePerformance
      */
     private function calculateEarningEstimation(array $aggregated, $numberOfDays)
     {
-        $monthWorkDays = WorkDays::getWorkDays();
+        $daysInMonth = Carbon::now()->daysInMonth;
 
         //default values if user is not employee so roleMinimum is 0
         if ($aggregated['roleMinimum'] === 0) {
             $aggregated['earnedPercentage'] = sprintf("%d%%", 0);
-            $aggregated['expectedPercentage'] = sprintf("%d%%", 0);
             $aggregated['monthPrediction'] = 0;
-            $aggregated['monthPredictionPercentage'] = sprintf("%d%%", 0);
 
             return $aggregated;
         }
 
-        $expectedPercentage = $aggregated['totalPayoutCombined'] === 0 ? sprintf("%d%%", 0) :
-            sprintf("%d%%", ($aggregated['totalPayoutCombined'] / $aggregated['roleMinimum']) * 100);
+        $minimumForNumberOfDays = $aggregated['roleMinimum'] / $daysInMonth * $numberOfDays;
 
-        $earnedPercentage = $aggregated['realPayoutCombined'] === 0 ? sprintf("%d%%", 0) :
-            sprintf("%d%%", ($aggregated['realPayoutCombined'] / $aggregated['roleMinimum']) * 100);
+        $earnedPercentage = sprintf("%d", $aggregated['realPayoutCombined'] / $minimumForNumberOfDays * 100);
 
-        $monthlyProjection = $aggregated['realPayoutCombined'] === 0 ? 0 :
-            ($aggregated['realPayoutCombined'] / $numberOfDays) * count($monthWorkDays);
-
-        $monthlyProjectionPercentage = $monthlyProjection === 0 ? sprintf("%d%%", 0) :
-            sprintf("%d%%", ($monthlyProjection / $aggregated['roleMinimum']) * 100);
+        $monthlyProjection = (float) $aggregated['realPayoutCombined'] / $numberOfDays * $daysInMonth;
 
         $aggregated['earnedPercentage'] = $earnedPercentage;
-        $aggregated['expectedPercentage'] = $expectedPercentage;
         $aggregated['monthPrediction'] = $this->roundFloat($monthlyProjection, 2, 10);
-        $aggregated['monthPredictionPercentage'] = $monthlyProjectionPercentage;
 
         return $aggregated;
     }

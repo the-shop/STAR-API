@@ -9,7 +9,7 @@
     </p>
 
     <p>
-        Delivered hours: <strong>{{$estimatedHours}}</strong>
+        Delivered hours: <strong>{{$hoursDelivered}}</strong>
     </p>
 
     <p>
@@ -36,10 +36,12 @@
         Real payout combined: <strong>{{$realPayoutCombined}}</strong>
     </p>
     <p>
-        Your expected payout for last 7 days is <strong>{{$expectedPercentage}}</strong> and your real payout is :
-        <strong>{{ $earnedPercentage }}</strong> of your role minimum : <strong>{{$roleMinimum}}</strong>.
-        Based on your performance, projection of real payout for current month is: <strong>{{$monthPrediction}}</strong>
-        and that's <strong>{{$monthPredictionPercentage}}</strong> of your role minimum.
+        Over last 7 days you earned <strong>{{$realPayoutCombined}}</strong> and that's
+        <strong>{{$earnedPercentage}}%</strong> for the time range of your role minimum
+        (<strong>{{$roleMinimum}}</strong>).
+
+        Based on your performance, projection of real payout for current month is:
+        <strong>{{$monthPrediction}}</strong>
     </p>
 
 
