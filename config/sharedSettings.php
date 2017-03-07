@@ -88,7 +88,8 @@ return [
             'React',
             'DevOps',
             'Node',
-            'Planning'
+            'Planning',
+            'Management',
         ],
         'webDomain' => env('WEB_DOMAIN', 'http://the-shop.io:3000/'),
         'employeeMonthlyMinimum' => [
