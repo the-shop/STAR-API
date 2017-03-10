@@ -2,6 +2,9 @@
 
 namespace App\Listeners;
 
+use App\GenericModel;
+use Illuminate\Support\Facades\Auth;
+
 class GenericModelHistory
 {
     /**
@@ -10,18 +13,20 @@ class GenericModelHistory
      */
     public function handle(\App\Events\GenericModelHistory $event)
     {
-        if ($event->model->isDirty()) {
-            $newAllAttributes = $event->model->getAttributes();
-            $newValues = $event->model->getDirty();
-            $oldValues = $event->model->getOriginal();
+        $model = $event->model;
+        if ($model->isDirty()) {
+            $newAllAttributes = $model->getAttributes();
+            $newValues = $model->getDirty();
+            $oldValues = $model->getOriginal();
 
-            $history = $event->model->history;
-            $date = new \DateTime();
-            $unixTime = $date->format('U');
+            $modelHistoryRecord = $this->getHistoryRecord($model);
+            $history = $modelHistoryRecord->history;
+            $unixTime = (new \DateTime())->format('U');
+
             foreach ($newValues as $newField => $newValue) {
                 if (key_exists($newField, $oldValues)) {
                     $history[] = [
-                        'profileId' => \Auth::user()->id,
+                        'profileId' => Auth::user()->id,
                         'filedName' => $newField,
                         'oldValue' => $oldValues[$newField],
                         'newValue' => $newValue,
@@ -29,7 +34,7 @@ class GenericModelHistory
                     ];
                 } else {
                     $history[] = [
-                        'profileId' => \Auth::user()->id,
+                        'profileId' => Auth::user()->id,
                         'fieldName' => $newField,
                         'oldValue' => null,
                         'newValue' => $newValue,
@@ -41,7 +46,7 @@ class GenericModelHistory
             foreach ($oldValues as $oldFieldName => $oldFieldValue) {
                 if (!key_exists($oldFieldName, $newAllAttributes)) {
                     $history[] = [
-                        'profileId' => \Auth::user()->id,
+                        'profileId' => Auth::user()->id,
                         'fieldName' => $oldFieldName,
                         'oldValue' => $oldFieldValue,
                         'newValue' => null,
@@ -49,8 +54,29 @@ class GenericModelHistory
                     ];
                 }
             }
-
-            $event->model->history = $history;
+            $modelHistoryRecord->history = $history;
+            $modelHistoryRecord->save();
         }
+    }
+
+    /**
+     * Helper to get model history record from document-history collection
+     * @param GenericModel $model
+     * @return GenericModel
+     */
+    private function getHistoryRecord(GenericModel $model)
+    {
+        $oldCollection = GenericModel::getCollection();
+        GenericModel::setCollection('document-history');
+        if (!$model->history_id) {
+            $modelHistoryRecord = new GenericModel(['history' => []]);
+            $modelHistoryRecord->save();
+            $model->history_id = $modelHistoryRecord->_id;
+        } else {
+            $modelHistoryRecord = GenericModel::find($model->history_id);
+        }
+        GenericModel::setCollection($oldCollection);
+
+        return $modelHistoryRecord;
     }
 }
