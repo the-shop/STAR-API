@@ -57,7 +57,7 @@ class GenericResourceController extends Controller
                 }
 
                 // Check if value has "range" delimiter and set query
-                if (strpos($value, '>=<')) {
+                if (!is_array($value) && strpos($value, '>=<')) {
                     $values = explode('>=<', $value);
                     $trimmedValues = array_map('trim', $values);
                     $query->where(
