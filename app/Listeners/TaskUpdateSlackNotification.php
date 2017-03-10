@@ -32,6 +32,10 @@ class TaskUpdateSlackNotification
         // Let's build a list of recipients
         $recipients = [];
 
+        if (!isset($task->watchers)) {
+            $task->watchers = [];
+        }
+
         foreach ($task->watchers as $watcher) {
             $watcherProfile = Profile::find($watcher);
             if ($watcherProfile !== null && $watcherProfile->slack) {
