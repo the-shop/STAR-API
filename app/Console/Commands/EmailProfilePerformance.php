@@ -39,13 +39,14 @@ class EmailProfilePerformance extends Command
 
         $profiles = Profile::where('employee', '=', true)->get();
 
-        $daysAgo = $this->argument('daysAgo');
-        $unixNow = (new \DateTime())->format('U');
-        $unixAgo = $unixNow - (int)$daysAgo * 24 * 60 * 60;
+        // Set time range
+        $daysAgo = (int) $this->argument('daysAgo');
+        $unixNow = (int) Carbon::now()->format('U');
+        $unixAgo = $unixNow - $daysAgo * 24 * 60 * 60;
 
         $forAccountants = $this->option('accountants');
 
-        //if option is passed set date range from 1st day of current month until last day of current month
+        // If option is passed set date range from 1st day of current month until last day of current month
         if ($forAccountants) {
             $unixNow = Carbon::now()->endOfMonth()->format('U');
             $unixAgo = Carbon::now()->firstOfMonth()->format('U');
@@ -63,12 +64,12 @@ class EmailProfilePerformance extends Command
             $data['fromDate'] = \DateTime::createFromFormat('U', $unixAgo)->format('Y-m-d');
             $data['toDate'] = \DateTime::createFromFormat('U', $unixNow)->format('Y-m-d');
 
-            //if option is not passed send mail to each profile
+            // If option is not passed send mail to each profile
             if ($forAccountants === false) {
                 $view = 'emails.profile.performance';
                 $subject = Config::get('mail.private_mail_subject');
 
-                if ($profile->email) {
+                if ($profile->email && $profile->active) {
                     MailSend::send($view, $data, $profile, $subject);
                 }
             }
@@ -77,7 +78,7 @@ class EmailProfilePerformance extends Command
 
         $overviewRecipients = Profile::where('admin', '=', true)->get();
 
-        //if option is passed get all admins and profiles with accountant role
+        // If option is passed get all admins and profiles with accountant role
         if ($forAccountants) {
             $overviewRecipients = Profile::where('admin', '=', true)
                 ->orWhere('role', '=', 'accountant')
@@ -89,7 +90,9 @@ class EmailProfilePerformance extends Command
                 : 'emails.profile.admin-performance-report';
             $subject = Config::get('mail.admin_performance_email_subject');
 
-            MailSend::send($view, ['reports' => $adminAggregation], $recipient, $subject);
+            if ($recipient->active) {
+                MailSend::send($view, ['reports' => $adminAggregation], $recipient, $subject);
+            }
         }
     }
 }
