@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Exceptions\UserInputException;
 use App\GenericModel;
 use App\Helpers\InputHandler;
+use App\Helpers\ProfileOverall;
 use App\Profile;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Config;
@@ -47,6 +48,8 @@ class ProfilePerformance
 
         $estimatedHours = 0;
         $hoursDelivered = 0;
+        $totalWorkSeconds = 0;
+        $totalNumberFailedQa = 0;
         $totalPayoutInternal = 0;
         $realPayoutInternal = 0;
         $totalPayoutExternal = 0;
@@ -70,6 +73,8 @@ class ProfilePerformance
                     if ($userId === $profile->id) {
                         $estimatedHours += (float)$task->estimatedHours;
                         $timeDoingQa += $workStats['qa_total_time'];
+                        $totalWorkSeconds += $workStats['worked'];
+                        $totalNumberFailedQa += $workStats['numberFailedQa'];
                     } else {
                         $timeDoingQa += $workStats['qa_total_time'];
                     }
@@ -125,9 +130,16 @@ class ProfilePerformance
         $totalPayoutCombined = $totalPayoutExternal + $totalPayoutInternal;
         $realPayoutCombined = $realPayoutExternal + $realPayoutInternal;
         $timeDoingQaHours = $this->roundFloat(($timeDoingQa / 60 / 60), 2, 5);
+        $totalWorkHours = $this->roundFloat($totalWorkSeconds / 60 / 60, 2, 5);
+        $qaSuccessRate = $totalNumberFailedQa > 0 ?
+            sprintf("%d", $totalNumberFailedQa / count($profileTasks) * 100)
+            : sprintf("%d", 100);
+        $profileOverall = ProfileOverall::getProfileOverallRecord($profile);
+
         $out = [
             'estimatedHours' => $estimatedHours,
             'hoursDelivered' => $hoursDelivered,
+            'totalWorkHours' => $totalWorkHours,
             'totalPayoutExternal' => $totalPayoutExternal,
             'realPayoutExternal' => $realPayoutExternal,
             'totalPayoutInternal' => $totalPayoutInternal,
@@ -135,8 +147,12 @@ class ProfilePerformance
             'totalPayoutCombined' => $totalPayoutCombined,
             'realPayoutCombined' => $realPayoutCombined,
             'hoursDoingQA' => $timeDoingQaHours,
+            'qaSuccessRate' => $qaSuccessRate,
             'xpDiff' => $xpDiff,
             'xpTotal' => $profile->xp,
+            'OverallTotalEarned' => $profileOverall->totalEarned,
+            'OverallTotalCost' => $profileOverall->totalCost,
+            'OverallProfit' => $profileOverall->profit
         ];
 
         $out = array_merge($out, $this->calculateSalary($out, $profile));
@@ -175,6 +191,7 @@ class ProfilePerformance
             $userPerformance['qaSeconds'] = $stats['qa'];
             $userPerformance['qaProgressSeconds'] = $stats['qa_in_progress'];
             $userPerformance['qaProgressTotalSeconds'] = $stats['qa_total_time'];
+            $userPerformance['totalNumberFailedQa'] = $stats['numberFailedQa'];
             $userPerformance['blockedSeconds'] = $stats['blocked'];
             $userPerformance['workTrackTimestamp'] = $stats['workTrackTimestamp'];
 
@@ -460,9 +477,13 @@ class ProfilePerformance
      */
     private function calculateEarningEstimation(array $aggregated, $numberOfDays)
     {
+        // Calculate number of days
         $daysInMonth = Carbon::now()->daysInMonth;
+        $daysIn3Months = Carbon::now()->diffInDays(Carbon::now()->addMonths(3));
+        $daysIn6Months = Carbon::now()->diffInDays(Carbon::now()->addMonths(6));
+        $daysIn12Months = Carbon::now()->diffInDays(Carbon::now()->addMonths(12));
 
-        //default values if user is not employee so roleMinimum is 0
+        // Default values if user is not employee so roleMinimum is 0
         if ($aggregated['roleMinimum'] === 0) {
             $aggregated['earnedPercentage'] = sprintf("%d", 0);
             $aggregated['monthPrediction'] = 0;
@@ -474,10 +495,32 @@ class ProfilePerformance
 
         $earnedPercentage = sprintf("%d", $aggregated['realPayoutCombined'] / $minimumForNumberOfDays * 100);
 
+        // Calculate earning projection
         $monthlyProjection = (float) $aggregated['realPayoutCombined'] / $numberOfDays * $daysInMonth;
+        $projectionFor3Months = (float) $aggregated['realPayoutCombined'] / $numberOfDays * $daysIn3Months;
+        $projectionFor6Months = (float) $aggregated['realPayoutCombined'] / $numberOfDays * $daysIn6Months;
+        $projectionFor12Months = (float) $aggregated['realPayoutCombined'] / $numberOfDays * $daysIn12Months;
 
+        // Total cost of employee per time range
+        $totalEmployeeCostPerTimeRange = $aggregated['costTotal'] / $daysInMonth * $numberOfDays;
+
+        // Calculate projection difference employee earned <--> employee cost
+        $projectedDifference1Month = $monthlyProjection - $totalEmployeeCostPerTimeRange;
+        $projectedDifference3Months = $projectionFor3Months -
+            ($aggregated['costTotal'] / $daysInMonth * $daysIn3Months);
+        $projectedDifference6Months = $projectionFor6Months -
+            ($aggregated['costTotal'] / $daysInMonth * $daysIn6Months);
+        $projectedDifference12Months = $projectionFor12Months -
+            ($aggregated['costTotal'] / $daysInMonth * $daysIn12Months);
+
+        // Generate output
         $aggregated['earnedPercentage'] = $earnedPercentage;
         $aggregated['monthPrediction'] = $this->roundFloat($monthlyProjection, 2, 10);
+        $aggregated['totalEmployeeCostPerTimeRange'] = $this->roundFloat($totalEmployeeCostPerTimeRange, 2, 10);
+        $aggregated['projectedDifference1Month'] = $this->roundFloat($projectedDifference1Month, 2, 10);
+        $aggregated['projectedDifference3Months'] = $this->roundFloat($projectedDifference3Months, 2, 10);
+        $aggregated['projectedDifference6Months'] = $this->roundFloat($projectedDifference6Months, 2, 10);
+        $aggregated['projectedDifference12Months'] = $this->roundFloat($projectedDifference12Months, 2, 10);
 
         return $aggregated;
     }
