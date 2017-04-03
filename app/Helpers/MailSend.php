@@ -16,9 +16,10 @@ class MailSend
      * @param $data
      * @param $profile
      * @param $subject
+     * @param array $attachments
      * @return bool
      */
-    public static function send($view, $data, $profile, $subject)
+    public static function send($view, $data, $profile, $subject, array $attachments = [])
     {
         $mailConfig = Config::get('mail.emails_enabled');
 
@@ -30,10 +31,14 @@ class MailSend
                 $profile,
                 $emailFrom,
                 $emailName,
-                $subject
+                $subject,
+                $attachments
             ) {
                 $message->from($emailFrom, $emailName);
                 $message->to($profile->email, $profile->name)->subject($emailName . ' - ' . $subject);
+                foreach ($attachments as $FileNameAndExtension => $attachmentContent) {
+                    $message->attachData($attachmentContent, $FileNameAndExtension);
+                }
             });
 
             return true;
