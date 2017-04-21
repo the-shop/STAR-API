@@ -45,6 +45,22 @@ class ProfileController extends Controller
     }
 
     /**
+     * Returns current user if there, otherwise HTTP 401
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function current()
+    {
+        $profile = Auth::user();
+
+        if (!$profile) {
+            return $this->jsonError('User not logged in.', 401);
+        }
+
+        return $this->jsonSuccess($profile);
+    }
+
+    /**
      * @return \Illuminate\Http\JsonResponse
      */
     public function index()
