@@ -19,7 +19,7 @@ class JwtAuth extends BaseMiddleware
     public function handle($request, \Closure $next)
     {
         if (!$token = $this->auth->setRequest($request)->getToken()) {
-            return $this->respond('tymon.jwt.absent', 'token_not_provided', 400);
+            return $this->response->json(['errors' => ["Not logged in."]], 401);
         }
 
         $user = $this->auth->authenticate($token);
@@ -31,7 +31,7 @@ class JwtAuth extends BaseMiddleware
         $userCheck = \Auth::user();
 
         if ($userCheck === null) {
-            return $this->respond('tymon.jwt.absent', 'Not logged in.', 400);
+            return $this->response->json(['errors' => ["Not logged in."]], 401);
         }
 
         $coreDatabaseName = \Config::get('sharedSettings.internalConfiguration.coreDatabaseName');
@@ -45,7 +45,7 @@ class JwtAuth extends BaseMiddleware
         }
 
         if (GenericModel::where('email', '=', $userCheck->email)->first() === null) {
-            return $this->respond('tymon.jwt.absent', 'User does not exist in database.', 403);
+            return $this->respond('tymon.jwt.absent', ['User does not exist in database.'], 401);
         }
 
         return $next($request);
