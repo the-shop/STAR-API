@@ -399,7 +399,11 @@ class ProfileController extends Controller
             return $this->jsonError('Issue with sending password reset email.');
         };
 
-        return $this->jsonSuccess('You will shortly receive an email with the link to reset your password.');
+        return $this->jsonSuccess(
+            [
+                'messages' => ['You will shortly receive an email with the link to reset your password.']
+            ]
+        );
     }
 
     /**
