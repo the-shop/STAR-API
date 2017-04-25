@@ -460,9 +460,15 @@ class ProfileController extends Controller
             $subject = 'Password successfully changed!';
             MailSend::send($view, [], $profile, $subject);
 
-            return $this->jsonSuccess('Password successfully changed.');
+            return $this->jsonSuccess([
+                'messages' => ['Password successfully changed.']
+            ]);
         };
 
-        return $this->jsonError('Issue with saving new password');
+        return $this->jsonError(
+            [
+                'errors' => ['Issue with saving new password']
+            ]
+        );
     }
 }
