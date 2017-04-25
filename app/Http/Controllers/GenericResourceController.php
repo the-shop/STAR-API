@@ -7,7 +7,10 @@ use App\Events\GenericModelCreate;
 use App\Events\GenericModelDelete;
 use App\Events\GenericModelUpdate;
 use App\GenericModel;
+use App\Profile;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Helpers\InputHandler;
 
 /**
  * Class GenericResourceController

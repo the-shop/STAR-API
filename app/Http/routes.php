@@ -35,6 +35,7 @@ Route::group(['prefix' => 'api/v1/app/{appName}', 'middleware' => ['multiple-app
         Route::get('profiles/{id}/performance', 'ProfileController@getPerformance');
         Route::get('profiles/{id}/feedback', 'ProfileController@getFeedback');
         Route::post('profiles/{id}/feedback', 'ProfileController@storeFeedback');
+        Route::post('profiles/{id}/vacation', 'ProfileController@vacation');
         Route::resource('profiles', 'ProfileController');
         Route::resource('validations', 'ValidationController');
         Route::get('projects/{id}/uploads', 'FileUploadController@getProjectUploads');
