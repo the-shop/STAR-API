@@ -4,18 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Events\ProfileUpdate;
 use App\GenericModel;
+use App\Helpers\AuthHelper;
+use App\Helpers\DatabaseSeeder;
 use App\Helpers\InputHandler;
 use App\Services\ProfilePerformance;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Tymon\JWTAuth\Facades\JWTAuth;
 use App\Profile;
 use Illuminate\Http\Request;
 use App\Helpers\Configuration;
 use App\Helpers\MailSend;
-use Illuminate\Support\Facades\Config;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class ProfileController
@@ -24,34 +23,14 @@ use Carbon\Carbon;
 class ProfileController extends Controller
 {
     /**
-     * Accepts email and password, returns authentication token on success and (bool) false on failed login
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function login(Request $request)
-    {
-        $credentials = $request->only('email', 'password');
-
-        if (!$token = JWTAuth::attempt($credentials)) {
-            return $this->jsonError('Invalid credentials.', 401);
-        }
-
-        JWTAuth::setToken($token);
-
-        $profile = Auth::user();
-
-        return $this->jsonSuccess($profile);
-    }
-
-    /**
      * Returns current user if there, otherwise HTTP 401
      *
      * @return \Illuminate\Http\JsonResponse
      */
     public function current()
     {
-        $profile = Auth::user();
+        $account = AuthHelper::getAuthenticatedUser();
+        $profile = Profile::find($account->_id);
 
         if (!$profile) {
             return $this->jsonError('User not logged in.', 401);
@@ -219,39 +198,60 @@ class ProfileController extends Controller
      */
     public function store(Request $request)
     {
-        $fields = $request->all();
-        $this->validateInputsForResource($fields, 'profiles');
+        $authenticatedUser = AuthHelper::getAuthenticatedUser();
 
-        $profile = Profile::create($fields);
-
-        $credentials = $request->only('email', 'password');
-        if (!$token = JWTAuth::attempt($credentials)) {
-            return $this->jsonError(['Issue with automatic sign in.'], 401);
+        if (in_array($request->route('appName'), $authenticatedUser->applications)) {
+            return $this->jsonError('Permission denied. Already member of this application.', 403);
         }
 
-        JWTAuth::setToken($token);
+        $profile = Profile::find($authenticatedUser->_id);
 
-        //send confirmation E-mail upon profile creation on the platform
-
-        $teamSlackInfo = Configuration::getConfiguration(true);
-        if ($teamSlackInfo === false) {
-            $teamSlackInfo = [];
+        if ($profile && $profile->accountActive === true) {
+            return $this->jsonError('Permission denied. Profile already exists in this application.', 403);
         }
 
-        $data = [
-            'name' => $profile->name,
-            'email' => $profile->email,
-            'github' => $profile->github,
-            'trello' => $profile->trello,
-            'slack' => $profile->slack,
-            'teamSlack' => $teamSlackInfo
-        ];
-        $view = 'emails.registration';
-        $subject = 'Welcome to The Shop platform!';
+        if ($profile && $profile->accountActive === false) {
+            $profileToSave = $profile;
+            $profileToSave->accountActive = true;
+            $profileToSave->save();
+        }
 
-        MailSend::send($view, $data, $profile, $subject);
+        if (!$profile) {
+            $fields = $request->all();
+            $this->validateInputsForResource($fields, 'profiles');
 
-        return $this->jsonSuccess($profile);
+            $profileToSave = Profile::createForAccount($authenticatedUser->_id, $fields);
+
+            // Send confirmation E-mail upon profile creation on the application
+            $data = [
+                'name' => $profileToSave->name,
+                'email' => $profileToSave->email,
+                'github' => $profileToSave->github,
+                'trello' => $profileToSave->trello,
+                'slack' => $profileToSave->slack,
+            ];
+            $view = 'emails.application-joined';
+            $subject = 'Welcome to new application!';
+
+            MailSend::send($view, $data, $profileToSave, $subject);
+        }
+
+        // Connect to account database
+        $applicationName = $request->route('appName');
+        AuthHelper::setDatabaseConnection();
+
+        // Update account model
+        GenericModel::setCollection('accounts');
+        $account = GenericModel::find($authenticatedUser->_id);
+        $applicationsArray = $account->applications;
+        $applicationsArray[] = $applicationName;
+        $account->applications = $applicationsArray;
+        $account->save();
+
+        // Connect back to application database
+        AuthHelper::setDatabaseConnection($applicationName);
+
+        return $this->jsonSuccess($profileToSave);
     }
 
     /**
@@ -298,52 +298,6 @@ class ProfileController extends Controller
     }
 
     /**
-     * Change password implementation
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function changePassword(Request $request)
-    {
-        $profile = $this->getCurrentProfile();
-
-        if (!$profile instanceof Profile) {
-            return $this->jsonError('User not found.', 404);
-        }
-
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'oldPassword' => 'required|min:8',
-                'newPassword' => 'required|min:8',
-                'repeatNewPassword' => 'required|min:8'
-            ]
-        );
-
-        if ($validator->fails()) {
-            return $this->jsonError($validator->errors()->all(), 400);
-        }
-
-        $oldPassword = $request->input('oldPassword');
-        $newPassword = $request->input('newPassword');
-        $repeatNewPassword = $request->input('repeatNewPassword');
-
-        if ($newPassword != $repeatNewPassword) {
-            return $this->jsonError(['Passwords mismatch']);
-        }
-
-        if (Hash::check($oldPassword, $profile->password) === false) {
-            return $this->jsonError(['Invalid old password']);
-        }
-
-        $profile->password = $newPassword;
-
-        $profile->save();
-
-        return $this->jsonSuccess($profile);
-    }
-
-    /**
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -361,115 +315,6 @@ class ProfileController extends Controller
 
         $profile->delete();
         return $this->jsonSuccess(['id' => $profile->id]);
-    }
-
-    /**
-     * Send email with link to reset forgotten password
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function forgotPassword(Request $request)
-    {
-        $email = $request->get('email');
-
-        $profile = Profile::where('email', '=', $email)->first();
-
-        if (!$profile) {
-            return $this->jsonError('User not found.', 404);
-        }
-
-        // Generate random token and timestamp and set to profile
-        $passwordResetToken = md5(uniqid(rand(), true));
-        $profile->password_reset_token = $passwordResetToken;
-        $profile->password_reset_time = (int) Carbon::now()->format('U');
-        $profile->save();
-
-        // Send email with link for password reset
-        $webDomain = Config::get('sharedSettings.internalConfiguration.webDomain');
-        $webDomain .= 'reset-password';
-        $data = [
-            'token' => $passwordResetToken,
-            'webDomain' => $webDomain
-        ];
-
-        $view = 'emails.password.password-reset';
-        $subject = 'Password reset confirmation link!';
-
-        if (! MailSend::send($view, $data, $profile, $subject)) {
-            return $this->jsonError('Issue with sending password reset email.');
-        };
-
-        return $this->jsonSuccess(
-            [
-                'messages' => ['You will shortly receive an email with the link to reset your password.']
-            ]
-        );
-    }
-
-    /**
-     * Reset password
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function resetPassword(Request $request)
-    {
-        $token = $request->get('token');
-
-        if (!$token) {
-            return $this->jsonError('Token not provided.', 404);
-        }
-
-        $profile = Profile::where('password_reset_token', '=', $token)->first();
-
-        if (!$profile) {
-            return $this->jsonError('Invalid token provided.', 400);
-        }
-
-        // Check timestamps
-        $unixNow = (int) Carbon::now()->format('U');
-        if ($unixNow - $profile->password_reset_time > 86400) {
-            return $this->jsonError('Token has expired.', 400);
-        }
-
-        // Validate password
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'newPassword' => 'required|min:8',
-                'repeatNewPassword' => 'required|min:8'
-            ]
-        );
-
-        if ($validator->fails()) {
-            return $this->jsonError($validator->errors()->all(), 400);
-        }
-
-        $newPassword = $request->get('newPassword');
-        $repeatNewPassword = $request->get('repeatNewPassword');
-
-        if ($newPassword !== $repeatNewPassword) {
-            return $this->jsonError(['Passwords mismatch']);
-        }
-
-        // Reset token and set new profile password
-        $profile->password_reset_token = null;
-        $profile->setPasswordAttribute($newPassword);
-
-        if ($profile->save()) {
-            $view = 'emails.password.password-changed';
-            $subject = 'Password successfully changed!';
-            MailSend::send($view, [], $profile, $subject);
-
-            return $this->jsonSuccess([
-                'messages' => ['Password successfully changed.']
-            ]);
-        };
-
-        return $this->jsonError(
-            [
-                'errors' => ['Issue with saving new password']
-            ]
-        );
     }
 
     /**
@@ -492,7 +337,7 @@ class ProfileController extends Controller
             return $this->jsonError(['Method not allowed. Model already exists.'], 403);
         }
 
-         $requestFields = $request->all();
+        $requestFields = $request->all();
         if (empty($requestFields)) {
             $requestFields = [];
         }
@@ -545,7 +390,7 @@ class ProfileController extends Controller
                 [
                     'dateFrom' => $requestFields['dateFrom'],
                     'dateTo' => $requestFields['dateTo'],
-                    'recordTimestamp' => (int) Carbon::now()->format('U')
+                    'recordTimestamp' => (int)Carbon::now()->format('U')
                 ]
             ]
         ];
@@ -564,5 +409,117 @@ class ProfileController extends Controller
         }
 
         return $this->jsonError('Issue with saving resource.');
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function leaveApplication(Request $request)
+    {
+        $authenticatedUser = AuthHelper::getAuthenticatedUser();
+
+        if (!in_array($request->route('appName'), $authenticatedUser->applications)) {
+            return $this->jsonError('Permission denied. Not a member of this application.', 403);
+        }
+
+        $profile = Profile::find($authenticatedUser->_id);
+
+        if ($profile && $profile->accountActive === false) {
+            return $this->jsonError('Permission denied. Profile already left this application.', 403);
+        }
+
+        // Add tag that profile is removed from application
+        $profile->accountActive = false;
+        $profile->save();
+
+        // Connect to account database
+        $applicationName = $request->route('appName');
+        AuthHelper::setDatabaseConnection();
+
+        // Update account model
+        GenericModel::setCollection('accounts');
+        $account = GenericModel::find($authenticatedUser->_id);
+        $applicationsArray = $account->applications;
+        $applicationsArray = array_diff($applicationsArray, [$applicationName]);
+        $account->applications = $applicationsArray;
+        $account->save();
+
+        // Connect back to application database
+        AuthHelper::setDatabaseConnection($applicationName);
+
+        return $this->jsonSuccess('You have successfully left application.');
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createApplication(Request $request)
+    {
+        $requestedAppName = strtolower($request->get('appName'));
+        if (empty($requestedAppName)) {
+            return $this->jsonError('Missing appName field.', 403);
+        }
+
+        // Get list of all databases
+        $listExistingDatabases = DB::connection('mongodbAdmin')->command(['listDatabases' => true]);
+
+        $databaseNames = [];
+        foreach ($listExistingDatabases as $dbResult) {
+            $databasesBsonList = $dbResult->databases->getArrayCopy();
+            foreach ($databasesBsonList as $dbInfo) {
+                $databaseNames[] = $dbInfo->name;
+            }
+        }
+        // Check is application already exists with requested name
+        if (in_array($requestedAppName, $databaseNames)) {
+            return $this->jsonError('Permission denied. Application with that name already exists.', 403);
+        }
+
+        $authenticatedUser = AuthHelper::getAuthenticatedUser();
+
+        $fields = $request->all();
+        $fields['name'] = $authenticatedUser->name;
+        $fields['email'] = $authenticatedUser->email;
+
+        $this->validateInputsForResource($fields, 'profiles');
+
+        // Set database to requested application name
+        AuthHelper::setDatabaseConnection($requestedAppName);
+        DatabaseSeeder::seedApplicationDatabase();
+
+        $profileToSave = Profile::createForAccount($authenticatedUser->_id, $fields);
+        $profileToSave->admin = true;
+        $profileToSave->save();
+
+        // Send confirmation E-mail upon profile creation on the application
+
+        $data = [
+            'name' => $profileToSave->name,
+            'email' => $profileToSave->email,
+            'appName' => $requestedAppName
+        ];
+
+        $view = 'emails.application-created';
+        $subject = 'New application created!';
+
+        MailSend::send($view, $data, $profileToSave, $subject);
+
+        // Connect to account database
+        AuthHelper::setDatabaseConnection();
+
+        // Update account model
+        GenericModel::setCollection('accounts');
+        $account = GenericModel::find($authenticatedUser->_id);
+        $applicationsArray = $account->applications;
+        $applicationsArray[] = $requestedAppName;
+        $account->applications = $applicationsArray;
+        $account->save();
+
+        // Connect back to application database
+        AuthHelper::setDatabaseConnection($requestedAppName);
+
+        return $this->jsonSuccess('Successfully created new application.');
     }
 }

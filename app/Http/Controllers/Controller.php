@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\DynamicValidationException;
+use App\Helpers\AuthHelper;
 use Illuminate\Http\Request;
 use App\Profile;
 use App\Validation;
@@ -88,16 +89,29 @@ class Controller extends BaseController
     }
 
     /**
-     * @param $model
      * @param $fields
      * @param $resourceName
+     * @param null $model
      * @param array $inputOverrides
+     * @param bool $jwtAuthenticated
      * @return bool
      * @throws DynamicValidationException
      */
-    protected function validateInputsForResource(&$fields, $resourceName, $model = null, array $inputOverrides = [])
+    protected function validateInputsForResource(&$fields, $resourceName, $model = null, array $inputOverrides = [], $jwtAuthenticated = true)
     {
-        $user = \Auth::user();
+        if ($jwtAuthenticated) {
+            $user = AuthHelper::getAuthenticatedUser();
+        } else {
+            $user = null;
+        }
+
+        $profile = null;
+        if ($user) {
+            $profile = Profile::find($user->_id);
+        }
+        if ($profile) {
+            $user = $profile;
+        }
 
         // Validations per user role
         if ($user && $user->admin === true) {

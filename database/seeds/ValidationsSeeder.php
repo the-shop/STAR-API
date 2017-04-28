@@ -33,6 +33,36 @@ namespace {
                             'name' => 'required|regex:/\\w+ \\w+/',
                             'password' => 'required|min:8',
                             'email' => 'required|email|unique:profiles',
+                            'applications' => 'array'
+                        ],
+                        'messages' => [
+                            'name.regex' => 'Full name needed, at least 2 words.'
+                        ],
+                        'resource' => 'accounts',
+                        'acl' => [
+                            'standard' => [
+                                'editable' => [
+                                    'name',
+                                    'password',
+                                    'email',
+                                    'applications'
+                                ],
+                                'GET' => true,
+                                'DELETE' => false,
+                                'POST' => false
+                            ],
+                            'guest' => [
+                                'editable' => [],
+                                'GET' => true,
+                                'DELETE' => false,
+                                'POST' => true
+                            ]
+                        ]
+                    ],
+                    [
+                        'fields' => [
+                            'name' => 'required|regex:/\\w+ \\w+/',
+                            'email' => 'required|email|unique:profiles',
                             'slack' => 'alpha_dash',
                             'trello' => 'alpha_dash',
                             'github' => 'alpha_dash',
@@ -44,7 +74,6 @@ namespace {
                             'employee' => 'boolean',
                             'skills' => 'array',
                             'minimumsMissed' => 'integer'
-
                         ],
                         'messages' => [
                             'name.regex' => 'Full name needed, at least 2 words.'
@@ -54,7 +83,6 @@ namespace {
                             'standard' => [
                                 'editable' => [
                                     'name',
-                                    'password',
                                     'email',
                                     'slack',
                                     'trello',
@@ -65,7 +93,7 @@ namespace {
                                 ],
                                 'GET' => true,
                                 'DELETE' => false,
-                                'POST' => false
+                                'POST' => true
                             ],
                             'guest' => [
                                 'editable' => [],
