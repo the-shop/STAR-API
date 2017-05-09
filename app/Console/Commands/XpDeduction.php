@@ -39,8 +39,8 @@ class XpDeduction extends Command
      */
     public function handle()
     {
-        GenericModel::setCollection('profiles');
-        $profiles = GenericModel::all();
+        $profiles = GenericModel::whereTo('profiles')
+        ->all();
 
         $profileHashMap = [];
         foreach ($profiles as $profile) {
@@ -53,12 +53,12 @@ class XpDeduction extends Command
             // Set current time of cron start and get all logs for previous 4 days
             $date = new \DateTime();
             $cronTime = $date->format('U');
-            GenericModel::setCollection('logs');
             $unixNow = $date->format('U') - (24 * 60 * 60 * $daysChecked);
             $unixDayAgo = $unixNow - 24 * 60 * 60;
             $hexNow = dechex($unixNow);
             $hexDayAgo = dechex($unixDayAgo);
-            $logs = GenericModel::where('_id', '<', new ObjectID($hexNow . '0000000000000000'))
+            $logs = GenericModel::whereTo('logs')
+                ->where('_id', '<', new ObjectID($hexNow . '0000000000000000'))
                 ->where('_id', '>=', new ObjectID($hexDayAgo . '0000000000000000'))
                 ->get();
 
@@ -90,14 +90,13 @@ class XpDeduction extends Command
                     if ($profile->xp - 1 == 0) {
                         $profile->banned = true;
                     }
-                    GenericModel::setCollection('xp');
 
                     if (!$profile->xp_id) {
                         $userXP = new GenericModel(['records' => []]);
-                        $userXP->save();
+                        $userXP->saveModel('xp');
                         $profile->xp_id = $userXP->_id;
                     } else {
-                        $userXP = GenericModel::find($profile->xp_id);
+                        $userXP = GenericModel::whereTo('xp')->find($profile->xp_id);
                     }
 
                     $records = $userXP->records;
@@ -109,11 +108,9 @@ class XpDeduction extends Command
                     $userXP->records = $records;
                     $userXP->save();
 
-                    GenericModel::setCollection('profiles');
-
                     $profile->xp--;
                     $profile->lastTimeActivityCheck = (int) $cronTime;
-                    $profile->save();
+                    $profile->saveModel('profiles');
                 }
             }
 

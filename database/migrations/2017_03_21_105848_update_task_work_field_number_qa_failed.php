@@ -17,8 +17,7 @@ namespace {
          */
         public function up()
         {
-            GenericModel::setCollection('tasks');
-            $tasks = GenericModel::all();
+            $tasks = GenericModel::whereTo('tasks')->all();
 
             foreach ($tasks as $task) {
                 if (empty($task->owner)) {

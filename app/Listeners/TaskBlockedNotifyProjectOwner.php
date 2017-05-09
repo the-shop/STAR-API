@@ -26,13 +26,12 @@ class TaskBlockedNotifyProjectOwner
             $updatedFields = $task->getDirty();
 
             if (key_exists('blocked', $updatedFields) && $updatedFields['blocked'] === true) {
-                $preSetCollection = GenericModel::getCollection();
-                GenericModel::setCollection('projects');
-                $project = GenericModel::find($task->project_id);
-                GenericModel::setCollection($preSetCollection);
+                $project = GenericModel::whereTo('projects')
+                    ->find($task->project_id);
 
                 // Get project owner and send slack message that task is blocked
-                $po = Profile::find($project->acceptedBy);
+                $po = GenericModel::whereTo('profiles')
+                    ->find($project->acceptedBy);
                 if ($po && $po->slack) {
                     $webDomain = Config::get('sharedSettings.internalConfiguration.webDomain');
                     $recipient = '@' . $po->slack;

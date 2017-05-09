@@ -2,6 +2,10 @@
 
 namespace App;
 
+use App\Services\GenericModelQueryBuilder;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+
 /**
  * Class GenericModel
  * @package App
@@ -185,5 +189,109 @@ class GenericModel extends StarModel
             self::setCollection($preSetCollection);
             return $restoredModel;
         }
+    }
+
+    /**
+     * Save model to specific collection and database
+     * @param null $collection
+     * @param null $databaseName
+     * @return bool
+     */
+    public function saveModel($collection = null, $databaseName = null)
+    {
+        $databaseToReconnect = null;
+        $preSetCollection = null;
+
+        if ($collection !== null) {
+            $preSetCollection = self::getCollection();
+            self::setCollection($collection);
+            $this->collection = self::getCollection();
+        }
+
+        if ($databaseName !== null) {
+            $databaseToReconnect = Config::get('database.connections.' . Config::get('database.default') . '.database');
+            self::setDatabaseConnection($databaseName);
+        }
+
+        $savedModel = parent::save();
+
+        if ($databaseName !== null) {
+            self::setDatabaseConnection($databaseToReconnect);
+        }
+
+        if ($collection !== null) {
+            self::setCollection($preSetCollection);
+        }
+
+        return $savedModel;
+    }
+
+    /**
+     * @param null $collection
+     * @param null $databaseName
+     * @param array $attributes
+     * @return static
+     */
+    public static function createModel(array $attributes = [], $collection = null, $databaseName = null)
+    {
+        $databaseToReconnect = null;
+        $preSetCollection = null;
+
+        if ($collection !== null) {
+            $preSetCollection = self::getCollection();
+            self::setCollection($collection);
+        }
+
+        if ($databaseName !== null) {
+            $databaseToReconnect = Config::get('database.connections.' . Config::get('database.default') . '.database');
+            self::setDatabaseConnection($databaseName);
+        }
+
+        $createdModel = parent::create($attributes);
+
+        if ($databaseName !== null) {
+            self::setDatabaseConnection($databaseToReconnect);
+        }
+
+        if ($collection !== null) {
+            self::setCollection($preSetCollection);
+        }
+
+        return $createdModel;
+    }
+
+    /**
+     * Set collection and database name for query
+     * @param null $collection
+     * @param null $databaseName
+     * @return static
+     */
+    public static function whereTo($collection = null, $databaseName = null)
+    {
+        if ($collection !== null) {
+            self::setCollection($collection);
+        }
+
+        if ($databaseName !== null) {
+            self::setDatabaseConnection($databaseName);
+        }
+
+        return new static();
+    }
+
+
+    /**
+     * Set database connection so we can modify model to specific database
+     * @param null $connectionName
+     * @return bool
+     */
+    private static function setDatabaseConnection($connectionName)
+    {
+        $defaultDb = Config::get('database.default');
+        Config::set('database.connections.' . $defaultDb . '.database', strtolower($connectionName));
+        DB::purge($defaultDb);
+        DB::connection($defaultDb);
+
+        return true;
     }
 }

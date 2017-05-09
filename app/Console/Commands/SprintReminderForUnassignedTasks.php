@@ -33,8 +33,7 @@ class SprintReminderForUnassignedTasks extends Command
      */
     public function handle()
     {
-        GenericModel::setCollection('projects');
-        $projects = GenericModel::all();
+        $projects = GenericModel::whereTo('projects')->all();
 
         $activeProjects = [];
         $members = [];
@@ -47,8 +46,8 @@ class SprintReminderForUnassignedTasks extends Command
         foreach ($projects as $project) {
             if (!empty($project->acceptedBy) && $project->isComplete !== true) {
                 $activeProjects[$project->id] = $project;
-                GenericModel::setCollection('sprints');
-                $projectSprints = GenericModel::where('project_id', '=', $project->id)->get();
+                $projectSprints = GenericModel::whereTo('sprints')
+                ->where('project_id', '=', $project->id)->get();
                 foreach ($projectSprints as $sprint) {
                     $sprintStartDueDate =
                         Carbon::createFromFormat('U', InputHandler::getUnixTimestamp($sprint->start))->format('Y-m-d');
@@ -58,10 +57,9 @@ class SprintReminderForUnassignedTasks extends Command
                         $sprints[$sprint->id] = $sprint;
                     }
                 }
-                GenericModel::setCollection('profiles');
                 if (!empty($project->members)) {
                     foreach ($project->members as $memberId) {
-                        $member = GenericModel::where('_id', '=', $memberId)->first();
+                        $member = GenericModel::whereTo('profiles')->find($memberId);
                         $members[$memberId] = $member;
                     }
                 }
@@ -69,9 +67,10 @@ class SprintReminderForUnassignedTasks extends Command
         }
 
         // Get all active tasks
-        GenericModel::setCollection('tasks');
         foreach ($sprints as $sprint) {
-            $sprintTasks = GenericModel::where('sprint_id', '=', $sprint->id)->get();
+            $sprintTasks = GenericModel::whereTo('tasks')
+                ->where('sprint_id', '=', $sprint->id)
+                ->get();
             foreach ($sprintTasks as $task) {
                 if (empty($task->owner)) {
                     $tasks[$task->id] = $task;

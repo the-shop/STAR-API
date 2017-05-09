@@ -18,8 +18,7 @@ namespace {
          */
         public function up()
         {
-            GenericModel::setCollection('tasks');
-            $tasks = GenericModel::all();
+            $tasks = GenericModel::whereTo('tasks')->all();
             // Rename Cloud skill to DevOps on all tasks
             foreach ($tasks as $task) {
                 if (isset($task->skillset) && is_array($task->skillset) && in_array('Cloud', $task->skillset)) {
@@ -36,7 +35,7 @@ namespace {
                 }
             }
 
-            $profiles = Profile::all();
+            $profiles = GenericModel::whereTo('profiles')->all();
             // Rename Cloud skill to DevOps on all profiles
             foreach ($profiles as $profile) {
                 if (isset($profile->skills) && is_array($profile->skills) && in_array('Cloud', $profile->skills)) {

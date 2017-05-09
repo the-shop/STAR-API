@@ -37,15 +37,16 @@ class NotifyAdminsAndPoAboutLateAndQaTasks extends Command
         $webDomain = Config::get('sharedSettings.internalConfiguration.webDomain');
         $sendMessage = false;
 
-        GenericModel::setCollection('tasks');
         // Get all late unfinished tasks (lower due_date then today)
-        $lateTasks = GenericModel::where('due_date', '<=', $unixNow)
+        $lateTasks = GenericModel::whereTo('tasks')
+            ->where('due_date', '<=', $unixNow)
             ->where('ready', '=', true)
             ->where('passed_qa', '=', false)
             ->get();
 
         // Get all tasks that are submitted_for_qa
-        $qaTasks = GenericModel::where('submitted_for_qa', '=', true)
+        $qaTasks = GenericModel::whereTo('tasks')
+            ->where('submitted_for_qa', '=', true)
             ->get();
 
         // Merge tasks
@@ -53,10 +54,9 @@ class NotifyAdminsAndPoAboutLateAndQaTasks extends Command
 
         // Get all tasks projects so we can check project owners
         $projects = [];
-        GenericModel::setCollection('projects');
         foreach ($tasks as $task) {
             if (!key_exists($task->project_id, $projects)) {
-                $project = GenericModel::find($task->project_id);
+                $project = GenericModel::findModel($task->project_id, 'projects');
                 if ($project) {
                     $projects[$project->_id] = $project;
                 }

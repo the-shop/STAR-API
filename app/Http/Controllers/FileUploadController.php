@@ -33,8 +33,7 @@ class FileUploadController extends Controller
                 throw new FileUploadException('File could not be uploaded.');
             }
 
-            GenericModel::setCollection('uploads');
-            $upload = GenericModel::create();
+            $upload = GenericModel::createModel([], 'uploads');
 
             $fileName = $userId . '-' . str_random(20) . '.' . $file->getClientOriginalExtension();
 
@@ -63,14 +62,14 @@ class FileUploadController extends Controller
      */
     public function getProjectUploads(Request $request)
     {
-        GenericModel::setCollection('projects');
-        $project = GenericModel::find($request->route('id'));
+        $project = GenericModel::whereTo('projects')->find($request->route('id'));
         if (!$project) {
             return $this->jsonError(['Project with given ID not found'], 404);
         }
 
-        GenericModel::setCollection('uploads');
-        $uploads = GenericModel::where('projectId', '=', $request->route('id'))->get();
+        $uploads = GenericModel::whereTo('uploads')
+            ->where('projectId', '=', $request->route('id'))
+            ->get();
 
         return $this->jsonSuccess($uploads);
     }
@@ -84,14 +83,14 @@ class FileUploadController extends Controller
      */
     public function deleteProjectUploads(Request $request)
     {
-        GenericModel::setCollection('projects');
-        $project = GenericModel::find($request->route('projectId'));
+        $project = GenericModel::whereTo('projects')->find($request->route('projectId'));
         if (!$project) {
             return $this->jsonError(['Project with given ID not found'], 404);
         }
 
-        GenericModel::setCollection('uploads');
-        $uploads = GenericModel::where('projectId', '=', $request->route('projectId'))->get();
+        $uploads = GenericModel::whereTo('uploads')
+            ->where('projectId', '=', $request->route('projectId'))
+            ->get();
 
         foreach ($uploads as $upload) {
             $upload->delete();

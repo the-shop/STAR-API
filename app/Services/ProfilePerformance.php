@@ -85,12 +85,12 @@ class ProfilePerformance
             // Get the project if not loaded already
             if (!array_key_exists($task->project_id, $loadedProjects)) {
                 if ($task['collection'] === 'tasks') {
-                    GenericModel::setCollection('projects');
+                    $loadedProjects[$task->project_id] = GenericModel::whereTo('projects')
+                        ->find($task->project_id);
                 } else {
-                    GenericModel::setCollection('projects_archived');
+                    $loadedProjects[$task->project_id] = GenericModel::whereTo('projects_archived')
+                        ->find($task->project_id);
                 }
-
-                $loadedProjects[$task->project_id] = GenericModel::find($task->project_id);
             }
 
             $project = $loadedProjects[$task->project_id];
@@ -115,10 +115,10 @@ class ProfilePerformance
 
         // Let's see the XP diff within time range
         if ($profile->xp_id) {
-            GenericModel::setCollection('xp');
             $unixStartDate = InputHandler::getUnixTimestamp($unixStart);
             $unixEndDate = InputHandler::getUnixTimestamp($unixEnd);
-            $xpRecord = GenericModel::find($profile->xp_id);
+            $xpRecord = GenericModel::whereTo('xp')
+                ->find($profile->xp_id);
             if ($xpRecord) {
                 foreach ($xpRecord->records as $record) {
                     $recordTimestamp = InputHandler::getUnixTimestamp($record['timestamp']);
@@ -274,18 +274,16 @@ class ProfilePerformance
         $taskPriorityCoefficient = 1;
 
         // Get all projects that user is a member of
-        $preSetCollection = GenericModel::getCollection();
-        GenericModel::setCollection('projects');
-        $taskOwnerProjects = GenericModel::whereIn('members', [$taskOwner->id])
+        $taskOwnerProjects = GenericModel::whereTo('projects')
+            ->whereIn('members', [$taskOwner->id])
             ->get();
-
-        GenericModel::setCollection('tasks');
 
         $unassignedTasksPriority = [];
 
         // Get all unassigned tasks from projects that user is a member of, and make list of tasks priority
         foreach ($taskOwnerProjects as $project) {
-            $projectTasks = GenericModel::where('project_id', '=', $project->id)
+            $projectTasks = GenericModel::whereTo('tasks')
+                ->where('project_id', '=', $project->id)
                 ->get();
             foreach ($projectTasks as $projectTask) {
                 // Let's compare user skills with task skillset
@@ -314,8 +312,6 @@ class ProfilePerformance
             $taskPriorityCoefficient = 0.8;
         }
 
-        GenericModel::setCollection($preSetCollection);
-
         return $taskPriorityCoefficient;
     }
 
@@ -333,9 +329,8 @@ class ProfilePerformance
             return $hourlyRate;
         }
 
-        $preSetCollection = GenericModel::getCollection();
-        GenericModel::setCollection('hourly-rates');
-        $hourlyRatesPerSkill = GenericModel::first();
+        $hourlyRatesPerSkill = GenericModel::whereTo('hourly-rates')
+            ->first();
 
         if ($hourlyRatesPerSkill) {
             $skillCompare = array_intersect_key(array_flip($task->skillset), $hourlyRatesPerSkill->hourlyRates);
@@ -347,8 +342,6 @@ class ProfilePerformance
                 $hourlyRate = $hourlyRate / count($skillCompare);
             }
         }
-
-        GenericModel::setCollection($preSetCollection);
 
         return InputHandler::getFloat($hourlyRate) * $task->estimatedHours;
     }
@@ -510,9 +503,8 @@ class ProfilePerformance
         $workDays = WorkDays::getWorkDays($unixStart);
         $totalProfileWorkedDays = count($workDays);
 
-        $oldCollection = GenericModel::getCollection();
-        GenericModel::setCollection('vacations');
-        $vacations = GenericModel::find($profile->id);
+        $vacations = GenericModel::whereTo('vacations')
+            ->find($profile->id);
 
         if ($vacations) {
             foreach ($vacations->records as $record) {
@@ -525,8 +517,6 @@ class ProfilePerformance
                 }
             }
         }
-
-        GenericModel::setCollection($oldCollection);
 
         // Calculate minimum (percentage of base minimum)
         $calculatedMinimum = ($totalProfileWorkedDays / count($workDays)) * $baseMinimum;
@@ -631,7 +621,8 @@ class ProfilePerformance
     {
         GenericModel::setCollection($collection);
 
-        return GenericModel::where('owner', '=', $profile->id)
+        return GenericModel::whereTo($collection)
+            ->where('owner', '=', $profile->id)
             ->where('passed_qa', '=', $passedQa)
             ->where('timeAssigned', '>=', $unixStart)
             ->where('timeAssigned', '<=', $unixEnd)

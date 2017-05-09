@@ -13,8 +13,9 @@ trait DynamicListener
         $dispatcher = $app->events;
 
         $presetCollection = GenericModel::getCollection();
-        GenericModel::setCollection('listener-rules');
-        $listenerRules = GenericModel::all();
+
+        $listenerRules = GenericModel::whereTo('listener-rules')
+            ->all();
 
         $eventsListeners = [];
 
@@ -34,7 +35,5 @@ trait DynamicListener
                 event(new $eventName($event->model));
             }
         }
-
-        GenericModel::setCollection($presetCollection);
     }
 }

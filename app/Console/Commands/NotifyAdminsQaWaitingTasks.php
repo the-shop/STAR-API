@@ -42,8 +42,8 @@ class NotifyAdminsQaWaitingTasks extends Command
         $sendMessage = false;
 
         // Get all tasks that are submitted for QA
-        GenericModel::setCollection('tasks');
-        $tasksInQa = GenericModel::where('submitted_for_qa', '=', true)
+        $tasksInQa = GenericModel::whereTo('tasks')
+            ->where('submitted_for_qa', '=', true)
             ->get();
 
         // Get projects and project owners
@@ -51,8 +51,7 @@ class NotifyAdminsQaWaitingTasks extends Command
         $projectOwners = [];
         foreach ($tasksInQa as $task) {
             if (!array_key_exists($task->project_id, $projects)) {
-                GenericModel::setCollection('projects');
-                $project = GenericModel::find($task->project_id);
+                $project = GenericModel::whereTo('projects')->find($task->project_id);
                 if ($project) {
                     $projects[$project->_id] = $project;
                 }
