@@ -2,11 +2,13 @@
 
 namespace App\Http\Middleware;
 
+use App\Helpers\AuthHelper;
 use Closure;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Middleware\BaseMiddleware;
 
-class MultipleAppSupport
+class MultipleAppSupport extends BaseMiddleware
 {
     /**
      * Handle an incoming request.
@@ -21,6 +23,20 @@ class MultipleAppSupport
         $coreDbName = Config::get('sharedSettings.internalConfiguration.coreDatabaseName');
         if ($requestDbName === $coreDbName) {
             return $next($request);
+        }
+
+        // Set database connection to "accounts"
+        AuthHelper::setDatabaseConnection();
+
+        $token = $this->auth->setRequest($request)->getToken();
+        if ($token) {
+            $user = $this->auth->authenticate($token);
+
+            $this->events->fire('tymon.jwt.valid', $user);
+
+            // Set authenticated user to app instance so we can call it from AuthHelper
+            $app = \App::getFacadeRoot();
+            $app->instance('authenticatedUser', $user);
         }
 
         $dbName = Config::get('database.connections.mongodb.database');

@@ -27,14 +27,6 @@ class JwtAuth extends BaseMiddleware
         // Set database connection to "accounts"
         AuthHelper::setDatabaseConnection();
 
-        $user = $this->auth->authenticate($token);
-
-        $this->events->fire('tymon.jwt.valid', $user);
-
-        // Set authenticated user to app instance so we can call it from AuthHelper
-        $app = App::getFacadeRoot();
-        $app->instance('authenticatedUser', $user);
-
         $userCheck = AuthHelper::getAuthenticatedUser();
 
         if (!$userCheck instanceof Account) {
