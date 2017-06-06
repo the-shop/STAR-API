@@ -17,7 +17,7 @@ return [
                 \App\Helpers\Slack::LOW_PRIORITY => 120,
             ]
         ],
-        'hourlyRate' => 500,
+        'hourlyRate' => 450,
         'employees' => [
             'roles' => [
                 'Apprentice' => [
