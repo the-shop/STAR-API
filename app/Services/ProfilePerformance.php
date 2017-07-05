@@ -244,8 +244,8 @@ class ProfilePerformance
      */
     public function getTaskValuesForProfile(Profile $profile, GenericModel $task)
     {
-        $xpAwardMultiplyBy = 2;
-        $xpDeductionMultiplyBy = 15;
+        $xpAwardMultiplyBy = 4;
+        $xpDeductionMultiplyBy = 10;
 
         $xpAward = $this->calculateXpAwardOrDeduction($profile, $task, $xpAwardMultiplyBy);
         $xpDeduction = $this->calculateXpAwardOrDeduction($profile, $task, $xpDeductionMultiplyBy);
